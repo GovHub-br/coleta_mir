@@ -1,0 +1,31 @@
+services:
+
+  sinapir_joomla:
+    build:
+      context: ./docker/oidc
+      dockerfile: Dockerfile
+    image: sinapir-joomla-oidc:local
+    ports:
+      - "443:443"
+    environment:
+      OIDC_PUBLIC_BASE_URL: https://sinapir-homol.igualdaderacial.gov.br
+      OIDC_REDIRECT_URI_MODE: site_root
+    volumes:
+      - ./.local/oidc/certificates:/etc/apache2/ssl:ro
+    depends_on:
+      oidc_certificates:
+        condition: service_completed_successfully
+
+  oidc_certificates:
+    restart: "no"
+    network_mode: none
+    image: sinapir-joomla-oidc:local
+    entrypoint: ["/usr/local/bin/certgen.sh"]
+    command: []
+    volumes:
+      - ./.local/oidc/certificates:/output
+
+networks:
+  proxy:
+    name: sinapir-oidc
+    external: false
