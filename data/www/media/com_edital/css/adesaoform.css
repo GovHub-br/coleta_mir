@@ -1,0 +1,1000 @@
+body.com_edital.view-adesaoform .sp-page-title .sp-page-title-heading {
+    margin: 0 0 8px !important;
+    font-family: Rawline, sans-serif !important;
+    font-size: 30px !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    line-height: 36px !important;
+    letter-spacing: -0.75px !important;
+    vertical-align: middle;
+}
+
+body.com_edital.view-adesaoform .sp-page-title .sp-page-title-sub-heading {
+    margin: 0 !important;
+    color: #444444 !important;
+    font-family: Rawline, sans-serif !important;
+    font-size: 16px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 24px !important;
+    letter-spacing: 0 !important;
+    vertical-align: middle;
+}
+
+.solicitante h3 i {
+    color: #1351B4;
+}
+.solicitante .input-group>.form-control, .input-group>.form-floating, .input-group>.form-select {
+    border-left: none;
+}
+.solicitante span.input-group-text {
+    background: transparent;
+    color: #888888;
+    border-right: none;
+    padding-right: 2px;
+}
+.solicitante .is-valid, 
+.solicitante .was-validated .input-group-text:valid {
+    border-color: #198754;
+}
+.solicitante .input-group-text.is-invalid, 
+.solicitante .was-validated .input-group-text:invalid {
+    border-color: #dc3545;
+}
+.solicitante .form-control:focus {
+    border-color: #ced4da;
+}
+#cnpj-error a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+}
+#cnpj-error p {
+    margin-bottom: 0.35rem;
+}
+#cnpj-error p:last-child {
+    margin-bottom: 0;
+}
+.container-informativo {
+    box-sizing: border-box;
+    background: #F6F7F8;
+    border: 1px solid #D9D9D9;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 9px;
+    padding: 20px 40px;
+}
+.container-informativo i {
+    color: #1351B4;
+}
+.pergunta-field .alert-info {
+    color: #000000 !important;
+    background-color: #D4E5FF !important;
+    border-color: #c4d8f5 !important;
+}
+.pergunta-field .alert-info i {
+    color: #155BCB !important;
+}
+.pergunta-field button.btn-close {
+    padding: 0 !important;
+    margin: 1rem;
+}
+
+.perguntas .form-label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0px;
+}
+
+/* Question Index Styling */
+.pergunta-field p:last-of-type {
+    margin-bottom: 0;
+}
+.pergunta-index {
+    background: rgba(21, 91, 203, 0.15);
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #155bcb;
+    flex-shrink: 0;
+}
+
+.pergunta-content {
+    align-items: flex-start !important;
+}
+
+.pergunta-content .flex-grow-1 {
+    flex: 1;
+    min-width: 0;
+}
+
+.pergunta-options-radio,
+.pergunta-options-checkbox {
+    display: grid;
+    gap: 8px;
+}
+
+.pergunta-options .form-check {
+    margin: 0;
+}
+
+.pergunta-invalida > .pergunta-content {
+    padding-left: 12px;
+    border-left: 3px solid #dc3545;
+}
+
+/* Plano Municipal: descrição simples e campos do instrumento em uma linha. */
+.tab-agrupamento.plano-municipal .card-body {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 16px;
+}
+
+.tab-agrupamento.plano-municipal .etapa-titulo,
+.tab-agrupamento.plano-municipal .pergunta-field {
+    grid-column: 1 / -1;
+}
+
+.tab-agrupamento.plano-municipal .container-informativo {
+    padding: 0;
+    color: #667085;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.tab-agrupamento.plano-municipal .pergunta-field[data-pergunta-chave="instrumento"],
+.tab-agrupamento.plano-municipal .pergunta-field[data-pergunta-chave="numero"],
+.tab-agrupamento.plano-municipal .pergunta-field[data-pergunta-chave="ano-do-instrumento"] {
+    grid-column: span 1;
+}
+
+@media (max-width: 767.98px) {
+    .tab-agrupamento.plano-municipal .pergunta-field {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+/* File Upload Drag and Drop Styles */
+.file-upload-wrapper {
+    position: relative;
+    margin-top: 0.5rem;
+}
+
+.file-input-hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.file-drop-area {
+    background: #FFFFFF;
+    border: 1px dashed #155BCB;
+    border-radius: 6px;
+
+    padding: 10px 20px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-drop-area:hover {
+    border-color: #155bcb;
+    background-color: #f0f4ff;
+}
+
+.file-drop-area.dragover {
+    border-color: #155bcb;
+    background-color: #e6f0ff;
+    border-style: solid;
+}
+
+.file-drop-area.file-selected {
+    border-color: #28a745;
+    background-color: #f0fff4;
+}
+
+.file-drop-icon {
+    font-size: 1rem;
+    color: #155bcb;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+    float: left;
+}
+
+.file-drop-content {
+    flex: 1;
+    color: #495057;
+}
+
+.file-drop-message {
+    font-size: 1rem;
+    color: #2c3e50;
+    font-style: italic;
+}
+
+.file-drop-message strong {
+    color: #155bcb;
+}
+
+.file-drop-hint {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.file-selected-name {
+    font-size: 1rem;
+    color: #28a745;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background-color: rgba(40, 167, 69, 0.1);
+    border-radius: 6px;
+    margin-top: 0.5rem;
+}
+
+.file-selected-name i {
+    color: #28a745;
+}
+
+
+.file-remove-btn{
+    float: right;
+}
+
+.file-remove-btn i {
+    color: #dc3545;
+    margin-right: 8px;
+}
+
+.file-current {
+    padding: 1rem;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.file-current p {
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+.form-text.info {
+    color: #fff;
+    background-color: rgba(21, 91, 203, 1) ;
+    padding: 5px 10px;
+}
+
+.form-text.info p{
+    margin: 0;
+}
+
+/* Municípios Input */
+.municipios-input-wrapper {
+    position: relative;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    background-color: #fff;
+    min-height: 38px;
+    padding: 0.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    cursor: text;
+}
+
+.municipios-input-wrapper:focus-within {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Quando não há tags, ajustar padding do wrapper */
+.municipios-input-wrapper:has(.municipios-tags-container:empty) {
+    padding: 0;
+}
+
+/* Select sempre flexível */
+.municipios-select-integrated {
+    padding-left: 0.5rem;
+}
+
+/* Quando não há tags, o select ocupa todo o espaço */
+.municipios-tags-container:empty + .municipios-select-integrated {
+    padding: 0.375rem 0.75rem;
+    width: 100%;
+}
+
+/* Container de tags integrado */
+.municipios-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.municipio-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #155bcb;
+    color: #fff;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.municipio-tag:hover {
+    background-color: #1351b4;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.municipio-tag-remove {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.125rem;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.municipio-tag-remove:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.municipio-tag-remove:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* Campos de e-mail por município (exibidos apenas para Consórcio) */
+.municipios-emails-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.municipio-email-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+}
+
+.municipio-email-row .municipio-email-label {
+    flex: 0 0 220px;
+    max-width: 220px;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.municipio-email-row .municipio-email-input {
+    flex: 1;
+    min-width: 220px;
+}
+
+/* Select integrado */
+.municipios-select-integrated {
+    flex: 1;
+    min-width: 150px;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0.375rem 0.5rem;
+    background: transparent;
+    cursor: pointer;
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    appearance: menulist;
+}
+
+.municipios-select-integrated:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.municipios-select-integrated:disabled {
+    background: transparent;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Quando não há tags, o select ocupa todo o espaço */
+.municipios-tags-container:empty + .municipios-select-integrated {
+    padding: 0.375rem 0.75rem;
+    width: 100%;
+    min-width: 100%;
+}
+
+/* Resumo da Adesão */
+.numero-documentos {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.numero-documentos.default-color {
+    color: #6c757d;
+}
+.numero-documentos.success-color {
+    color: #198754;
+}
+.numero-documentos.warning-color {
+    color: #ffc107;
+}
+.numero-documentos.danger-color {
+    color: #dc3545;
+}
+
+/* Centralização da div de controles do resumo da adesão */
+.resumo-adesao .row .col-md-6:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.resumo-adesao .row .col-md-6:last-child .control-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.resumo-adesao .row .col-md-6:last-child .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.resumo-adesao .btn.disabled, 
+.resumo-adesao .btn:disabled, 
+.resumo-adesao fieldset:disabled .btn {
+    color: #fff;
+    pointer-events: none;
+    background-color: #bacce9;
+    border-color: #a3bce5;
+    opacity: 1;
+}
+
+
+.cf-turnstile.form-control{
+    border: 0px;
+    text-align: center;
+}
+
+
+
+/* Estrutura das etapas da solicitação */
+.adesao-workspace {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.adesao-sidebar {
+    position: sticky;
+    top: 100px;
+}
+
+.adesao-progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: #4b5563;
+    font-size: 0.8rem;
+}
+
+.adesao-progress {
+    height: 7px;
+    margin-bottom: 14px;
+    background: #e5e7eb;
+}
+
+.adesao-progress .progress-bar {
+    background: #1351b4;
+    transition: width .25s ease;
+}
+
+.nav-tabs-agrupamento {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.nav-tabs-agrupamento .nav-item {
+    width: 100%;
+}
+
+.nav-link-agrupamento {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #d5dbe3;
+    border-radius: 6px;
+    padding: 11px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.nav-link-agrupamento:hover {
+    color: #1351b4;
+    border-color: #1351b4;
+}
+
+.nav-link-agrupamento.active {
+    color: #fff;
+    border-color: #1351b4;
+    background: #1351b4;
+}
+
+.adesao-main {
+    min-width: 0;
+}
+
+.adesao-required-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    color: #243b53;
+    background: #e7f2ff;
+    border: 1px solid #b8d8ff;
+    border-radius: 7px;
+    font-size: .92rem;
+}
+
+.adesao-required-info i {
+    color: #1351b4;
+}
+
+.adesao-main .card.tab-agrupamento {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, .1);
+}
+
+.adesao-main .tab-agrupamento h3,
+.adesao-main .tab-agrupamento h4 {
+    color: #1f2937;
+}
+
+/* Etapa 2 — Identificação do Órgão */
+.tab-agrupamento[data-agrupamento-id="2"] .card-body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 14px;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .etapa-titulo,
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field {
+    grid-column: 1 / -1;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .etapa-titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .etapa-titulo i {
+    color: #1351b4;
+    margin-right: 8px;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-index {
+    display: none;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field {
+    min-width: 0;
+    margin: 0 !important;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-content {
+    height: 100%;
+    padding: 0 !important;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .form-label {
+    margin-bottom: 5px;
+    font-size: .95rem;
+    font-weight: 400;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] :is(.form-control, .form-select) {
+    min-height: 41px;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] textarea.form-control {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="22"] {
+    grid-column: span 10;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="23"] {
+    grid-column: span 2;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="25"],
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="27"],
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="28"],
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="29"],
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="30"] {
+    grid-column: span 6;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="26"],
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="219"] {
+    grid-column: span 3;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] :is(
+    .pergunta-field[data-pergunta-id="26"],
+    .pergunta-field[data-pergunta-id="219"]
+) .form-label {
+    white-space: nowrap;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="219"] .form-label {
+    visibility: hidden;
+}
+
+.tab-agrupamento[data-agrupamento-id="2"] .file-drop-area {
+    padding: 10px 14px;
+}
+
+@media (max-width: 767.98px) {
+    .tab-agrupamento[data-agrupamento-id="2"] .pergunta-field {
+        grid-column: 1 / -1 !important;
+    }
+
+    .tab-agrupamento[data-agrupamento-id="2"] .pergunta-field[data-pergunta-id="219"] .form-label {
+        visibility: visible;
+    }
+
+    .tab-agrupamento[data-agrupamento-id="2"] :is(
+        .pergunta-field[data-pergunta-id="26"],
+        .pergunta-field[data-pergunta-id="219"]
+    ) .form-label {
+        white-space: normal;
+    }
+}
+
+/* Etapa 3 — Titular do Órgão */
+.tab-agrupamento[data-agrupamento-id="3"] .card-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 14px;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .etapa-titulo,
+.tab-agrupamento[data-agrupamento-id="3"] .etapa-subtitulo,
+.tab-agrupamento[data-agrupamento-id="3"] .pergunta-field[data-pergunta-id="38"],
+.tab-agrupamento[data-agrupamento-id="3"] .pergunta-field[data-pergunta-id="39"],
+.tab-agrupamento[data-agrupamento-id="3"] .pergunta-field[data-pergunta-id="40"] {
+    grid-column: 1 / -1;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .etapa-titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .etapa-titulo i {
+    color: #1351b4;
+    margin-right: 8px;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .etapa-subtitulo {
+    margin-top: 6px;
+    padding-top: 18px;
+    border-top: 1px solid #d5dbe3;
+    color: #374151;
+    font-size: .95rem;
+    font-weight: 500;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .pergunta-index {
+    display: none;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .pergunta-field {
+    min-width: 0;
+    margin: 0 !important;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .pergunta-content {
+    height: 100%;
+    padding: 0 !important;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .form-label {
+    margin-bottom: 5px;
+    font-size: .95rem;
+    font-weight: 400;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .form-control {
+    min-height: 41px;
+}
+
+.tab-agrupamento[data-agrupamento-id="3"] .file-drop-area {
+    padding: 10px 14px;
+}
+
+@media (max-width: 767.98px) {
+    .tab-agrupamento[data-agrupamento-id="3"] .pergunta-field {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Etapa 4 - Estrutura e Gestão */
+.etapa-estrutura-gestao .etapa-titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.etapa-estrutura-gestao .etapa-titulo i {
+    color: #1351b4;
+    margin-right: 8px;
+}
+
+.etapa-estrutura-gestao .pergunta-index {
+    display: none;
+}
+
+.etapa-estrutura-gestao .pergunta-field {
+    margin: 0 0 14px !important;
+}
+
+.etapa-estrutura-gestao .pergunta-content {
+    padding: 0 !important;
+}
+
+.etapa-estrutura-gestao .form-label {
+    margin-bottom: 5px;
+    font-size: .95rem;
+    font-weight: 400;
+}
+
+.etapa-estrutura-gestao :is(.form-control, .form-select) {
+    min-height: 41px;
+}
+
+.etapa-estrutura-gestao .estrutura-bloco-separado {
+    margin-top: 20px !important;
+    padding-top: 18px;
+    border-top: 1px solid #d5dbe3;
+}
+
+.etapa-estrutura-gestao .estrutura-fim-subsecao {
+    margin-bottom: 20px !important;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #d5dbe3;
+}
+
+.etapa-estrutura-gestao .ato-normativo-perguntas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 12px;
+}
+
+.etapa-estrutura-gestao .ato-normativo-perguntas .pergunta-field {
+    min-width: 0;
+    margin-bottom: 0 !important;
+}
+
+.etapa-estrutura-gestao :is(.ato-normativo-numero, .ato-normativo-ano) .form-label {
+    visibility: hidden;
+}
+
+.etapa-estrutura-gestao .file-drop-area {
+    padding: 10px 14px;
+}
+
+.etapa-estrutura-gestao .estrutura-equipe-permanente input[type="number"] {
+    width: 174px;
+    max-width: 100%;
+}
+
+.etapa-estrutura-gestao .distribuicao-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.etapa-estrutura-gestao .distribuicao-total {
+    margin-left: auto;
+    color: #667085;
+    font-size: .875rem;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.etapa-estrutura-gestao .estrutura-sexo-outro {
+    min-width: 0;
+    margin: 0 0 8px !important;
+}
+
+.etapa-estrutura-gestao .estrutura-sexo-outro .pergunta-content,
+.etapa-estrutura-gestao .estrutura-sexo-outro .flex-grow-1 {
+    width: 100%;
+}
+
+.etapa-estrutura-gestao .estrutura-sexo-outro .form-label {
+    margin-bottom: 0;
+}
+
+.etapa-estrutura-gestao .estrutura-perguntas-binarias {
+    margin: 18px 0;
+    padding: 18px 0;
+    border-top: 1px solid #d5dbe3;
+    border-bottom: 1px solid #d5dbe3;
+}
+
+.etapa-estrutura-gestao .estrutura-perguntas-binarias .pergunta-field {
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 767.98px) {
+    .etapa-estrutura-gestao .ato-normativo-perguntas {
+        grid-template-columns: 1fr;
+    }
+
+    .etapa-estrutura-gestao :is(.ato-normativo-numero, .ato-normativo-ano) .form-label {
+        visibility: visible;
+    }
+
+    .etapa-estrutura-gestao .estrutura-perguntas-binarias {
+        row-gap: 18px;
+    }
+}
+
+.adesao-help {
+    width: 100%;
+    max-width: none;
+    margin: 32px 0 20px;
+    padding: 20px 24px;
+    background: #fff;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.adesao-help .container-informativo{
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+}
+
+.adesao-help h3 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+}
+
+.adesao-help p {
+    margin-bottom: 10px;
+}
+
+.adesao-help > a {
+    display: block;
+    margin-top: 6px;
+}
+
+.adesao-navigation {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0;
+}
+
+.tp-formulario.edital-adesaoform .adesao-navigation {
+    display: flex;
+    justify-content: space-between;
+}
+
+.adesao-navigation #btn-etapa-anterior {
+    justify-self: start;
+}
+
+.adesao-navigation #btn-proxima-etapa {
+    justify-self: end;
+}
+
+.adesao-save-draft {
+    text-decoration: none;
+}
+
+@media (max-width: 991.98px) {
+    .adesao-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .adesao-sidebar {
+        position: static;
+    }
+
+    .nav-tabs-agrupamento {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+    }
+
+    .nav-tabs-agrupamento .nav-item {
+        width: auto;
+        min-width: 220px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .adesao-navigation {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .adesao-save-draft {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-self: center;
+    }
+}
+
+.card.tab-agrupamento {
+    display: none;
+}
+
+.tab-agrupamento.active {
+    display: block!important;
+}

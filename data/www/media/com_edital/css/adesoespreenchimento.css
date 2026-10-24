@@ -1,0 +1,91 @@
+/* ============================================================
+   ADESÕES EM PREENCHIMENTO
+   ============================================================ */
+
+.adesoes-preenchimento .preenchimento-intro {
+  margin: 0 0 18px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.adesao-item-row-static {
+  cursor: default;
+}
+
+.status-rascunho {
+  background: #eef2f7;
+  color: #4a5568;
+}
+
+.adesao-progresso {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  border-left: 1px solid #f0f0f0;
+  padding-left: 18px;
+  min-width: 180px;
+}
+
+.adesao-progresso-label {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.adesao-progresso-bar {
+  width: 160px;
+  height: 8px;
+  background: #eef0f3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.adesao-progresso-fill {
+  height: 100%;
+  background: #f0a500;
+  border-radius: 999px;
+  transition: width .2s ease;
+}
+
+.adesao-progresso-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: #888;
+}
+
+.adesao-progresso-meta strong {
+  color: #333;
+  font-size: 13px;
+}
+
+.adesao-meta a {
+  color: #1a5cde;
+  text-decoration: none;
+}
+
+.adesao-meta a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .adesao-item-row-static {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .adesao-progresso {
+    align-items: stretch;
+    border-left: 0;
+    padding-left: 0;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+    min-width: 0;
+  }
+
+  .adesao-progresso-bar {
+    width: 100%;
+  }
+}

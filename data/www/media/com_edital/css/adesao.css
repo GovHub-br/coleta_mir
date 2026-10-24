@@ -1,0 +1,213 @@
+.aviso-sucesso-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border-top: rgba(22, 136, 33, 1) solid 20px;
+    text-align: center;
+}
+
+.aviso-sucesso-container i {
+    background: rgba(22, 136, 33, 1);
+    color: white;
+    font-size: 40px;
+    margin-bottom: 10px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    line-height: 50px;
+    border-radius: 25px;
+}
+
+.btn-comprovante {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 5px 20px;
+    border: 1px solid rgba(19, 81, 180, 1);
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.detalhe-protocolo-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.detalhe-protocolo-container h3 {
+    color: #1e40af;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detalhe-protocolo-container h3 i {
+    color: #1e40af;
+    font-size: 20px;
+}
+
+.protocolo-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.protocolo-card {
+    flex: 1;
+    min-width: 200px;
+    margin: 10px 0px;
+}
+
+.protocolo-card.full-width {
+    flex: 100%;
+}
+
+.protocolo-card-status {
+    border-left:  5px solid rgba(255, 205, 7, 1);
+    padding-left: 10px;
+}
+.protocolo-card-numero {
+    border-left:  5px solid rgba(19, 81, 180, 1);
+    padding-left: 10px;
+}
+
+.protocolo-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.protocolo-value {
+    font-size: 16px;
+    color: #111827;
+}
+
+.protocolo-value.status-em-analise {
+    color: #1e40af;
+}
+
+.instrucoes-finais-container {
+    background: rgba(212, 229, 255, 1);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+/* time line*/
+.timeline-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e0e7ff;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+    padding-left: 20px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: -20px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.timeline-icon.completed {
+    background: rgba(22, 136, 33, 1);
+    color: white;
+}
+
+.timeline-icon.current {
+    background: #fff;
+    color: rgba(19, 81, 180, 1);
+    border: solid 1px rgba(19, 81, 180, 1);
+}
+
+.timeline-icon.pending {
+    background: #e5e7eb;
+    border: 2px solid #d1d5db;
+    color: #9ca3af;
+}
+
+.timeline-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: #111827;
+}
+
+.timeline-status {
+    font-size: 14px;
+    margin: 0;
+}
+
+.timeline-status.completed {
+    color: rgba(22, 136, 33, 1);
+}
+
+.timeline-status.current {
+    color: rgba(19, 81, 180, 1);
+}
+
+.timeline-status.pending {
+    color: #9ca3af;
+}
+
+/* File upload error states */
+.file-drop-area.file-error {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.file-error-message {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+}

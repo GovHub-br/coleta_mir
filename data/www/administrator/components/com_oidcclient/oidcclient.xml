@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="component" method="upgrade">
+    <name>com_oidcclient</name>
+    <creationDate>2026-07-24</creationDate>
+    <author>OIDC Client Team</author>
+    <authorEmail>dev@example.com</authorEmail>
+    <authorUrl>https://example.com</authorUrl>
+    <copyright>Copyright (C) 2026. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <version>0.1.0-dev</version>
+    <description>COM_OIDCCLIENT_DESCRIPTION</description>
+    <namespace path="src">JoomlaOidc\Component\OidcClient</namespace>
+    <files folder="site">
+        <filename>index.html</filename>
+        <folder>src</folder>
+    </files>
+    <languages folder="site">
+        <language tag="en-GB">language/en-GB/com_oidcclient.ini</language>
+        <language tag="pt-BR">language/pt-BR/com_oidcclient.ini</language>
+    </languages>
+    <media destination="com_oidcclient" folder="media">
+        <filename>joomla.asset.json</filename>
+    </media>
+    <administration>
+        <menu>COM_OIDCCLIENT</menu>
+        <files folder="administrator">
+            <filename>index.html</filename>
+            <filename>config.xml</filename>
+            <folder>forms</folder>
+            <folder>services</folder>
+            <folder>sql</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+        </files>
+        <languages folder="administrator">
+            <language tag="en-GB">language/en-GB/com_oidcclient.ini</language>
+            <language tag="en-GB">language/en-GB/com_oidcclient.sys.ini</language>
+            <language tag="pt-BR">language/pt-BR/com_oidcclient.ini</language>
+            <language tag="pt-BR">language/pt-BR/com_oidcclient.sys.ini</language>
+        </languages>
+    </administration>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="enabled"
+                    type="list"
+                    default="1"
+                    label="COM_OIDCCLIENT_CONFIG_ENABLED"
+                    description="COM_OIDCCLIENT_CONFIG_ENABLED_DESC"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                    name="user_resolution_policy"
+                    type="list"
+                    default="existing_only"
+                    label="COM_OIDCCLIENT_CONFIG_USER_RESOLUTION"
+                    description="COM_OIDCCLIENT_CONFIG_USER_RESOLUTION_DESC"
+                >
+                    <option value="existing_only">COM_OIDCCLIENT_CONFIG_USER_RESOLUTION_EXISTING_ONLY</option>
+                </field>
+                <field
+                    name="allow_exact_username_link"
+                    type="radio"
+                    default="0"
+                    label="COM_OIDCCLIENT_CONFIG_ALLOW_USERNAME_LINK"
+                    description="COM_OIDCCLIENT_CONFIG_ALLOW_USERNAME_LINK_DESC"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                    name="local_login_policy"
+                    type="list"
+                    default="govbr_people_ente_local"
+                    label="COM_OIDCCLIENT_CONFIG_LOCAL_LOGIN_POLICY"
+                    description="COM_OIDCCLIENT_CONFIG_LOCAL_LOGIN_POLICY_DESC"
+                >
+                    <option value="govbr_people_ente_local">COM_OIDCCLIENT_CONFIG_LOCAL_LOGIN_SELECTIVE</option>
+                </field>
+                <field
+                    name="ente_group_id"
+                    type="usergrouplist"
+                    default="11"
+                    label="COM_OIDCCLIENT_CONFIG_ENTE_GROUP"
+                    description="COM_OIDCCLIENT_CONFIG_ENTE_GROUP_DESC"
+                />
+            </fieldset>
+        </fields>
+    </config>
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/updates/mysql/0.1.0.sql</file>
+            <file driver="postgresql" charset="utf8">sql/updates/postgresql/0.1.0.sql</file>
+        </sql>
+    </install>
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/uninstall.mysql.sql</file>
+            <file driver="postgresql" charset="utf8">sql/uninstall.postgresql.sql</file>
+        </sql>
+    </uninstall>
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+            <schemapath type="postgresql">sql/updates/postgresql</schemapath>
+        </schemas>
+    </update>
+</extension>

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form><fieldset><field name="municipio" groupByFieldset="false" filter="safehtml" type="text" label="COM_EDITAL_SUBFORM_LBL_MUNICIPIOS_MUNICIPIO" description="COM_EDITAL_SUBFORM_DESC_MUNICIPIOS_MUNICIPIO" hint=""/></fieldset></form>

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form><fieldset><field name="nome" groupByFieldset="false" filter="safehtml" type="text" label="COM_EDITAL_SUBFORM_LBL_OPCOES_NOME" description="COM_EDITAL_SUBFORM_DESC_OPCOES_NOME" hint=""/><field name="valor" groupByFieldset="false" type="text" label="COM_EDITAL_SUBFORM_LBL_OPCOES_VALOR" description="COM_EDITAL_SUBFORM_DESC_OPCOES_VALOR" hint=""/></fieldset></form>

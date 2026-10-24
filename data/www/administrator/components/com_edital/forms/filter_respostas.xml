@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fields name="filter">
+        <field name="search" type="text" description="COM_EDITAL_SEARCH_FILTER_SUBMIT"
+               label="COM_USERS_FILTER_SEARCH_DESC"
+               class="js-stools-search-string" />
+
+        <field name="state"
+               type="status"
+               label="COM_EDITAL_FILTER_STATE"
+               description="COM_EDITAL_FILTER_STATE_DESC"
+               onchange="this.form.submit();"
+        >
+            <option value="">JOPTION_SELECT_PUBLISHED</option>
+        </field>
+
+        <field
+            name="co_pergunta"
+            type="sql"
+            label="COM_EDITAL_FORM_LBL_RESPOSTA_CO_PERGUNTA"
+            query="SELECT `id` AS `id`, CONCAT(`ds_titulo`, ' ', `co_edital`) AS val FROM `#__tb_pergunta`"
+            key_field="id"
+            value_field="val"
+            class="inputbox"
+            onchange="this.form.submit()"
+            translate="true"
+            layout="joomla.form.field.list-fancy-select"
+            multiple="true"
+            hint="COM_EDITAL_RESPOSTAS_CO_PERGUNTA_FILTER"
+        />
+        <field
+            name="co_adesao"
+            type="sql"
+            label="COM_EDITAL_FORM_LBL_RESPOSTA_CO_ADESAO"
+            query="SELECT a.`id` AS `id`, CONCAT(a.`no_oficial`, ' (id ', a.`id`, ') - Edital ', IFNULL(e.`no_edital`, ''), ' (id ', a.`co_edital`, ')') AS val FROM `#__tb_adesao` AS a LEFT JOIN `#__tb_edital` AS e ON e.`id` = a.`co_edital` ORDER BY a.`no_oficial` ASC, a.`id` ASC"
+            key_field="id"
+            value_field="val"
+            class="inputbox"
+            onchange="this.form.submit()"
+            translate="true"
+            layout="joomla.form.field.list-fancy-select"
+            multiple="true"
+            hint="COM_EDITAL_RESPOSTAS_CO_ADESAO_FILTER"
+        />
+        <field
+            name="st_situacao"
+            label="COM_EDITAL_FORM_LBL_RESPOSTA_ST_SITUACAO"
+            type="list"
+            onchange="this.form.submit();"
+            multiple="true"
+            class="js-select-submit-on-change"
+            layout="joomla.form.field.list-fancy-select"
+            hint="COM_EDITAL_RESPOSTAS_ST_SITUACAO_FILTER"
+        >
+            <option value="aprovada">COM_EDITAL_RESPOSTAS_ST_SITUACAO_OPTION_APROVADA</option>
+            <option value="reprovada">COM_EDITAL_RESPOSTAS_ST_SITUACAO_OPTION_REPROVADA</option>
+            <option value="pendente">COM_EDITAL_RESPOSTAS_ST_SITUACAO_OPTION_PENDENTE</option>
+        </field>
+        <field
+            name="st_adesao"
+            type="list"
+            label="COM_EDITAL_RESPOSTAS_ST_ADESAO"
+            onchange="this.form.submit();"
+            multiple="true"
+            class="js-select-submit-on-change"
+            layout="joomla.form.field.list-fancy-select"
+            hint="COM_EDITAL_RESPOSTAS_ST_ADESAO_FILTER"
+        >
+            <option value="pendente">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_PENDENTE</option>
+            <option value="rascunho">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_RASCUNHO</option>
+            <option value="avaliado">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_AVALIADA</option>
+            <option value="recusado">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_RECUSADA</option>
+            <option value="recurso">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_RECURSO</option>
+            <option value="aprovado">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_APROVADA</option>
+            <option value="indeferido">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_INDEFERIDO</option>
+            <option value="deferido">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_DEFERIDO</option>
+            <option value="assinatura">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_ASSINATURA</option>
+            <option value="publicacao">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_PUBLICACAO</option>
+            <option value="complemento">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_COMPLEMENTO</option>
+            <option value="complementacao">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_COMPLEMENTACAO</option>
+        </field>
+        <field
+            name="co_edital"
+            type="sql"
+            label="COM_EDITAL_RESPOSTAS_CO_EDITAL"
+            query="SELECT `id` AS `id`, `no_edital` AS val FROM `#__tb_edital`"
+            key_field="id"
+            value_field="val"
+            class="inputbox"
+            onchange="this.form.submit()"
+            translate="true"
+            layout="joomla.form.field.list-fancy-select"
+            multiple="true"
+            hint="COM_EDITAL_RESPOSTAS_CO_EDITAL_FILTER"
+        />
+        <field
+            name="co_agrupamento"
+            type="sql"
+            label="COM_EDITAL_RESPOSTAS_CO_AGRUPAMENTO"
+            query="SELECT `id` AS `id`, `no_agrupamento` AS val FROM `#__tb_agrupamento` ORDER BY `ordering` ASC, `no_agrupamento` ASC"
+            key_field="id"
+            value_field="val"
+            class="inputbox"
+            onchange="this.form.submit()"
+            layout="joomla.form.field.list-fancy-select"
+            multiple="true"
+            hint="COM_EDITAL_RESPOSTAS_CO_AGRUPAMENTO_FILTER"
+        />
+        <field
+            name="info_complementares"
+            type="list"
+            label="COM_EDITAL_RESPOSTAS_INFO_COMPLEMENTARES"
+            onchange="this.form.submit();"
+        >
+            <option value="">COM_EDITAL_RESPOSTAS_INFO_COMPLEMENTARES_FILTER</option>
+            <option value="1">COM_EDITAL_RESPOSTAS_INFO_COMPLEMENTARES_OPTION_SIM</option>
+            <option value="0">COM_EDITAL_RESPOSTAS_INFO_COMPLEMENTARES_OPTION_NAO</option>
+        </field>
+
+
+    </fields>
+
+    <fields name="list">
+
+        <field name="fullordering"
+               type="list"
+               label="COM_EDITAL_LIST_FULL_ORDERING"
+               description="COM_EDITAL_LIST_FULL_ORDERING_DESC"
+               onchange="this.form.submit();"
+               default="a.id DESC"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+            <option value="a.id ASC">COM_EDITAL_ID_ASC</option><option value="a.id DESC">COM_EDITAL_ID_DESC</option><option value="a.state ASC">COM_EDITAL_STATE_ASC</option><option value="a.state DESC">COM_EDITAL_STATE_DESC</option><option value="a.ordering ASC">COM_EDITAL_ORDERING_ASC</option><option value="a.ordering DESC">COM_EDITAL_ORDERING_DESC</option><option value="a.co_pergunta ASC">COM_EDITAL_CO_PERGUNTA_ASC</option><option value="a.co_pergunta DESC">COM_EDITAL_CO_PERGUNTA_DESC</option><option value="a.co_adesao ASC">COM_EDITAL_CO_ADESAO_ASC</option><option value="a.co_adesao DESC">COM_EDITAL_CO_ADESAO_DESC</option><option value="a.dt_criacao ASC">COM_EDITAL_DT_CRIACAO_ASC</option><option value="a.dt_criacao DESC">COM_EDITAL_DT_CRIACAO_DESC</option><option value="a.st_situacao ASC">COM_EDITAL_ST_SITUACAO_ASC</option><option value="a.st_situacao DESC">COM_EDITAL_ST_SITUACAO_DESC</option>
+
+        </field>
+
+       <field name="limit"
+               type="limitbox"
+               label="COM_EDITAL_LIST_LIMIT"
+               description="COM_EDITAL_LIST_LIMIT_DESC"
+               class="input-mini"
+               default="25"
+               onchange="this.form.submit();"
+        />
+
+    </fields>
+
+</form>

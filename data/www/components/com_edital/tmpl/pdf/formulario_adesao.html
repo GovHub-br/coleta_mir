@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: helvetica;
+            font-size: 9.5pt;
+            color: #000000;
+        }
+
+        .gov-title {
+            font-size: 13pt;
+            font-weight: bold;
+        }
+
+        .document-title {
+            text-align: center;
+            font-size: 15pt;
+            font-weight: bold;
+        }
+
+        .document-subtitle {
+            text-align: center;
+            font-size: 10.5pt;
+        }
+
+        .info-table td {
+            border: 1px solid #999999;
+        }
+
+        .info-label {
+            background-color: #e6eff9;
+            font-weight: bold;
+        }
+
+        .info-value {
+            background-color: #f9f9f9;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #1351b4;
+        }
+
+        .text-muted {
+            color: #777777;
+            font-style: italic;
+        }
+
+        .footer-info {
+            font-size: 8pt;
+            color: #666666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td class="gov-title" width="65%" valign="middle">GOVERNO FEDERAL - BRASIL<br/>Ministério da Igualdade Racial</td>
+            <td width="35%" align="right" valign="middle">{{LOGO}}</td>
+        </tr>
+    </table>
+
+    <br/><br/>
+
+    <div class="document-title">{{TITULO}}</div>
+    <div class="document-subtitle">{{SUBTITULO}}</div>
+
+    <br/>
+
+    <table class="info-table" cellpadding="5" cellspacing="0" width="100%">
+        <tr>
+            <td class="info-label" width="35%">Número do Protocolo</td>
+            <td class="info-value" width="65%">{{PROTOCOLO}}</td>
+        </tr>
+        <tr>
+            <td class="info-label" width="35%">Situação</td>
+            <td class="info-value" width="65%">{{STATUS}}</td>
+        </tr>
+        <tr>
+            <td class="info-label" width="35%">Data/Hora do Envio</td>
+            <td class="info-value" width="65%">{{DATA_ENVIO}}</td>
+        </tr>
+    </table>
+
+    <br/>
+
+    {{SECOES}}
+
+    <br/><br/>
+    <hr color="#cccccc"/>
+    <div class="footer-info">
+        <strong>Documento gerado eletronicamente pelo sistema SINAPIR-ADESÃO</strong><br/>
+        Reproduz as informações registradas pelo Ente Federado no Formulário de Adesão.<br/>
+        Ministério da Igualdade Racial – Governo Federal · Data de emissão: {{DATA_GERACAO}}
+    </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+.env
+.history/*
+data/mysql/*
+data/mysql_data/*
+data/www/administrator/logs/*
+data/www/administrator/cache/_media_version/*
+data/www/administrator/cache/*
+data/www/cache/*
+.idea
+*.cache
+tools/saida/
+tools/__pycache__/
+.local/oidc/
+test/
+docs/

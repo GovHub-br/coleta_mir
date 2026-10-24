@@ -1,0 +1,69 @@
+.jcc-color-box {
+    float: left;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+
+.other-filters{
+    padding: 0 14px;
+}
+
+.depende-valores-opcoes {
+    max-height: 220px;
+    overflow: auto;
+    padding: 8px 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 4px;
+}
+
+.depende-valores-opcoes .form-check {
+    margin-bottom: 0.25rem;
+}
+
+.depende-valores .form-check-label {
+    margin-left: 0.35rem;
+}
+
+.pergunta-config-separador {
+    margin: 1.25rem 0;
+    border: 0;
+    border-top: 1px solid #d8dde3;
+    opacity: 1;
+}
+
+joomla-field-fancy-select.pergunta-depende .choices__list--dropdown .choices__item--disabled {
+    display: none;
+}
+
+.form-horizontal .control-group.dias-nao-aplica {
+    align-items: center;
+    margin-bottom: 0.65rem;
+}
+
+.form-horizontal .control-group.dias-nao-aplica::before {
+    content: "";
+    flex: 0 0 240px;
+    inline-size: 240px;
+}
+
+.form-horizontal .control-group.dias-nao-aplica .controls {
+    order: 1;
+    flex: 0 0 auto;
+    min-inline-size: 0;
+    max-inline-size: none;
+}
+
+.form-horizontal .control-group.dias-nao-aplica .control-label {
+    order: 2;
+    flex: 1 1 auto;
+    inline-size: auto;
+    padding: 0 0 0 0.45rem;
+}
+
+.form-horizontal .control-group.dias-nao-aplica .form-check {
+    margin: 0;
+    min-height: 0;
+    padding-top: 0;
+}

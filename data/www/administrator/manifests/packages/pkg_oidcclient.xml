@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="package" method="upgrade">
+    <name>pkg_oidcclient</name>
+    <packagename>oidcclient</packagename>
+    <version>0.1.0-dev</version>
+    <description>Joomla OpenID Connect Client Package</description>
+    <files>
+        <file type="component" id="com_oidcclient">com_oidcclient.zip</file>
+        <file type="plugin" id="oidcclient" group="authentication">plg_authentication_oidcclient.zip</file>
+        <file type="plugin" id="oidcclient" group="system">plg_system_oidcclient.zip</file>
+        <file type="module" id="mod_oidc_login" client="site">mod_oidc_login.zip</file>
+    </files>
+</extension>

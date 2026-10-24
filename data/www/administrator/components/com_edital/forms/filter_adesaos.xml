@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fields name="filter">
+        <field name="search" type="text" description="COM_EDITAL_SEARCH_FILTER_SUBMIT"
+               label="COM_USERS_FILTER_SEARCH_DESC"
+               class="js-stools-search-string" />
+
+        <field name="state"
+               type="status"
+               label="COM_EDITAL_FILTER_STATE"
+               description="COM_EDITAL_FILTER_STATE_DESC"
+               onchange="this.form.submit();"
+        >
+            <option value="">JOPTION_SELECT_PUBLISHED</option>
+        </field>
+
+        <field name="tp_esfera_governamental" label="COM_EDITAL_FORM_LBL_ADESAO_TP_ESFERA_GOVERNAMENTAL" type="list" onchange="this.form.submit();" default="COM_EDITAL_ADESAOS_TP_ESFERA_GOVERNAMENTAL_FILTER" multiple="true" class="js-select-submit-on-change" layout="joomla.form.field.list-fancy-select">
+  <option value="">COM_EDITAL_ADESAOS_TP_ESFERA_GOVERNAMENTAL_FILTER</option>
+  <option value="estadual">COM_EDITAL_ADESAOS_TP_ESFERA_GOVERNAMENTAL_OPTION_ESTADUAL</option>
+  <option value="municipal">COM_EDITAL_ADESAOS_TP_ESFERA_GOVERNAMENTAL_OPTION_MUNICIPAL</option>
+  <option value="consorcio">COM_EDITAL_ADESAOS_TP_ESFERA_GOVERNAMENTAL_OPTION_CONSORCIO</option>
+</field>
+<field name="co_edital" type="sql" label="COM_EDITAL_FORM_LBL_ADESAO_CO_EDITAL" query="SELECT `id` AS `id`, `no_edital` AS val FROM `#__tb_edital`" key_field="id" value_field="val" class="inputbox" onchange="this.form.submit()" translate="true" layout="joomla.form.field.list-fancy-select" multiple="true"/>
+<field name="sg_estado" label="COM_EDITAL_FORM_LBL_ADESAO_SG_ESTADO" type="list" onchange="this.form.submit();" default="COM_EDITAL_ADESAOS_SG_ESTADO_FILTER" multiple="true" class="js-select-submit-on-change" layout="joomla.form.field.list-fancy-select">
+  <option value="">COM_EDITAL_ADESAOS_SG_ESTADO_FILTER</option>
+  <option value="GO">COM_EDITAL_ADESAOS_SG_ESTADO_OPTION_GO</option>
+  <option value="TO">COM_EDITAL_ADESAOS_SG_ESTADO_OPTION_TO</option>
+  <option value="SP">COM_EDITAL_ADESAOS_SG_ESTADO_OPTION_SP</option>
+</field>
+
+
+    </fields>
+
+    <fields name="list">
+
+        <field name="fullordering"
+               type="list"
+               label="COM_EDITAL_LIST_FULL_ORDERING"
+               description="COM_EDITAL_LIST_FULL_ORDERING_DESC"
+               onchange="this.form.submit();"
+               default="a.id DESC"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+            <option value="a.id ASC">COM_EDITAL_ID_ASC</option><option value="a.id DESC">COM_EDITAL_ID_DESC</option><option value="a.state ASC">COM_EDITAL_STATE_ASC</option><option value="a.state DESC">COM_EDITAL_STATE_DESC</option><option value="a.ordering ASC">COM_EDITAL_ORDERING_ASC</option><option value="a.ordering DESC">COM_EDITAL_ORDERING_DESC</option><option value="a.tp_esfera_governamental ASC">COM_EDITAL_TP_ESFERA_GOVERNAMENTAL_ASC</option><option value="a.tp_esfera_governamental DESC">COM_EDITAL_TP_ESFERA_GOVERNAMENTAL_DESC</option><option value="a.co_edital ASC">COM_EDITAL_CO_EDITAL_ASC</option><option value="a.co_edital DESC">COM_EDITAL_CO_EDITAL_DESC</option><option value="a.ds_cnpj ASC">COM_EDITAL_DS_CNPJ_ASC</option><option value="a.ds_cnpj DESC">COM_EDITAL_DS_CNPJ_DESC</option><option value="a.no_oficial ASC">COM_EDITAL_NO_OFICIAL_ASC</option><option value="a.no_oficial DESC">COM_EDITAL_NO_OFICIAL_DESC</option><option value="a.ds_email_responsavel ASC">COM_EDITAL_DS_EMAIL_RESPONSAVEL_ASC</option><option value="a.ds_email_responsavel DESC">COM_EDITAL_DS_EMAIL_RESPONSAVEL_DESC</option><option value="a.sg_estado ASC">COM_EDITAL_SG_ESTADO_ASC</option><option value="a.sg_estado DESC">COM_EDITAL_SG_ESTADO_DESC</option><option value="a.st_adesao ASC">COM_EDITAL_ST_ADESAO_ASC</option><option value="a.st_adesao DESC">COM_EDITAL_ST_ADESAO_DESC</option>
+
+        </field>
+
+       <field name="limit"
+               type="limitbox"
+               label="COM_EDITAL_LIST_LIMIT"
+               description="COM_EDITAL_LIST_LIMIT_DESC"
+               class="input-mini"
+               default="25"
+               onchange="this.form.submit();"
+        />
+
+    </fields>
+
+</form>

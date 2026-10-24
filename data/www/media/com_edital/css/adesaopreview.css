@@ -1,0 +1,146 @@
+.adesao-preview-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 0 24px;
+    padding: 22px 24px;
+    color: #1f2937;
+    background: linear-gradient(135deg, #f4f8ff 0%, #fff 72%);
+    border: 1px solid #bfd6f6;
+    border-radius: 10px;
+}
+
+.adesao-preview-heading h2 {
+    margin: 7px 0 5px;
+    font-size: 1.4rem;
+}
+
+.adesao-preview-heading p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.adesao-preview-badge {
+    display: inline-block;
+    padding: 4px 9px;
+    color: #fff;
+    background: #1351b4;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.adesao-preview-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 10px;
+}
+
+.edital-adesaoform.is-preview .adesao-progress-header,
+.edital-adesaoform.is-preview .adesao-progress {
+    display: none;
+}
+
+.edital-adesaoform.is-preview .adesao-sidebar {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.edital-adesaoform.is-preview .adesao-preview-fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.edital-adesaoform.is-preview .card.tab-agrupamento {
+    display: block !important;
+    margin-bottom: 28px;
+    scroll-margin-top: 110px;
+}
+
+.edital-adesaoform.is-preview .formSolicitante,
+.edital-adesaoform.is-preview .pergunta-field[data-depende-de],
+.edital-adesaoform.is-preview .pergunta-field[data-depende-ocultar] {
+    display: block !important;
+}
+
+.edital-adesaoform.is-preview .tab-agrupamento :is(input, select, textarea, button):disabled {
+    color: #374151;
+    background-color: #f8fafc;
+    opacity: 1;
+}
+
+.edital-adesaoform.is-preview .tab-agrupamento input[type="radio"]:disabled,
+.edital-adesaoform.is-preview .tab-agrupamento input[type="checkbox"]:disabled {
+    background-color: #fff;
+}
+
+.edital-adesaoform.is-preview .file-drop-area {
+    cursor: default;
+}
+
+.edital-adesaoform.is-preview .adesao-preview-condition {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 3px 8px;
+    color: #5b4300;
+    background: #fff4cc;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.edital-adesaoform.is-preview .adesao-help {
+    margin-bottom: 0;
+}
+
+.edital-adesaoform.is-preview .nav-link-agrupamento {
+    position: relative;
+}
+
+.edital-adesaoform.is-preview .nav-tabs-agrupamento.nav {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: nowrap;
+}
+
+.edital-adesaoform.is-preview .nav-link-agrupamento.active::after {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 6px;
+    height: 6px;
+    content: "";
+    background: currentColor;
+    border-radius: 50%;
+    transform: translateY(-50%);
+}
+
+@media (max-width: 767.98px) {
+    .adesao-preview-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .adesao-preview-actions {
+        width: 100%;
+    }
+
+    .adesao-preview-actions .btn {
+        flex: 1;
+    }
+
+    .edital-adesaoform.is-preview .nav-tabs-agrupamento .nav-item {
+        min-width: 210px;
+    }
+
+    .edital-adesaoform.is-preview .adesao-workspace {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -1,0 +1,161 @@
+.formularios-gestao-container {
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 32px 20px 56px;
+}
+
+.formularios-gestao-header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 24px;
+}
+
+.formularios-gestao-eyebrow {
+	color: #6f3e13;
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+}
+
+.formularios-gestao-header h1 {
+	margin: 8px 0 4px;
+	font-size: 32px;
+}
+
+.formularios-gestao-header p {
+	margin: 0;
+	color: #687383;
+}
+
+.formularios-gestao-count {
+	color: #687383;
+	font-size: 14px;
+}
+
+.formularios-gestao-search {
+	margin-bottom: 20px;
+}
+
+.formularios-gestao-search label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+
+.formularios-gestao-search > div {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: 620px;
+}
+
+.formularios-gestao-search i {
+	margin-right: -34px;
+	z-index: 1;
+	color: #8993a1;
+}
+
+.formularios-gestao-search input {
+	flex: 1;
+	min-width: 0;
+	padding: 10px 12px 10px 36px;
+	border: 1px solid #d7dce2;
+	border-radius: 4px;
+}
+
+.formularios-gestao-search button {
+	padding: 10px 16px;
+	border: 0;
+	border-radius: 4px;
+	background: #6f3e13;
+	color: #fff;
+	cursor: pointer;
+}
+
+.formularios-gestao-list {
+	display: grid;
+	gap: 14px;
+}
+
+.formulario-gestao-card {
+	padding: 16px 18px;
+	border: 1px solid #d9dfe5;
+	border-radius: 7px;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(20, 35, 50, .08);
+}
+
+.formulario-gestao-card-top,
+.formulario-gestao-meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.formulario-gestao-status,
+.formulario-gestao-state {
+	font-size: 12px;
+}
+
+.formulario-gestao-status {
+	padding: 4px 9px;
+	border-radius: 12px;
+}
+
+.formulario-gestao-status.is-open { background: #e7f6ed; color: #26864b; }
+.formulario-gestao-status.is-closed { background: #e9f3fb; color: #2875a8; }
+.formulario-gestao-status.is-draft { background: #fff4e0; color: #b45309; }
+.formulario-gestao-state { color: #7b8794; }
+
+.formulario-gestao-version {
+	font-size: 12px;
+	color: #7b8794;
+	padding: 4px 9px;
+}
+
+.formulario-gestao-card h2 {
+	margin: 12px 0 6px;
+	font-size: 18px;
+}
+
+.formulario-gestao-description,
+.formulario-gestao-meta {
+	color: #788493;
+	font-size: 13px;
+}
+
+.formulario-gestao-description { margin: 0 0 12px; }
+.formulario-gestao-meta { justify-content: flex-start; }
+.formulario-gestao-meta i { margin-right: 4px; }
+
+.formularios-gestao-empty {
+	padding: 24px;
+	border: 1px dashed #ccd3da;
+	color: #687383;
+	text-align: center;
+}
+
+.formulario-cadastro-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.formulario-cadastro-actions > div {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
+.formularios-gestao-pagination { margin-top: 24px; }
+
+@media (max-width: 576px) {
+	.formularios-gestao-header { align-items: flex-start; flex-direction: column; gap: 8px; }
+	.formularios-gestao-search > div { align-items: stretch; flex-direction: column; }
+	.formularios-gestao-search i { margin: 12px 0 -32px 14px; }
+}

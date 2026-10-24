@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fields name="filter">
+        <field name="search" type="text" description="COM_EDITAL_SEARCH_FILTER_SUBMIT"
+               label="COM_USERS_FILTER_SEARCH_DESC"
+               class="js-stools-search-string" />
+
+        <field name="state"
+               type="status"
+               label="COM_EDITAL_FILTER_STATE"
+               description="COM_EDITAL_FILTER_STATE_DESC"
+               onchange="this.form.submit();"
+        >
+            <option value="">JOPTION_SELECT_PUBLISHED</option>
+        </field>
+
+        <field
+            name="co_edital"
+            type="sql"
+            label="COM_EDITAL_FORM_LBL_PERGUNTA_CO_EDITAL"
+            query="SELECT `id` AS `id`, `no_edital` AS val FROM `#__tb_edital`"
+            key_field="id"
+            value_field="val"
+            class="inputbox"
+            onchange="this.form.submit()"
+            translate="true"
+            layout="joomla.form.field.list-fancy-select"
+            multiple="true"
+            hint="COM_EDITAL_PERGUNTAS_CO_EDITAL_FILTER"
+        />
+        <field
+            name="co_agrupamento"
+            type="sql"
+            label="COM_EDITAL_FORM_LBL_PERGUNTA_CO_AGRUPAMENTO"
+            query="SELECT `id` AS `id`, `no_agrupamento` AS val FROM `#__tb_agrupamento` ORDER BY `ordering` ASC, `no_agrupamento` ASC"
+            key_field="id"
+            value_field="val"
+            class="inputbox"
+            onchange="this.form.submit()"
+            layout="joomla.form.field.list-fancy-select"
+            multiple="true"
+            hint="COM_EDITAL_PERGUNTAS_CO_AGRUPAMENTO_FILTER"
+        />
+        <field
+            name="tp_pergunta"
+            type="list"
+            label="COM_EDITAL_FORM_LBL_PERGUNTA_TP_PERGUNTA"
+            onchange="this.form.submit();"
+            multiple="true"
+            class="js-select-submit-on-change"
+            layout="joomla.form.field.list-fancy-select"
+            hint="COM_EDITAL_PERGUNTAS_TP_PERGUNTA_FILTER"
+        >
+            <option value="arquivo">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_ARQUIVO</option>
+            <option value="linha">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_LINHA</option>
+            <option value="texto">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TEXTO</option>
+            <option value="lista">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_LISTA</option>
+            <option value="informativo">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_INFORMATIVO</option>
+            <option value="cep">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_CEP</option>
+            <option value="telefone">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TELEFONE</option>
+            <option value="telefones">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TELEFONES</option>
+            <option value="cnpj">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_CNPJ</option>
+            <option value="email">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_EMAIL</option>
+            <option value="url">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_URL</option>
+            <option value="radio">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_RADIO</option>
+            <option value="checkbox">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_CHECKBOX</option>
+            <option value="numero">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_NUMERO</option>
+            <option value="uf">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_UF</option>
+            <option value="municipio">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_MUNICIPIO</option>
+            <option value="distribuicao_numerica">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_DISTRIBUICAO_NUMERICA</option>
+        </field>
+        <field
+            name="tp_requerida"
+            type="list"
+            label="COM_EDITAL_FORM_LBL_PERGUNTA_TP_REQUERIDA"
+            onchange="this.form.submit();"
+        >
+            <option value="">COM_EDITAL_PERGUNTAS_TP_REQUERIDA_FILTER</option>
+            <option value="sim">COM_EDITAL_PERGUNTAS_TP_REQUERIDA_OPTION_SIM</option>
+            <option value="nao">COM_EDITAL_PERGUNTAS_TP_REQUERIDA_OPTION_NAO</option>
+        </field>
+        <field
+            name="tp_etapa"
+            label="COM_EDITAL_FORM_LBL_PERGUNTA_TP_ETAPA"
+            type="list"
+            onchange="this.form.submit();"
+            multiple="true"
+            class="js-select-submit-on-change"
+            layout="joomla.form.field.list-fancy-select"
+            hint="COM_EDITAL_PERGUNTAS_TP_ETAPA_FILTER"
+        >
+            <option value="adesao">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_ADESAO</option>
+            <option value="recurso">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_RECURSO</option>
+            <option value="avaliacao">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_AVALIACAO</option>
+            <option value="complementar">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_COMPLEMENTAR</option>
+            <option value="assinatura">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_ASSINATURA</option>
+            <option value="avaliacao_recurso">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_AVALIACAO_RECURSO</option>
+        </field>
+
+
+    </fields>
+
+    <fields name="list">
+
+        <field name="fullordering"
+               type="list"
+               label="COM_EDITAL_LIST_FULL_ORDERING"
+               description="COM_EDITAL_LIST_FULL_ORDERING_DESC"
+               onchange="this.form.submit();"
+               default="a.id DESC"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+            <option value="a.id ASC">COM_EDITAL_ID_ASC</option><option value="a.id DESC">COM_EDITAL_ID_DESC</option><option value="a.state ASC">COM_EDITAL_STATE_ASC</option><option value="a.state DESC">COM_EDITAL_STATE_DESC</option><option value="a.ordering ASC">COM_EDITAL_ORDERING_ASC</option><option value="a.ordering DESC">COM_EDITAL_ORDERING_DESC</option><option value="a.ds_titulo ASC">COM_EDITAL_DS_TITULO_ASC</option><option value="a.ds_titulo DESC">COM_EDITAL_DS_TITULO_DESC</option><option value="a.co_edital ASC">COM_EDITAL_CO_EDITAL_ASC</option><option value="a.co_edital DESC">COM_EDITAL_CO_EDITAL_DESC</option><option value="a.tp_pergunta ASC">COM_EDITAL_TP_PERGUNTA_ASC</option><option value="a.tp_pergunta DESC">COM_EDITAL_TP_PERGUNTA_DESC</option><option value="a.tp_requerida ASC">COM_EDITAL_TP_REQUERIDA_ASC</option><option value="a.tp_requerida DESC">COM_EDITAL_TP_REQUERIDA_DESC</option><option value="a.tp_etapa ASC">COM_EDITAL_TP_ETAPA_ASC</option><option value="a.tp_etapa DESC">COM_EDITAL_TP_ETAPA_DESC</option>
+
+        </field>
+
+       <field name="limit"
+               type="limitbox"
+               label="COM_EDITAL_LIST_LIMIT"
+               description="COM_EDITAL_LIST_LIMIT_DESC"
+               class="input-mini"
+               default="25"
+               onchange="this.form.submit();"
+        />
+
+    </fields>
+
+</form>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Comedital\Component\Edital\Administrator\Field">
+  <fieldset>
+    <field name="id" type="text" readonly="true" class="readonly" default="0" description="JGLOBAL_FIELD_ID_DESC"/>
+    <field name="state" default="1" type="list" label="JSTATUS" description="JFIELD_PUBLISHED_DESC" class="inputbox" size="1">
+      <option value="1">JPUBLISHED</option>
+      <option value="0">JUNPUBLISHED</option>
+      <option value="2">JARCHIVED</option>
+      <option value="-2">JTRASHED</option>
+    </field>
+    <field name="ordering"/>
+    <field name="checked_out" type="hidden" filter="unset"/>
+    <field name="checked_out_time" type="hidden" filter="unset"/>
+    <field name="created_by" type="createdby" default="0" label="JGLOBAL_FIELD_CREATED_BY_LABEL" description="JGLOBAL_FIELD_CREATED_BY_DESC" hidden="true" hint="COM_EDITAL_FORM_LBL_PERGUNTA_CREATED_BY"/>
+    <field name="modified_by" type="modifiedby" default="0" label="JGLOBAL_FIELD_MODIFIED_BY_LABEL" description="JGLOBAL_FIELD_MODIFIED_BY_DESC" hidden="true" hint="COM_EDITAL_FORM_LBL_PERGUNTA_MODIFIED_BY"/>
+    <field name="ds_titulo" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_PERGUNTA_DS_TITULO" description="COM_EDITAL_FORM_DESC_PERGUNTA_DS_TITULO" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DS_TITULO"/>
+    <field name="co_edital" type="foreignkey" label="COM_EDITAL_FORM_LBL_PERGUNTA_CO_EDITAL" description="COM_EDITAL_FORM_DESC_PERGUNTA_CO_EDITAL" default="" input_type="list" table="#__tb_edital" key_field="id" translate="true" value_field="no_edital" required="true" fk_ordering="dt_abertura DESC"/>
+    <field name="co_agrupamento" type="foreignkey" label="COM_EDITAL_FORM_LBL_PERGUNTA_CO_AGRUPAMENTO" description="COM_EDITAL_FORM_DESC_PERGUNTA_CO_AGRUPAMENTO" default="" input_type="list" table="#__tb_agrupamento" key_field="id" translate="false" value_field="no_agrupamento" required="false" fk_ordering="ordering ASC" hide_trashed="1" layout="joomla.form.field.list" showon="co_edital!:" data_field="co_editais" option_key_field="" option_value_field="COM_EDITAL_PERGUNTAS_CO_AGRUPAMENTO_FILTER"/>
+    <field name="ds_descricao" editor="tinymce" buttons="false" filter="\Joomla\CMS\Component\ComponentHelper::filterText" type="cadastroeditor" label="COM_EDITAL_FORM_LBL_PERGUNTA_DS_DESCRICAO" description="COM_EDITAL_FORM_DESC_PERGUNTA_DS_DESCRICAO" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DS_DESCRICAO"/>
+    <field name="tp_pergunta" type="list" label="COM_EDITAL_FORM_LBL_PERGUNTA_TP_PERGUNTA" description="COM_EDITAL_FORM_DESC_PERGUNTA_TP_PERGUNTA" hint="COM_EDITAL_FORM_LBL_PERGUNTA_TP_PERGUNTA">
+      <option value="arquivo">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_ARQUIVO</option>
+      <option value="linha">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_LINHA</option>
+      <option value="texto">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TEXTO</option>
+      <option value="lista">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_LISTA</option>
+      <option value="informativo">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_INFORMATIVO</option>
+      <option value="cep">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_CEP</option>
+      <option value="telefone">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TELEFONE</option>
+      <option value="telefones">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TELEFONES</option>
+      <option value="cnpj">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_CNPJ</option>
+      <option value="email">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_EMAIL</option>
+      <option value="url">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_URL</option>
+      <option value="radio">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_RADIO</option>
+      <option value="checkbox">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_CHECKBOX</option>
+      <option value="numero">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_NUMERO</option>
+      <option value="uf">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_UF</option>
+      <option value="municipio">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_MUNICIPIO</option>
+      <option value="distribuicao_numerica">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_DISTRIBUICAO_NUMERICA</option>
+    </field>
+    <field name="ds_opcoes" multiple="true" layout="joomla.form.field.subform.repeatable" buttons="" formsource="administrator/components/com_edital/forms/subform_opcoes.xml" type="subform" label="COM_EDITAL_FORM_LBL_PERGUNTA_DS_OPCOES" description="COM_EDITAL_FORM_DESC_PERGUNTA_DS_OPCOES" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DS_OPCOES"/>
+    <field name="tp_requerida" type="list" label="COM_EDITAL_FORM_LBL_PERGUNTA_TP_REQUERIDA" description="COM_EDITAL_FORM_DESC_PERGUNTA_TP_REQUERIDA" hint="COM_EDITAL_FORM_LBL_PERGUNTA_TP_REQUERIDA">
+      <option value="sim">COM_EDITAL_PERGUNTAS_TP_REQUERIDA_OPTION_SIM</option>
+      <option value="nao">COM_EDITAL_PERGUNTAS_TP_REQUERIDA_OPTION_NAO</option>
+    </field>
+    <field
+      name="depende_de"
+      type="foreignkey"
+      label="COM_EDITAL_FORM_LBL_PERGUNTA_DEPENDE_DE"
+      description="COM_EDITAL_FORM_DESC_PERGUNTA_DEPENDE_DE"
+      input_type="list"
+      table="#__tb_pergunta"
+      key_field="id"
+      value_field="ds_titulo"
+      header="COM_EDITAL_PERGUNTA_DEPENDENCIA_NENHUMA"
+      required="false"
+      hide_trashed="1"
+      fk_ordering="ordering ASC"
+      data_field="co_edital"
+      class="pergunta-depende"
+      filter="cmd"
+      layout="joomla.form.field.list-fancy-select">
+      <option value="solicitante">COM_EDITAL_PERGUNTA_DEPENDENCIA_SOLICITANTE</option>
+    </field>
+    <field name="depende_de_valor" filter="raw" type="text" label="COM_EDITAL_FORM_LBL_PERGUNTA_DEPENDE_DE_VALOR" description="COM_EDITAL_FORM_DESC_PERGUNTA_DEPENDE_DE_VALOR" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DEPENDE_DE_VALOR" showon="depende_de!:"/>
+    <field
+      name="depende_de_ocultar"
+      type="foreignkey"
+      label="COM_EDITAL_FORM_LBL_PERGUNTA_DEPENDE_DE_OCULTAR"
+      description="COM_EDITAL_FORM_DESC_PERGUNTA_DEPENDE_DE_OCULTAR"
+      input_type="list"
+      table="#__tb_pergunta"
+      key_field="id"
+      value_field="ds_titulo"
+      header="COM_EDITAL_PERGUNTA_DEPENDENCIA_NENHUMA"
+      required="false"
+      hide_trashed="1"
+      fk_ordering="ordering ASC"
+      data_field="co_edital"
+      class="pergunta-depende"
+      filter="cmd"
+      layout="joomla.form.field.list-fancy-select">
+      <option value="solicitante">COM_EDITAL_PERGUNTA_DEPENDENCIA_SOLICITANTE</option>
+    </field>
+    <field name="depende_de_ocultar_valor" filter="raw" type="text" label="COM_EDITAL_FORM_LBL_PERGUNTA_DEPENDE_DE_OCULTAR_VALOR" description="COM_EDITAL_FORM_DESC_PERGUNTA_DEPENDE_DE_OCULTAR_VALOR" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DEPENDE_DE_OCULTAR_VALOR" showon="depende_de_ocultar!:"/>
+
+    <field name="ds_informacao_complementar" editor="tinymce" buttons="false" filter="\Joomla\CMS\Component\ComponentHelper::filterText" type="cadastroeditor" label="COM_EDITAL_FORM_LBL_PERGUNTA_DS_INFORMACAO_COMPLEMENTAR" description="COM_EDITAL_FORM_DESC_PERGUNTA_DS_INFORMACAO_COMPLEMENTAR" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DS_INFORMACAO_COMPLEMENTAR"/>
+    <field name="qt_dias_nao_aplica" type="checkbox" value="1" filter="integer" parentclass="dias-nao-aplica" hiddenDescription="true" label="COM_EDITAL_FORM_LBL_PERGUNTA_QT_DIAS_NAO_APLICA" description="COM_EDITAL_FORM_DESC_PERGUNTA_QT_DIAS_NAO_APLICA"/>
+    <field name="qt_dias_complementacao" type="number" default="5" min="1" step="1" filter="int" label="COM_EDITAL_FORM_LBL_PERGUNTA_QT_DIAS_COMPLEMENTACAO" description="COM_EDITAL_FORM_DESC_PERGUNTA_QT_DIAS_COMPLEMENTACAO" hint="COM_EDITAL_FORM_LBL_PERGUNTA_QT_DIAS_COMPLEMENTACAO"/>
+    <field name="ds_subtitulo" filter="safehtml" type="text" label="COM_EDITAL_FORM_LBL_PERGUNTA_DS_SUBTITULO" description="COM_EDITAL_FORM_DESC_PERGUNTA_DS_SUBTITULO" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DS_SUBTITULO"/>
+    <field name="tp_etapa" type="list" required="true" label="COM_EDITAL_FORM_LBL_PERGUNTA_TP_ETAPA" description="COM_EDITAL_FORM_DESC_PERGUNTA_TP_ETAPA" hint="COM_EDITAL_FORM_LBL_PERGUNTA_TP_ETAPA">
+      <option value="adesao">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_ADESAO</option>
+      <option value="recurso">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_RECURSO</option>
+      <option value="avaliacao">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_AVALIACAO</option>
+      <option value="complementar">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_COMPLEMENTAR</option>
+      <option value="assinatura">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_ASSINATURA</option>
+      <option value="avaliacao_recurso">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_AVALIACAO_RECURSO</option>
+      <option value="ajuda_adesao">COM_EDITAL_PERGUNTAS_TP_ETAPA_OPTION_AJUDA_ADESAO</option>
+    </field>
+    <field name="ds_informacao_complementar2" editor="tinymce" buttons="false" filter="\Joomla\CMS\Component\ComponentHelper::filterText" type="cadastroeditor" label="COM_EDITAL_FORM_LBL_PERGUNTA_DS_INFORMACAO_COMPLEMENTAR2" description="COM_EDITAL_FORM_DESC_PERGUNTA_DS_INFORMACAO_COMPLEMENTAR2" hint="COM_EDITAL_FORM_LBL_PERGUNTA_DS_INFORMACAO_COMPLEMENTAR2"/>
+    <field name="version_note" type="text" label="JGLOBAL_FIELD_VERSION_NOTE_LABEL" description="JGLOBAL_FIELD_VERSION_NOTE_DESC" class="inputbox" size="45" labelclass="control-label"/>
+  </fieldset>
+</form>

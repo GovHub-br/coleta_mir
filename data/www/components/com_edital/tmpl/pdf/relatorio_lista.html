@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: helvetica; font-size: 9pt; color: #1a1a1a; }
+        .gov-header { width: 100%; margin-bottom: 8px; }
+        .gov-title { font-size: 11pt; font-weight: bold; }
+        .document-title { font-size: 14pt; font-weight: bold; }
+        .document-subtitle { font-size: 9pt; color: #666666; }
+        .stat-card { border: 1px solid #e8e8e8; }
+        .stat-label { font-size: 8pt; color: #888888; }
+        .stat-number { font-size: 16pt; font-weight: bold; }
+        .adesao-item { border: 1px solid #e8e8e8; }
+        .adesao-protocolo { font-size: 8pt; color: #888888; }
+        .adesao-nome { font-size: 11pt; font-weight: bold; color: #1a1a1a; }
+        .adesao-meta { font-size: 8pt; color: #888888; }
+        .adesao-side { font-size: 8pt; color: #888888; text-align: right; }
+        .footer-info { font-size: 8pt; color: #666666; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="gov-header">
+        <table cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+                <td class="gov-title" width="70%">GOVERNO FEDERAL - BRASIL<br/>Ministério da Igualdade Racial</td>
+                <td width="30%" align="right">{{LOGO}}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="document-title">{{TITLE}}</div>
+    <div class="document-subtitle">{{SUBTITLE}}</div>
+    <br/>
+    {{STATS}}
+    {{ITEMS}}
+    <br/>
+    <div class="footer-info">
+        Documento gerado eletronicamente pelo sistema SINAPIR-ADESÃO<br/>
+        Ministério da Igualdade Racial – Governo Federal<br/>
+        Data de emissão: {{DATA_GERACAO}}
+    </div>
+</body>
+</html>

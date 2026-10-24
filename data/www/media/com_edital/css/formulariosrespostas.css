@@ -1,0 +1,280 @@
+
+.fr-page {
+	padding: 20px 0;
+	max-width: 1000px;
+	margin: 0 auto;
+}
+
+.fr-header{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.btn-voltar {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	margin-bottom: 20px;
+	background: #f0f0f0;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	text-decoration: none;
+	color: #333;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+
+.btn-voltar:hover {
+	background: #e0e0e0;
+	color: #333;
+	text-decoration: none;
+}
+
+.fr-info-card {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 30px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 30px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.fr-proto-row {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin-bottom: 10px;
+}
+
+.fr-protocolo {
+	font-size: 18px;
+	font-weight: bold;
+	color: #007bff;
+}
+
+.fr-ente-nome {
+	font-size: 18px;
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 15px;
+}
+
+.fr-meta-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #666;
+	font-size: 14px;
+	margin-bottom: 8px;
+}
+
+.fr-meta-row i {
+	color: #999;
+}
+
+.fr-dados-titulo {
+	font-weight: bold;
+	color: #555;
+	margin-bottom: 12px;
+	font-size: 13px;
+	text-transform: uppercase;
+}
+
+.fr-dado-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 8px 0;
+	border-bottom: 1px solid #eee;
+	font-size: 14px;
+	color: #666;
+}
+
+.fr-dado-row span {
+	color: #333;
+	font-weight: 500;
+}
+
+.fr-docs-section {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.fr-docs-titulo {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 16px;
+	font-weight: 600;
+	padding-bottom: 15px;
+	border-bottom: 2px solid #f0f0f0;
+	color: #333;
+}
+
+
+.fr-agrupamento-titulo {
+	font-size: 15px;
+	font-weight: 600;
+	color: #555;
+	margin: 0;
+}
+
+.fr-resposta-card {
+	background: #f9f9f9;
+	border: 1px solid #eee;
+	border-radius: 6px;
+	padding: 15px;
+	margin-bottom: 15px;
+	transition: background 0.2s;
+}
+
+.fr-resposta-card:hover {
+	background: #fff;
+	border-color: #ddd;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.fr-resposta-header {
+	display: flex;
+	align-items: flex-start;
+	margin-bottom: 10px;
+}
+
+.fr-resposta-titulo {
+	font-weight: 600;
+	color: #333;
+	font-size: 15px;
+}
+
+.fr-obrigatoria {
+	color: #dc3545;
+	font-weight: bold;
+}
+
+.fr-resposta-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: #666;
+	margin-bottom: 12px;
+}
+
+.fr-meta-sep {
+	color: #ccc;
+}
+
+.fr-resposta-conteudo {
+	padding: 12px;
+	background: #fff;
+	border-left: 3px solid #007bff;
+	border-radius: 4px;
+	margin-bottom: 12px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #333;
+}
+
+.fr-resposta-acoes {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-start;
+	margin-top: 12px;
+}
+
+.fr-btn-download,
+.fr-btn-visualizar {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	transition: all 0.2s;
+}
+
+.fr-btn-download {
+	background: #28a745;
+	color: white;
+}
+
+.fr-btn-download:hover {
+	background: #218838;
+	color: white;
+	text-decoration: none;
+}
+
+.fr-btn-visualizar {
+	background: #007bff;
+	color: white;
+}
+
+.fr-btn-visualizar:hover {
+	background: #0056b3;
+	color: white;
+	text-decoration: none;
+}
+
+
+/* Status badges */
+.adesao-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.status-analise, .status-rascunho {
+  background: rgba(249, 122, 31, 0.15);
+  color: #f97a1f;
+}
+
+.status-deferido {
+  background: #eaf6ee;
+  color: #28a745;
+}
+
+.status-indeferido, .status-encerrado {
+  background: #fdecea;
+  color: #e74c3c;
+}
+
+.status-recurso {
+  background: #fff4e5;
+  color: #f0a500;
+}
+
+.status-complementacao {
+  background: #fff4e5;
+  color: #f0a500;
+}
+
+@media (max-width: 768px) {
+	.fr-info-card {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+
+	.fr-resposta-acoes {
+		flex-direction: column;
+	}
+
+	.fr-btn-download,
+	.fr-btn-visualizar {
+		width: 100%;
+		justify-content: center;
+	}
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "com_edital",
+  "version": "CVS: 1.0.0",
+  "license": "GNU General Public License version 2 or later; see LICENSE.txt",
+  "assets": [
+    {
+      "name": "com_edital.admin",
+      "type": "style",
+      "uri": "com_edital/admin.css"
+    },
+    {
+      "name": "com_edital.admin",
+      "type": "script",
+      "uri": "com_edital/admin.js",
+      "dependencies": [
+        "jquery"
+      ],
+      "attributes": {
+        "defer": true
+      }
+    },
+    {
+        "name": "com_edital.list",
+        "type": "style",
+        "uri": "com_edital/list.css"
+    },
+    {
+        "name": "com_edital.cadastro",
+        "type": "style",
+        "uri": "com_edital/cadastro.css"
+    },
+    {
+        "name": "com_edital.cadastro",
+        "type": "script",
+        "uri": "com_edital/cadastro.js",
+        "dependencies": [
+            "core"
+        ],
+        "attributes": {
+            "defer": true
+        }
+    },
+    {
+        "name": "com_edital.construtorperguntas",
+        "type": "style",
+        "uri": "com_edital/construtorperguntas.css"
+    },
+    {
+        "name": "com_edital.construtorperguntas",
+        "type": "script",
+        "uri": "com_edital/construtorperguntas.js",
+        "dependencies": [
+            "core"
+        ],
+        "attributes": {
+            "defer": true
+        }
+    }
+  ]
+}

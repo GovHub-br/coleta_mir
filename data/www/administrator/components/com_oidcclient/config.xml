@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <fieldset name="basic" label="COM_OIDCCLIENT_COMPONENT_PARAMS">
+        <field
+            name="enabled"
+            type="list"
+            default="1"
+            label="COM_OIDCCLIENT_CONFIG_ENABLED"
+            description="COM_OIDCCLIENT_CONFIG_ENABLED_DESC"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+
+        <field
+            name="user_resolution_policy"
+            type="list"
+            default="existing_only"
+            label="COM_OIDCCLIENT_CONFIG_USER_RESOLUTION"
+            description="COM_OIDCCLIENT_CONFIG_USER_RESOLUTION_DESC"
+        >
+            <option value="existing_only">COM_OIDCCLIENT_CONFIG_USER_RESOLUTION_EXISTING_ONLY</option>
+        </field>
+
+        <field
+            name="allow_exact_username_link"
+            type="radio"
+            default="0"
+            label="COM_OIDCCLIENT_CONFIG_ALLOW_USERNAME_LINK"
+            description="COM_OIDCCLIENT_CONFIG_ALLOW_USERNAME_LINK_DESC"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+
+        <field
+            name="local_login_policy"
+            type="list"
+            default="govbr_people_ente_local"
+            label="COM_OIDCCLIENT_CONFIG_LOCAL_LOGIN_POLICY"
+            description="COM_OIDCCLIENT_CONFIG_LOCAL_LOGIN_POLICY_DESC"
+        >
+            <option value="govbr_people_ente_local">COM_OIDCCLIENT_CONFIG_LOCAL_LOGIN_SELECTIVE</option>
+        </field>
+
+        <field
+            name="ente_group_id"
+            type="usergrouplist"
+            default="11"
+            label="COM_OIDCCLIENT_CONFIG_ENTE_GROUP"
+            description="COM_OIDCCLIENT_CONFIG_ENTE_GROUP_DESC"
+        />
+    </fieldset>
+</config>

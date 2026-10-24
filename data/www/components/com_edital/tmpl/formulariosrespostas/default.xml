@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+	<layout title="COM_EDITAL_TITLE_VIEW_FORMULARIOSRESPOSTAS" option="View">
+		<message>
+			<![CDATA[COM_EDITAL_TITLE_VIEW_FORMULARIOSRESPOSTAS_DESC]]>
+		</message>
+	</layout>
+</metadata>

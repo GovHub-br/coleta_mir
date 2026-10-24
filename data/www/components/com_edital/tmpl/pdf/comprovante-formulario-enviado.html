@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: helvetica;
+            font-size: 10pt;
+            line-height: 1.2;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+        }
+
+        .gov-header {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .gov-header table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .gov-title {
+            font-size: 14pt;
+            font-weight: bold;
+            width: 60%;
+            vertical-align: middle;
+        }
+
+        .sinapir-logo {
+            width: 40%;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        /* .ministry {
+            font-size: 10pt;
+            margin-bottom: 25px;
+            top: -10px;
+            position: relative;
+        } */
+
+        .document-title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .document-subtitle {
+            text-align: center;
+            font-size: 11pt;
+            margin-bottom: 25px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            border: 2px solid #000000;
+            vertical-align: middle;
+        }
+
+        .info-table td {
+            border: 1px solid #666666;
+            height: 20px;
+            vertical-align: middle;
+            line-height: 26px;
+        }
+
+        .info-label {
+            background-color: #e6eff9;
+            font-weight: bold;
+            width: 35%;
+        }
+
+        .info-value {
+            background-color: #f9f9f9;
+            width: 65%;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            margin: 20px 0 8px 0;
+        }
+
+        .section-content {
+            margin-bottom: 15px;
+            text-align: justify;
+            font-size: 10pt;
+        }
+
+        .footer-info {
+            font-size: 8pt;
+            color: #666666;
+            border-top: 1px solid #cccccc;
+            padding-top: 10px;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="gov-header">
+        <table>
+            <tr>
+                <td class="gov-title">GOVERNO FEDERAL - BRASIL<br/>Ministério da Igualdade Racial</td>
+                <td class="sinapir-logo"><img src="/images/logo/logo_comprovante.png" width="120px"/></td>
+            </tr>
+        </table>
+    </div>
+
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+
+    <div class="document-title">COMPROVANTE DE ENVIO {{NO_EDITAL}}</div>
+    <br/>
+
+    <table class="info-table">
+        <tr>
+            <td class="info-label">Número do Protocolo:</td>
+            <td class="info-value">{{PROTOCOL_NUMBER}}</td>
+        </tr>
+        <tr>
+            <td class="info-label">ENTE:</td>
+            <td class="info-value">{{ESFERA}}</td>
+        </tr>
+        <tr>
+            <td class="info-label">{{LABEL_ITENS_ESFERA}}:</td>
+            <td class="info-value {{LABEL_ITENS_ESFERA}}">{{ITENS_ESFERA}}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Status Atual:</td>
+            <td class="info-value">{{STATUS}}</td>
+        </tr>
+        <tr>
+            <td class="info-label">Data/Hora do Envio:</td>
+            <td class="info-value">{{DATA_ENVIO}}</td>
+        </tr>
+    </table>
+<br/>
+   
+    <br/>
+    <br/>
+    <br/>
+    <div class="footer-info">
+        <strong>Documento gerado eletronicamente pelo sistema SINAPIR-ADESÃO</strong><br/>
+        Ministério da Igualdade Racial – Governo Federal<br/>
+        Data de emissão: {{DATA_GERACAO}}
+    </div>
+</body>
+</html>

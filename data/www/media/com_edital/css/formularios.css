@@ -1,0 +1,275 @@
+
+.formularios-container {
+	padding: 20px 0;
+}
+
+.formularios-section {
+	margin-bottom: 40px;
+}
+
+.section-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	margin-bottom: 20px;
+	color: #333;
+}
+
+.formularios-list {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 20px;
+}
+
+.formulario-card {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	transition: box-shadow 0.2s ease;
+	display: flex;
+	flex-direction: column;
+    padding: 20px;
+}
+
+.formulario-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.formulario-card.closed {
+	opacity: 0.9;
+}
+
+.card-header {
+	padding: 15px;
+	border-bottom: 1px solid #eee;
+	background: #f9f9f9;
+}
+
+.badge-group {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.badge {
+	display: inline-block;
+	padding: 4px 12px;
+	border-radius: 20px;
+	font-size: 0.85rem;
+	font-weight: 500;
+}
+
+.badge-success {
+	background-color: #d4edda;
+	color: #155724;
+}
+
+.badge-info {
+	background-color: #d1ecf1;
+	color: #0c5460;
+}
+
+.card-body {
+	padding: 20px;
+	flex-grow: 1;
+}
+
+.formulario-title {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin: 0 0 10px 0;
+	color: #333;
+}
+
+.formulario-description {
+	font-size: 0.95rem;
+	color: #666;
+	margin-bottom: 15px;
+	line-height: 1.5;
+}
+
+.formulario-meta {
+	margin-bottom: 15px;
+	font-size: 0.9rem;
+	color: #666;
+}
+
+.meta-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.formulario-days-remaining {
+	color: #f97a1f;
+}
+
+.badge.badge-success{
+    background: #eaf6ee;
+    color: #28a745;
+}
+
+
+.badge.badge-info{
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge.badge-warning{
+    background: rgba(249, 122, 31, 0.15);
+    color: #f97a1f;
+}
+
+.formulario-progress {
+	margin-bottom: 15px;
+}
+
+.progress-bar {
+	height: 6px;
+	background-color: #e9ecef;
+	border-radius: 3px;
+	overflow: hidden;
+	margin-bottom: 6px;
+}
+
+.progress-fill {
+	height: 100%;
+	background-color: #28a745;
+	transition: width 0.3s ease;
+}
+
+.progress-bar.complete .progress-fill {
+	background-color: #663d2d;
+}
+
+.progress-text {
+	font-size: 0.85rem;
+	color: #666;
+}
+
+.progress-text span {
+	display: block;
+}
+
+.progress-text-split {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 6px;
+}
+
+.progress-pendencias {
+	color: #f97a1f;
+	white-space: nowrap;
+}
+
+.formulario-version {
+	display: inline-flex;
+	align-items: center;
+	font-size: 0.85rem;
+	color: #7b8794;
+}
+
+.formulario-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-top: 10px;
+	border-top: 1px solid #eee;
+	font-size: 0.9rem;
+}
+
+.info-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: #666;
+}
+
+.info-item i {
+	color: #999;
+}
+
+.info-item.pending {
+	margin-left: auto;
+}
+
+.pending-badge {
+	background-color: #f8d7da;
+	color: #721c24;
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-size: 0.8rem;
+	font-weight: 500;
+}
+
+.card-footer {
+	display: flex;
+	gap: 10px;
+	align-items: stretch;
+	padding: 15px;
+	border-top: 1px solid #eee;
+	background: #f9f9f9;
+}
+
+.btn-action {
+	flex: 0 1 auto;
+	width: auto;
+	padding: 10px;
+	border: none;
+	border-radius: 4px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.btn-action i {
+	margin-right: 6px;
+}
+
+.btn-primary {
+	background-color: #663d2d;
+	color: white;
+}
+
+.btn-primary:hover {
+	background-color: #4d2d1f;
+}
+
+.btn-secondary {
+	background-color: #6c757d;
+	color: white;
+}
+
+.btn-secondary:hover {
+	background-color: #5a6268;
+}
+
+@media (max-width: 768px) {
+	.card-footer {
+		flex-direction: column;
+	}
+
+	.card-footer .btn-action {
+		width: 100%;
+	}
+
+	.formularios-list {
+		grid-template-columns: 1fr;
+	}
+	
+	.formulario-info {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+	
+	.info-item.pending {
+		margin-left: 0;
+	}
+}

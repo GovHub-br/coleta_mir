@@ -1,0 +1,95 @@
+.adesao-entry {
+    max-width: 1040px;
+    margin: 24px auto 64px;
+}
+
+.adesao-entry-intro {
+    max-width: 720px;
+    margin-bottom: 28px;
+}
+
+.adesao-entry-intro h1 {
+    margin: 0 0 10px;
+    color: #1f2937;
+    font-size: clamp(1.75rem, 3vw, 2.4rem);
+    font-weight: 700;
+}
+
+.adesao-entry-intro p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.adesao-entry-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.adesao-entry-card {
+    position: relative;
+    display: flex;
+    min-height: 300px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 30px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #d9dee5;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+}
+
+.adesao-entry-card-primary {
+    border-top: 4px solid #1351b4;
+}
+
+.adesao-entry-card:not(.adesao-entry-card-primary) {
+    border-top: 4px solid #5891dc;
+}
+
+.adesao-entry-icon {
+    display: grid;
+    width: 52px;
+    height: 52px;
+    color: #1351b4;
+    background: #e7f2ff;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    place-items: center;
+}
+
+.adesao-entry-card h2 {
+    margin: 0 0 8px;
+    color: #1f2937;
+    font-size: 1.4rem;
+}
+
+.adesao-entry-card p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.55;
+}
+
+.adesao-entry-card .btn {
+    align-self: flex-start;
+    min-width: 180px;
+}
+
+@media (max-width: 767.98px) {
+    .adesao-entry {
+        margin-top: 12px;
+    }
+
+    .adesao-entry-options {
+        grid-template-columns: 1fr;
+    }
+
+    .adesao-entry-card {
+        min-height: 0;
+        padding: 24px;
+    }
+}

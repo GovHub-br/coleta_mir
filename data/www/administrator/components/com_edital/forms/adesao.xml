@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Comedital\Component\Edital\Administrator\Field">
+  <fieldset>
+    <field name="id" type="text" readonly="true" class="readonly" default="0" description="JGLOBAL_FIELD_ID_DESC"/>
+    <field name="state" default="1" type="list" label="JSTATUS" description="JFIELD_PUBLISHED_DESC" class="inputbox" size="1">
+      <option value="1">JPUBLISHED</option>
+      <option value="0">JUNPUBLISHED</option>
+      <option value="2">JARCHIVED</option>
+      <option value="-2">JTRASHED</option>
+    </field>
+    <field name="ordering"/>
+    <field name="checked_out" type="hidden" filter="unset"/>
+    <field name="checked_out_time" type="hidden" filter="unset"/>
+    <field name="created_by" type="user" default="0" label="JGLOBAL_FIELD_CREATED_BY_LABEL" description="JGLOBAL_FIELD_CREATED_BY_DESC" hidden="false" hint="COM_EDITAL_FORM_LBL_ADESAO_CREATED_BY"/>
+    <field name="modified_by" type="modifiedby" default="0" label="JGLOBAL_FIELD_MODIFIED_BY_LABEL" description="JGLOBAL_FIELD_MODIFIED_BY_DESC" hidden="true" hint="COM_EDITAL_FORM_LBL_ADESAO_MODIFIED_BY"/>
+    <field name="tp_esfera_governamental" type="list" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_TP_ESFERA_GOVERNAMENTAL" description="COM_EDITAL_FORM_DESC_ADESAO_TP_ESFERA_GOVERNAMENTAL" hint="COM_EDITAL_FORM_LBL_ADESAO_TP_ESFERA_GOVERNAMENTAL">
+      <option value="estadual">COM_EDITAL_ADESOES_TP_ESFERA_GOVERNAMENTAL_OPTION_ESTADUAL</option>
+      <option value="municipal">COM_EDITAL_ADESOES_TP_ESFERA_GOVERNAMENTAL_OPTION_MUNICIPAL</option>
+      <option value="consorcio">COM_EDITAL_ADESOES_TP_ESFERA_GOVERNAMENTAL_OPTION_CONSORCIO</option>
+    </field>
+    <field name="co_edital" type="foreignkey" label="COM_EDITAL_FORM_LBL_ADESAO_CO_EDITAL" description="COM_EDITAL_FORM_DESC_ADESAO_CO_EDITAL" default="" input_type="list" table="#__tb_edital" key_field="id" translate="true" value_field="no_edital" required="true"/>
+    <field
+      name="co_adesao_origem"
+      type="text"
+      label="COM_EDITAL_FORM_LBL_ADESAO_CO_ADESAO_ORIGEM"
+      description="COM_EDITAL_FORM_DESC_ADESAO_CO_ADESAO_ORIGEM"
+      hint="COM_EDITAL_FORM_HINT_ADESAO_CO_ADESAO_ORIGEM"
+      default=""
+      readonly="true"
+      class="readonly"
+      required="false"/>
+    <field name="ds_cnpj" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_CNPJ" description="COM_EDITAL_FORM_DESC_ADESAO_DS_CNPJ" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_CNPJ"/>
+    <field name="no_oficial" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_NO_OFICIAL" description="COM_EDITAL_FORM_DESC_ADESAO_NO_OFICIAL" hint="COM_EDITAL_FORM_LBL_ADESAO_NO_OFICIAL"/>
+    <field name="ds_email_responsavel" validate="email" type="email" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_EMAIL_RESPONSAVEL" description="COM_EDITAL_FORM_DESC_ADESAO_DS_EMAIL_RESPONSAVEL" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_EMAIL_RESPONSAVEL"/>
+    <field name="dt_criacao" type="timecreated" label="COM_EDITAL_FORM_LBL_ADESAO_DT_CRIACAO" description="COM_EDITAL_FORM_DESC_ADESAO_DT_CRIACAO" hint="COM_EDITAL_FORM_LBL_ADESAO_DT_CRIACAO"/>
+    <field name="sg_estado" type="adesaosgestado" multiple="true" label="COM_EDITAL_FORM_LBL_ADESAO_SG_ESTADO" description="COM_EDITAL_FORM_DESC_ADESAO_SG_ESTADO" hint="COM_EDITAL_FORM_LBL_ADESAO_SG_ESTADO"/>
+    <field name="ds_municipios" type="adesaodsmunicipios" multiple="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_MUNICIPIOS" description="COM_EDITAL_FORM_DESC_ADESAO_DS_MUNICIPIOS" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_MUNICIPIOS"/>
+    <field name="st_adesao" type="list" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_ST_ADESAO" description="COM_EDITAL_FORM_DESC_ADESAO_ST_ADESAO" hint="COM_EDITAL_FORM_LBL_ADESAO_ST_ADESAO">
+      <option value="pendente">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_PENDENTE</option>
+      <option value="rascunho">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_RASCUNHO</option>
+      <option value="avaliado">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_AVALIADA</option>
+      <option value="recusado">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_RECUSADA</option>
+      <option value="recurso">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_RECURSO</option>
+      <option value="aprovado">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_APROVADA</option>
+      <option value="indeferido">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_INDEFERIDA</option>
+      <option value="deferido">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_DEFERIDA</option>
+      <option value="assinatura">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_ASSINATURA</option>
+      <option value="publicacao">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_PUBLICACAO</option>
+      <option value="complemento">COM_EDITAL_ADESOES_ST_ADESAO_OPTION_COMPLEMENTO</option>
+    </field>
+    <field name="ds_observacao_interna" editor="|" buttons="false" filter="\Joomla\CMS\Component\ComponentHelper::filterText" type="editor" label="COM_EDITAL_FORM_LBL_ADESAO_DS_OBSERVACAO_INTERNA" description="COM_EDITAL_FORM_DESC_ADESAO_DS_OBSERVACAO_INTERNA" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_OBSERVACAO_INTERNA"/>
+    <field name="ds_resposta" editor="|" buttons="false" filter="\Joomla\CMS\Component\ComponentHelper::filterText" type="editor" label="COM_EDITAL_FORM_LBL_ADESAO_DS_RESPOSTA" description="COM_EDITAL_FORM_DESC_ADESAO_DS_RESPOSTA" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_RESPOSTA"/>
+    <field name="dt_limite_situacao" class="inputbox" format="%Y-%m-%d" timeformat="12" filter="server_utc" translateformat="false" showtime="false" singleheader="false" todaybutton="false" weeknumbers="false" filltable="false" type="calendar" label="COM_EDITAL_FORM_LBL_ADESAO_DT_LIMITE_SITUACAO" description="COM_EDITAL_FORM_DESC_ADESAO_DT_LIMITE_SITUACAO" hint="COM_EDITAL_FORM_LBL_ADESAO_DT_LIMITE_SITUACAO"/>
+    <field name="ds_emails_alternativos" filter="safehtml" type="text" label="COM_EDITAL_FORM_LBL_ADESAO_DS_EMAILS_ALTERNATIVOS" description="COM_EDITAL_FORM_DESC_ADESAO_DS_EMAILS_ALTERNATIVOS" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_EMAILS_ALTERNATIVOS"/>
+    <field name="version_note" type="text" label="JGLOBAL_FIELD_VERSION_NOTE_LABEL" description="JGLOBAL_FIELD_VERSION_NOTE_DESC" class="inputbox" size="45" labelclass="control-label"/>
+    <field name="ds_modalidade" type="list" required="false" label="Modalidade" description="Modalidade" hint="Modalidade">
+      <option value="">Selecione</option>
+      <option value="plena">Gestão Plena</option>
+      <option value="basica">Gestão Básica</option>
+      <option value="intermediaria">Gestão Intermediária</option>
+    </field>
+  </fieldset>
+  <fieldset name="accesscontrol">
+    <field name="asset_id" type="hidden" filter="unset"/>
+    <field name="rules" type="rules" label="JFIELD_RULES_LABEL" translate_label="false" filter="rules" validate="rules" class="inputbox" component="com_edital" section="adesao"/>
+  </fieldset>
+</form>

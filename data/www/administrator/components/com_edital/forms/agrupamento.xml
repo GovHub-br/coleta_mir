@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Comedital\Component\Edital\Administrator\Field">
+  <fieldset>
+    <field name="id" type="text" readonly="true" class="readonly" default="0" description="JGLOBAL_FIELD_ID_DESC"/>
+    <field name="state" default="1" type="list" label="JSTATUS" description="JFIELD_PUBLISHED_DESC" class="inputbox" size="1">
+      <option value="1">JPUBLISHED</option>
+      <option value="0">JUNPUBLISHED</option>
+      <option value="2">JARCHIVED</option>
+      <option value="-2">JTRASHED</option>
+    </field>
+    <field name="ordering"/>
+    <field name="checked_out" type="hidden" filter="unset"/>
+    <field name="checked_out_time" type="hidden" filter="unset"/>
+    <field name="created_by" type="createdby" default="0" label="JGLOBAL_FIELD_CREATED_BY_LABEL" description="JGLOBAL_FIELD_CREATED_BY_DESC" hidden="true" hint="COM_EDITAL_FORM_LBL_AGRUPAMENTO_CREATED_BY"/>
+    <field name="modified_by" type="modifiedby" default="0" label="JGLOBAL_FIELD_MODIFIED_BY_LABEL" description="JGLOBAL_FIELD_MODIFIED_BY_DESC" hidden="true" hint="COM_EDITAL_FORM_LBL_AGRUPAMENTO_MODIFIED_BY"/>
+    <field name="no_agrupamento" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_AGRUPAMENTO_NO_AGRUPAMENTO" description="COM_EDITAL_FORM_DESC_AGRUPAMENTO_NO_AGRUPAMENTO" hint="COM_EDITAL_FORM_LBL_AGRUPAMENTO_NO_AGRUPAMENTO"/>
+    <field name="no_titulo_tab" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_AGRUPAMENTO_TITULO_TAB" description="COM_EDITAL_FORM_DESC_AGRUPAMENTO_TITULO_TAB" hint="COM_EDITAL_FORM_LBL_AGRUPAMENTO_TITULO_TAB"/>
+    <field name="ds_classe_icone" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_AGRUPAMENTO_DS_ICONE" description="COM_EDITAL_FORM_DESC_AGRUPAMENTO_DS_ICONE" hint="COM_EDITAL_FORM_LBL_AGRUPAMENTO_DS_ICONE"/>
+    <field name="ds_agrupamento" editor="tinymce" buttons="false" filter="\Joomla\CMS\Component\ComponentHelper::filterText" type="cadastroeditor" label="COM_EDITAL_FORM_LBL_AGRUPAMENTO_DS_AGRUPAMENTO" description="COM_EDITAL_FORM_DESC_AGRUPAMENTO_DS_AGRUPAMENTO" hint="COM_EDITAL_FORM_LBL_AGRUPAMENTO_DS_AGRUPAMENTO"/>
+    <field
+      name="co_editais"
+      type="sql"
+      multiple="true"
+      layout="joomla.form.field.list-fancy-select"
+      required="false"
+      default=""
+      label="COM_EDITAL_FORM_LBL_AGRUPAMENTO_CO_EDITAIS"
+      description="COM_EDITAL_FORM_DESC_AGRUPAMENTO_CO_EDITAIS"
+      query="SELECT id AS value, no_edital AS text FROM #__tb_edital WHERE state != -2 ORDER BY no_edital ASC"
+      key_field="value"
+      value_field="text"
+      translate="false"/>
+    <field name="version_note" type="text" label="JGLOBAL_FIELD_VERSION_NOTE_LABEL" description="JGLOBAL_FIELD_VERSION_NOTE_DESC" class="inputbox" size="45" labelclass="control-label"/>
+  </fieldset>
+</form>

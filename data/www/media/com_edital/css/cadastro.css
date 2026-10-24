@@ -1,0 +1,103 @@
+/**
+ * Cadastro de editais, agrupamentos e perguntas no frontend.
+ */
+
+.com-edital-cadastro {
+	padding: 8px 0 24px;
+}
+
+.com-edital-cadastro h1 {
+	margin-bottom: 16px;
+	font-size: 1.75rem;
+}
+
+.com-edital-cadastro__toolbar {
+	align-items: center;
+}
+
+.com-edital-cadastro #adminForm,
+.com-edital-cadastro-form {
+	background: #fff;
+	border: 1px solid #e8e8e8;
+	border-radius: 8px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	padding: 16px 18px 20px;
+}
+
+.com-edital-cadastro .table {
+	margin-bottom: 0;
+}
+
+.com-edital-cadastro fieldset {
+	margin-bottom: 8px;
+}
+
+.com-edital-cadastro legend {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin-bottom: 12px;
+}
+
+.depende-valores-opcoes {
+	max-height: 220px;
+	overflow: auto;
+	padding: 8px 10px;
+	border: 1px solid #dfe3e8;
+	border-radius: 4px;
+}
+
+.depende-valores-opcoes .form-check {
+	margin-bottom: 0.25rem;
+}
+
+.depende-valores .form-check-label {
+	margin-left: 0.35rem;
+}
+
+.pergunta-config-separador {
+	margin: 1.25rem 0;
+	border: 0;
+	border-top: 1px solid #d8dde3;
+	opacity: 1;
+}
+
+joomla-field-fancy-select.pergunta-depende .choices__list--dropdown .choices__item--disabled {
+	display: none;
+}
+
+.com-edital-cadastro .control-group.dias-nao-aplica {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.65rem;
+}
+
+.com-edital-cadastro .control-group.dias-nao-aplica .controls {
+	order: 1;
+	flex: 0 0 auto;
+	width: auto;
+}
+
+.com-edital-cadastro .control-group.dias-nao-aplica .control-label {
+	order: 2;
+	width: auto;
+	padding: 0 0 0 0.45rem;
+}
+
+.com-edital-cadastro .control-group.dias-nao-aplica .form-check {
+	margin: 0;
+	min-height: 0;
+	padding-top: 0;
+}
+
+.com-edital-cadastro .js-stools {
+	margin-bottom: 12px;
+}
+
+.com-edital-cadastro .js-editor-tinymce,
+.com-edital-cadastro .tox-tinymce {
+	max-width: 100%;
+}
+
+.com-edital-cadastro textarea.joomla-editor-tinymce {
+	min-height: 280px;
+}

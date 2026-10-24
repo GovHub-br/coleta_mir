@@ -1,0 +1,9 @@
+{
+    "assets": [
+        {
+            "name": "mod_oidc_login.style",
+            "type": "style",
+            "uri": "mod_oidc_login/mod_oidc_login.css"
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+    <layout title="Visualização do formulário de adesão" option="View">
+        <message><![CDATA[Visualização completa e não editável do formulário de adesão.]]></message>
+    </layout>
+    <fields name="request">
+        <fieldset name="basic" label="Selecione o Edital">
+            <field
+                name="layout"
+                type="list"
+                label="Layout"
+                description="Define o layout na URL do item de menu (layout=default ou layout=preview)."
+                default="preview"
+                filter="cmd"
+            >
+                <option value="default">default</option>
+                <option value="preview">preview</option>
+            </field>
+            <field
+                name="modo"
+                type="list"
+                label="Modo de exibição"
+                description="Se não preenchido, o parâmetro não é incluído na URL. O valor iniciar adiciona modo=iniciar."
+                default=""
+                filter="cmd"
+            >
+                <option value="">-</option>
+                <option value="iniciar">iniciar</option>
+            </field>
+        </fieldset>
+    </fields>
+    <fields name="params">
+        <fieldset name="basic" label="Selecione o Edital">
+            <field
+                name="edital_id"
+                query="SELECT 0 as `id`, '-' title UNION SELECT `id`, no_edital title FROM #__tb_edital ORDER BY `id`"
+                type="sql"
+                key_field="id"
+                value_field="title"
+                label="Selecione o Edital"
+                required="true"
+            />
+        </fieldset>
+    </fields>
+</metadata>
