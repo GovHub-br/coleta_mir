@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="task" method="upgrade">
+	<name>plg_task_editalautorreject</name>
+	<author>SINAPIR</author>
+	<creationDate>2026-06-08</creationDate>
+	<copyright>2026 SINAPIR</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<version>1.0.0</version>
+	<description>PLG_TASK_EDITALAUTORREJECT_XML_DESCRIPTION</description>
+	<namespace path="src">Joomla\Plugin\Task\Editalautorreject</namespace>
+	<files>
+		<folder plugin="editalautorreject">services</folder>
+		<folder>src</folder>
+		<folder>forms</folder>
+		<folder>language</folder>
+	</files>
+	<languages>
+		<language tag="en-GB">language/en-GB/plg_task_editalautorreject.ini</language>
+		<language tag="en-GB">language/en-GB/plg_task_editalautorreject.sys.ini</language>
+		<language tag="pt-BR">language/pt-BR/plg_task_editalautorreject.ini</language>
+		<language tag="pt-BR">language/pt-BR/plg_task_editalautorreject.sys.ini</language>
+	</languages>
+</extension>

@@ -1,0 +1,1299 @@
+:root {
+    /* =========================================
+       1. DEFINIÇÃO (Cores exatas da paleta)
+       ========================================= */
+    --color-brown-900: #4A2712; /* Marrom Escuro */
+    --color-brown-700: #6F3E13; /* Marrom Café */
+    --color-beige-200: #FFDCC5; /* Bege */
+    --color-red-700: #9B0000; /* Vermelho Guará */
+    --color-red-500: #FF0000; /* Vermelho Urucum */
+    --color-orange-600: #FF5500; /* Laranja Coral */
+    --color-orange-400: #FF7D00; /* Amarelo Mel (Laranja claro) */
+    --color-yellow-400: #FFD000; /* Amarelo Sol */
+    --color-green-700: #009600; /* Verde Quartzo */
+    --color-green-500: #00D000; /* Verde Amazônia */
+    --color-blue-500: #183EFF; /* Azul Atlântico */
+    --color-pink-300: #FFA0B4; /* Rosa Manga */
+
+
+    /* =========================================
+       2. SEMÂNTICOS (Variáveis para o layout)
+       ========================================= */
+
+    --primary: var(--color-brown-700);
+    --primary-dark: var(--color-brown-900);
+    --secondary: var(--color-orange-600);
+    --surface-accent: var(--color-beige-200);
+    --success: var(--color-green-500);
+    --success-dark: var(--color-green-700);
+    --danger: var(--color-red-500);
+    --danger-dark: var(--color-red-700);
+    --warning: var(--color-yellow-400);
+    --info: var(--color-blue-500);
+    --accent-warm: var(--color-orange-400);
+    --accent-soft: var(--color-pink-300);
+    --white: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6, body {
+    font-family: 'Rawline', sans-serif;
+    text-decoration: none;
+    color: #000000;
+}
+
+body {
+    font-size: 16px;
+    background: #F6F7F8;
+}
+
+h1 {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+h2,
+.sp-page-title .sp-page-title-heading {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.sp-page-title-sub-heading {
+    font-weight: 400 !important;
+    font-size: 16.8px !important;
+    letter-spacing: 0;
+}
+
+.sp-page-title .sp-page-title-heading, .sp-page-title .sp-page-title-sub-heading {
+    color: #000000;
+}
+
+.sp-page-title {
+    background: transparent;
+}
+
+h4 {
+    font-size: 18px;
+}
+
+h5 {
+    font-size: 18px;
+}
+
+#sp-main-body {
+    padding: 0;
+}
+
+.itemid-101 {
+    background: #FFF;
+}
+
+.text-dark {
+    color: #000000 !important;
+}
+.breadcrumb-item+.breadcrumb-item::before {
+    content: ">";
+    color: #CCCCCC !important;
+}
+
+/* Breadcrumbs */
+.sp-page-title .breadcrumb > .active {
+    color: #333333;
+}
+
+.sp-page-title .breadcrumb > span,
+.sp-page-title .breadcrumb > li,
+.sp-page-title .breadcrumb > li + li:before,
+.sp-page-title .breadcrumb > li > a {
+    color: #1351B4;
+}
+
+.sp-page-title .breadcrumb > .active,
+.sp-page-title .breadcrumb > span,
+.sp-page-title .breadcrumb > li,
+.sp-page-title .breadcrumb > li + li:before,
+.sp-page-title .breadcrumb > li > a {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+/* Sobrescrever estilo inline do plugin de acessibilidade */
+._access-icon {
+    height: 40px !important;
+    background-color: #2974E0 !important;
+    width: 40px !important;
+    left: auto !important;
+    right: 8px !important;
+    bottom: 40% !important;
+    font-size: 30px !important;
+    line-height: 40px !important;
+    border-radius: 8px;
+}
+._access-menu._access {
+    left: auto !important;
+    right: 0 !important;
+    width: 25vw !important;
+}
+
+/*=================================================
+=                     Layout                      =
+==================================================*/
+#sp-top-bar-custom {
+    background-color: var(--primary);
+    padding: 13px 0px;
+    color: white;
+}
+
+.sp-megamenu-parent > li > a {
+    color: var(--primary-dark) !important;
+    font-weight: 600 !important;
+    font-size: 1rem;
+}
+
+/*=================================================
+=                     Sessões                     =
+==================================================*/
+
+#sp-por-que-aderir {
+    background-color: #F2F7FC;
+    padding-top: 52px !important;
+    padding-bottom: 52px !important;
+}
+
+#sp-por-que-aderir h3 {
+    margin-bottom: 42px;
+}
+
+#sp-por-que-aderir .sp-module-title {
+    margin-bottom: 42px;
+}
+
+#sp-ajuda {
+    background-color: var(--primary)
+}
+
+#sp-component{
+    margin-bottom: 30px;
+}
+
+
+/*=================================================
+=        Sessão Fortaleça Igualdade Racial        =
+==================================================*/
+.fortaleca-racial {
+    min-height: 647px;
+}
+
+.sinapir-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.sinapir-slider {
+    padding-left: 50px;
+    width: 90%;
+    padding-top: 50px;
+}
+
+.sinapir-slider 
+.n2-ss-slide-background-image {
+    border-radius: 15px;
+    overflow: hidden;
+}
+/* Tablet e mobile */
+@media (max-width: 992px) {
+    .sinapir-container {
+        grid-template-columns: 1fr; /* vira uma coluna */
+        gap: 32px;
+    }
+    #sp-footer2, #sp-footer3, #sp-footer4 {
+    margin-top: 15px!important;
+}
+
+}
+
+.sinapir-text {
+    padding-left: 3rem;
+    width: 100%;
+    padding-top: 50px;
+}
+
+.sinapir-text h1 {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 700;
+    font-size: 42px;
+    letter-spacing: 0;
+}
+
+.sinapir-text span {
+    color: var(--color-brown-700);
+}
+
+.sinapir-text p {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 25px;
+    letter-spacing: 0;
+    color: #333333;
+
+}
+
+.sinapir-buttons {
+    margin-top: 24px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.logos {
+    padding: 30px;
+}
+
+.logos img {
+    max-height: 70px;
+    width: auto;
+}
+
+.grandes-numeros {
+    text-align: center;
+    padding-top: 10px; /* espaço entre linha e números */
+    margin-top: 20px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.grandes-numeros .item-gn {
+    flex: 1;
+    padding: 30px 10px;
+    position: relative;
+}
+
+.item-gn strong {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 700;
+    font-size: 42px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: var(--color-brown-700);
+    display: block;
+    margin-bottom: 8px; /* ajuste o valor */
+}
+
+.item-gn span {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: #000000;
+
+}
+
+/* Responsividade */
+@media (max-width: 470px) {
+    .item-gn strong {
+        font-size: 35px;
+    }
+
+    .item-gn span {
+        font-size: 14px;
+    }
+
+    .sinapir-text h1 {
+        font-size: 35px;
+    }
+
+    .sinapir-text p {
+        font-size: 13px;
+    }
+
+    .sinapir-buttons .btn-custom {
+        width: 140px;
+    }
+}
+
+/* linhas divisória */
+.grandes-numeros .item-gn:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 25%;
+    right: 0;
+    width: 1px;
+    height: 50%;
+    background: #e5e5e5;
+}
+
+
+#sp-fortaleca-a-igualdade-racial {
+    background-image: url('../../../images/backgrounds/bg-esquerda.png'),
+    url('../../../images/backgrounds/bg-direita.png');
+    background-position: left center,
+    right center;
+    background-repeat: no-repeat,
+    no-repeat;
+    background-size: auto 100%,
+    auto 100%;
+    background-size: 50% 100%,
+    50% 100%;
+}
+#sp-position1 {
+    background: #FFF;
+}
+
+/* Telas maiores que 1650px */
+@media (min-width: 1650px) {
+    .bg-laterais {
+        background-size: calc((100vw - 1320px) / 2) 100%,
+        calc((100vw - 1320px) / 2) 100%;
+    }
+    .grandes-numeros::before {
+    width: 98%;
+    max-width: 1270px;
+    }
+}
+
+/*==============Fim sessão Fortaleça ===========*/
+
+
+/*=================================================
+=        Sessão Passos para adesão       =
+==================================================*/
+
+#sp-passos-para-adesao .passos-adesao {
+    margin: auto;
+    padding-top: 50px;
+    padding-bottom: 150px;
+    display: flex;
+    flex-direction: column;
+
+    /* IMAGEM DAS FLORES */
+    background-image: url('../../../images/backgrounds/image7.png'),
+    url('../../../images/backgrounds/image9.png');
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    /* POSIÇÃO: canto superior direito */
+    background-position: bottom -3px left -30px,
+    bottom -3px right -30px;
+
+    background-size: 525px,
+    340px;
+
+    overflow: hidden;
+
+}
+
+
+#sp-passos-para-adesao .passos-adesao h2 {
+    font-size: 24px;
+    margin-bottom: 24px;
+    color:#000000;
+}
+
+#sp-passos-para-adesao .steps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 50px;
+}
+
+/* Card */
+#sp-passos-para-adesao .card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 24px 24px 24px 90px;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+#sp-passos-para-adesao .card h3 {
+    margin-bottom: 6px;
+    font-family: 'Rawline', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 25px;
+    letter-spacing: 0%;
+    color: #000000;
+
+}
+
+#sp-passos-para-adesao .card p {
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.4;
+}
+
+/* Número */
+#sp-passos-para-adesao .step-number {
+    position: absolute;
+    top: 34px;
+    left: 18px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #F1ECE8;
+    color: var(--color-brown-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 25px;
+    letter-spacing: 0;
+
+}
+
+/* Caixa de informação */
+#sp-passos-para-adesao .info-box {
+    margin-top: 32px;
+    background: #F1ECE8;
+    border-radius: 10px;
+    padding: 16px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    align-self: center;
+    width: 75%;
+}
+
+#sp-passos-para-adesao .info-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary-dark);
+    color: #F1ECE8;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+#sp-passos-para-adesao .info-box p {
+    margin: 0;
+    font-size: 16.8px;
+    color: #000000;
+}
+
+/* Telas menores que 1280px */
+@media (max-width: 1280px) {
+    #sp-passos-para-adesao .passos-adesao {
+        background-size: calc(100vw / 2px) 100%,
+        calc(100vw * (340 / 1280));
+    }
+}
+
+@media (max-width: 770px) {
+    #sp-passos-para-adesao .passos-adesao {
+        background-size: calc(100vw / 2),
+        calc(100vw / 3);
+    }
+    #sp-passos-para-adesao .steps {
+        grid-template-columns: 1fr;
+    }
+    
+
+    .sinapir-text {
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 20px;
+    }
+    .sinapir-slider {
+        padding-left: 15px;
+        width: 100%;
+        padding-right: 15px;
+        padding-top: 20px;
+    }
+
+}
+/*==============Fim sessão PAssos para adesão ===========*/
+
+
+/*============== Rodapé ===========*/
+#sp-footer h3 {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 600;
+    font-size: 11.67px;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #FFFFFF; 
+    text-align: left;
+    padding-bottom: 4px;
+
+}
+
+#sp-footer #sp-footer2 {
+    text-align: left;
+}
+
+#sp-footer li {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    display: flex !important;
+}
+
+
+#sp-footer a {
+  color:#C5D4EB;
+}
+
+.footer-logo img {
+    max-width: 100%;
+    height: 100px;
+}
+
+.acesso-a-informacao-menu {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 600;
+    font-size: 11.67px;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #FFFFFF !important;
+    text-align: left;
+}
+#sp-footer3 .sp-module {
+    margin-top: -12px;
+}
+
+
+
+/* copyrigth*/
+#sp-copyright{
+    color: white;
+    text-align: center;
+    height: 44px;
+    align-content: center;
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-size: 11.67px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+
+}
+
+
+
+/*==============Fim rodapé ===========*/
+
+
+/*=================================================
+=                  Modal Login                     =
+==================================================*/
+.login-modal-dialog {
+    max-width: 448px;
+}
+
+.login-modal-content {
+    border: none;
+    border-radius: 16px;
+    padding: 32px 28px 24px;
+    position: relative;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+}
+
+.login-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 1;
+}
+
+.login-modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+#loginCpf, #loginPassword, #resetPassword, #resetCpf, #resetEmail {
+    padding: 0.5rem 2.5rem !important;
+    width: 100%;
+    height: 40px;
+    opacity: 1;
+    border-radius: 2px;
+    border-width: 1px;
+
+}
+.login-modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 1.3rem;
+}
+
+.login-modal-header h5 {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+
+}
+
+.login-modal-header p {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: rgba(124, 131, 141, 1);
+
+}
+
+.login-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-govbr .mod-oidc-login {
+    padding: 0;
+}
+
+.login-govbr .btn-oidc-login {
+    width: 100%;
+    min-height: 40px;
+    justify-content: center;
+    border-radius: 2px;
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(124, 131, 141, 1);
+    font-family: 'Rawline', sans-serif;
+    font-size: 12px;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid #ddd;
+}
+
+.login-cpf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-field label {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.login-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.login-input-icon {
+    position: absolute;
+    left: 14px;
+    color: #999;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.login-input-wrapper input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Rawline', sans-serif;
+    font-size: 14px;
+    color: #333;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+
+.login-input-wrapper input::placeholder {
+    color: #aaa;
+}
+
+.login-input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(111, 62, 19, 0.1);
+}
+
+.login-toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 14px;
+}
+
+.login-toggle-password:hover {
+    color: #666;
+}
+
+.login-btn-submit {
+    width: 100%;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rawline', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 4px;
+    height: 40px;
+    opacity: 1;
+    border-radius: 2px;
+    top: 168px;
+    padding-top: 8px;
+    padding-right: 16px;
+    padding-bottom: 8px;
+    padding-left: 16px;
+    background-color: var(--primary);
+
+}
+
+.login-btn-submit:hover {
+    background-color: var(--primary-dark);
+}
+
+.login-forgot {
+    text-align: center;
+}
+
+.login-forgot a {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: rgba(20, 89, 179, 1);
+
+
+}
+
+.login-forgot a:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+.login-terms {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 10px;
+    line-height: 15px;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: rgba(124, 131, 141, 1);
+
+
+}
+/*==============Fim Modal Login ===========*/
+
+
+/*=================================================
+=             Tela Escolha de Perfil               =
+==================================================*/
+.perfil-escolha-container {
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.perfil-escolha-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.perfil-escolha-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 1.8rem;
+}
+
+.perfil-escolha-header h2 {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: #000;
+    margin-bottom: 8px;
+}
+
+.perfil-escolha-header p {
+    font-family: 'Rawline', sans-serif;
+    font-size: 15px;
+    color: #666;
+}
+
+.perfil-escolha-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.perfil-card {
+    background: #fff;
+    border: 2px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.perfil-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(111, 62, 19, 0.12);
+    transform: translateY(-4px);
+    text-decoration: none;
+}
+
+.perfil-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #F1ECE8;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+}
+
+.perfil-card h3 {
+    font-family: 'Rawline', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.perfil-card p {
+    font-family: 'Rawline', sans-serif;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+}
+
+@media (max-width: 576px) {
+    .perfil-escolha-cards {
+        grid-template-columns: 1fr;
+    }
+}
+/*==============Fim Escolha de Perfil ===========*/
+
+/* Toast padronizado */
+#sp-main {
+    position: relative;
+}
+
+#sp-main:has(#system-message-container .alert),
+#sp-main:has(#system-message-container joomla-alert) {
+    padding-top: 39px;
+}
+
+#system-message-container {
+    position: absolute !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: 50% !important;
+    width: 100vw !important;
+    max-width: none !important;
+    margin: 0 0 0 -50vw !important;
+    z-index: 20;
+}
+
+#system-message-container .alert,
+#system-message-container joomla-alert {
+    display: flex !important;
+    align-items: center;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 39px;
+    margin: 0;
+    padding: 0 52px 0 70px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 16px;
+    line-height: 1.25;
+    color: #111827;
+}
+
+#system-message-container .alert::before,
+#system-message-container joomla-alert::before {
+    position: absolute;
+    left: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    font-family: "Font Awesome 6 Free";
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+#system-message-container .alert strong,
+#system-message-container joomla-alert strong {
+    font-weight: 700;
+}
+
+#system-message-container .alert > .btn-close,
+#system-message-container .alert .joomla-alert--close,
+#system-message-container joomla-alert > .btn-close,
+#system-message-container joomla-alert .joomla-alert--close {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: none;
+    background-image: none;
+    border: 0;
+    opacity: 1;
+    color: currentColor;
+    cursor: pointer;
+    font-size: 0;
+}
+
+#system-message-container .alert > .btn-close span,
+#system-message-container .alert .joomla-alert--close span,
+#system-message-container joomla-alert > .btn-close span,
+#system-message-container joomla-alert .joomla-alert--close span {
+    display: none;
+}
+
+#system-message-container .alert > .btn-close::before,
+#system-message-container .alert .joomla-alert--close::before,
+#system-message-container joomla-alert > .btn-close::before,
+#system-message-container joomla-alert .joomla-alert--close::before {
+    content: "\f00d";
+    font-family: "Font Awesome 6 Free";
+    font-size: 16px;
+    font-weight: 900;
+}
+
+#system-message-container .alert-success,
+#system-message-container joomla-alert[type="success"],
+#system-message-container joomla-alert[type="message"] {
+    background: rgba(34, 160, 86, 0.15);
+    color: #111827;
+}
+
+#system-message-container .alert-success::before,
+#system-message-container joomla-alert[type="success"]::before,
+#system-message-container joomla-alert[type="message"]::before {
+    content: "\f00c";
+    color: #22a056;
+}
+
+#system-message-container .alert-success > .btn-close,
+#system-message-container .alert-success .joomla-alert--close,
+#system-message-container joomla-alert[type="success"] > .btn-close,
+#system-message-container joomla-alert[type="success"] .joomla-alert--close,
+#system-message-container joomla-alert[type="message"] > .btn-close,
+#system-message-container joomla-alert[type="message"] .joomla-alert--close {
+    color: #22a056;
+}
+
+#system-message-container .alert-danger,
+#system-message-container .alert-error,
+#system-message-container joomla-alert[type="danger"],
+#system-message-container joomla-alert[type="error"] {
+    background: rgba(237, 28, 13, 0.15);
+    color: #111827;
+}
+
+#system-message-container .alert-danger::before,
+#system-message-container .alert-error::before,
+#system-message-container joomla-alert[type="danger"]::before,
+#system-message-container joomla-alert[type="error"]::before {
+    content: "\f00d";
+    color: #ed1c0d;
+}
+
+#system-message-container .alert-danger > .btn-close,
+#system-message-container .alert-danger .joomla-alert--close,
+#system-message-container .alert-error > .btn-close,
+#system-message-container .alert-error .joomla-alert--close,
+#system-message-container joomla-alert[type="danger"] > .btn-close,
+#system-message-container joomla-alert[type="danger"] .joomla-alert--close,
+#system-message-container joomla-alert[type="error"] > .btn-close,
+#system-message-container joomla-alert[type="error"] .joomla-alert--close {
+    color: #ed1c0d;
+}
+
+#system-message-container .alert-info,
+#system-message-container joomla-alert[type="info"],
+#system-message-container joomla-alert[type="notice"] {
+    background: rgba(19, 81, 216, 0.15);
+    color: #111827;
+}
+
+#system-message-container .alert-info::before,
+#system-message-container joomla-alert[type="info"]::before,
+#system-message-container joomla-alert[type="notice"]::before {
+    content: "\f129";
+    color: #1351d8;
+}
+
+#system-message-container .alert-info > .btn-close,
+#system-message-container .alert-info .joomla-alert--close,
+#system-message-container joomla-alert[type="info"] > .btn-close,
+#system-message-container joomla-alert[type="info"] .joomla-alert--close,
+#system-message-container joomla-alert[type="notice"] > .btn-close,
+#system-message-container joomla-alert[type="notice"] .joomla-alert--close {
+    color: #1351d8;
+}
+
+#system-message-container .alert-warning,
+#system-message-container joomla-alert[type="warning"] {
+    background: rgba(245, 159, 0, 0.15);
+    color: #111827;
+}
+
+#system-message-container .alert-warning::before,
+#system-message-container joomla-alert[type="warning"]::before {
+    content: "\f071";
+    color: #f59f00;
+}
+
+#system-message-container .alert-warning > .btn-close,
+#system-message-container .alert-warning .joomla-alert--close,
+#system-message-container joomla-alert[type="warning"] > .btn-close,
+#system-message-container joomla-alert[type="warning"] .joomla-alert--close {
+    color: #f59f00;
+}
+
+
+
+.menu-formularios-ente-container {
+    background: var(--white);
+    border-bottom: 1px solid #d9d9d9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 32px;
+}
+
+.menu-formularios-ente {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.menu-formularios-ente .menu-link {
+    align-items: center;
+    border-bottom: 3px solid transparent;
+    color: #333333;
+    display: flex;
+    font-family: 'Rawline', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 12px 16px 9px;
+}
+
+.menu-formularios-ente .menu-link:hover,
+.menu-formularios-ente .menu-link:focus {
+    color: var(--primary);
+}
+
+.menu-formularios-ente .menu-link.active {
+    background: transparent;
+    border-bottom-color: var(--primary);
+    color: var(--primary);
+}
+
+@media (max-width: 576px) {
+    .menu-formularios-ente-container {
+        margin-bottom: 24px;
+    }
+
+    .menu-formularios-ente {
+        gap: 0;
+        justify-content: space-between;
+    }
+
+    .menu-formularios-ente .nav-item {
+        flex: 1;
+    }
+
+    .menu-formularios-ente .menu-link {
+        font-size: 14px;
+        justify-content: center;
+        padding-left: 8px;
+        padding-right: 8px;
+        white-space: nowrap;
+    }
+}
+
+/*=================================================
+=  Kicker compartilhado (adesão + artigos)        =
+==================================================*/
+.adesao-entry-kicker {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #1351B4;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/*=================================================
+=           Tela de entrada da adesão             =
+==================================================*/
+.adesao-entry {
+    max-width: 1040px;
+    margin: 24px auto 64px;
+}
+
+.adesao-entry-intro {
+    max-width: 720px;
+    margin-bottom: 28px;
+}
+
+.adesao-entry-intro h1 {
+    margin: 0 0 10px;
+    color: #1f2937;
+    font-size: clamp(1.75rem, 3vw, 2.4rem);
+    font-weight: 700;
+}
+
+.adesao-entry-intro p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.adesao-entry-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.adesao-entry-card {
+    position: relative;
+    display: flex;
+    min-height: 300px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 30px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #d9dee5;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+}
+
+.adesao-entry-card-primary {
+    border-top: 4px solid #1351b4;
+}
+
+.adesao-entry-card:not(.adesao-entry-card-primary) {
+    border-top: 4px solid #5891dc;
+}
+
+.adesao-entry-icon {
+    display: grid;
+    width: 52px;
+    height: 52px;
+    color: #1351b4;
+    background: #e7f2ff;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    place-items: center;
+}
+
+.adesao-entry-card h2 {
+    margin: 0 0 8px;
+    color: #1f2937;
+    font-size: 1.4rem;
+}
+
+.adesao-entry-card p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.55;
+}
+
+.adesao-entry-card .btn {
+    align-self: flex-start;
+    min-width: 180px;
+}
+
+@media (max-width: 767.98px) {
+    .adesao-entry {
+        margin-top: 12px;
+    }
+
+    .adesao-entry-options {
+        grid-template-columns: 1fr;
+    }
+
+    .adesao-entry-card {
+        min-height: 0;
+        padding: 24px;
+    }
+}

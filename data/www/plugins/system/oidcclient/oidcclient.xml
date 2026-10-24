@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" method="upgrade" group="system">
+    <name>PLG_SYSTEM_OIDCCLIENT</name>
+    <creationDate>2026-07-24</creationDate>
+    <author>OIDC Client Team</author>
+    <authorEmail>dev@example.com</authorEmail>
+    <authorUrl>https://example.com</authorUrl>
+    <copyright>Copyright (C) 2026. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <version>0.1.0-dev</version>
+    <description>PLG_SYSTEM_OIDCCLIENT_DESCRIPTION</description>
+    <namespace path="src">JoomlaOidc\Plugin\System\OidcClient</namespace>
+    <files>
+        <folder plugin="oidcclient">services</folder>
+        <folder>src</folder>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_system_oidcclient.ini</language>
+        <language tag="en-GB">language/en-GB/plg_system_oidcclient.sys.ini</language>
+        <language tag="pt-BR">language/pt-BR/plg_system_oidcclient.ini</language>
+        <language tag="pt-BR">language/pt-BR/plg_system_oidcclient.sys.ini</language>
+    </languages>
+</extension>

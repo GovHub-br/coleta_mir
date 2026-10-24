@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.9" 
+    type="template" 
+    client="site" 
+    method="upgrade">
+    <name>shaper_helixultimate</name>
+    <creationDate>Feb 2018</creationDate>
+    <author>JoomShaper.com</author>
+    <authorEmail>support@joomshaper.com</authorEmail>
+    <authorUrl>http://www.joomshaper.com</authorUrl>
+    <copyright>Copyright (C) 2010 - 2025 JoomShaper.com. All rights reserved.</copyright>
+    <license>http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later</license>
+    <version>2.2.10</version>
+    <description>Helix Ultimate - Starter Template of Helix Ultimate Framework for Joomla 4, Joomla 5 and Joomla 6 Only.</description>
+
+    <updateservers>
+        <server type="extension" 
+            priority="1" 
+            name="shaper_helixultimate">https://www.joomshaper.com/updates/shaper-helixultimate.xml</server>
+    </updateservers>
+
+    <languages>
+        <language tag="en-GB">en-GB.tpl_shaper_helixultimate.ini</language>
+    </languages>
+
+    <positions>
+        <position>title</position>
+        <position>top1</position>
+        <position>top2</position>
+        <position>top3</position>
+        <position>top4</position>
+        <position>top5</position>
+        <position>top6</position>
+        <position>top7</position>
+        <position>top8</position>
+        <position>top9</position>
+        <position>top10</position>
+        <position>logo</position>
+        <position>menu</position>
+        <position>menu-modal</position>
+        <position>login-modal-oidc</position>
+        <position>search</position>
+        <position>slide</position>
+        <position>user1</position>
+        <position>user2</position>
+        <position>user3</position>
+        <position>user4</position>
+        <position>user5</position>
+        <position>left</position>
+        <position>right</position>
+        <position>feature</position>
+        <position>slider</position>
+        <position>position1</position>
+        <position>position2</position>
+        <position>position3</position>
+        <position>position4</position>
+        <position>position5</position>
+        <position>position6</position>
+        <position>position7</position>
+        <position>position8</position>
+        <position>position9</position>
+        <position>position10</position>
+        <position>position11</position>
+        <position>position12</position>
+        <position>position13</position>
+        <position>position14</position>
+        <position>position15</position>
+        <position>position16</position>
+        <position>position17</position>
+        <position>position18</position>
+        <position>position19</position>
+        <position>position20</position>
+        <position>position21</position>
+        <position>position22</position>
+        <position>position23</position>
+        <position>position24</position>
+        <position>position25</position>
+        <position>position26</position>
+        <position>position27</position>
+        <position>position28</position>
+        <position>position29</position>
+        <position>position30</position>
+        <position>content-top</position>
+        <position>content-bottom</position>
+        <position>bottom1</position>
+        <position>bottom2</position>
+        <position>bottom3</position>
+        <position>bottom4</position>
+        <position>bottom5</position>
+        <position>bottom6</position>
+        <position>bottom7</position>
+        <position>bottom8</position>
+        <position>bottom9</position>
+        <position>bottom10</position>
+        <position>breadcrumb</position>
+        <position>footer1</position>
+        <position>footer2</position>
+        <position>footer3</position>
+        <position>footer4</position>
+        <position>footer5</position>
+        <position>comingsoon</position>
+        <position>offcanvas</position>
+        <position>pagebuilder</position>
+        <position>404</position>
+        <position>debug</position>
+        <position>offcanvas-modules</position>
+        <position>logged-in-usermenu</position>
+    </positions>
+
+    <files>
+        <file>comingsoon.php</file>
+        <file>component.php</file>
+        <file>error.php</file>
+        <file>helper.php</file>
+        <file>index.php</file>
+        <file>offline.php</file>
+        <file>options.json</file>
+        <file>options.xml</file>
+        <file>template_preview.png</file>
+        <file>template_thumbnail.png</file>
+        <file>templateDetails.xml</file>
+        <folder>css/</folder>
+        <folder>features/</folder>
+        <folder>fonts/</folder>
+        <folder>headers/</folder>
+        <folder>offcanvas/</folder>
+        <folder>overrides/</folder>
+        <folder>html/</folder>
+        <folder>images/</folder>
+        <folder>js/</folder>
+        <folder>scss/</folder>
+        <folder>webfonts/</folder>
+    </files>
+    <config>
+        <fieldset name="basic" 
+            addfieldpath="/plugins/system/helixultimate/src/fields">
+            <field name="helixdetails" 
+                type="helixdetails" />
+        </fieldset>
+    </config>
+</extension>

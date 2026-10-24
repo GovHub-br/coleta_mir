@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" client="site" method="upgrade">
+    <name>mod_oidc_login</name>
+    <author>Joomla OIDC Project</author>
+    <version>0.1.0-dev</version>
+    <description>MOD_OIDC_LOGIN_DESCRIPTION</description>
+    <namespace path="src">JoomlaOidc\Module\OidcLogin</namespace>
+
+    <files>
+        <folder module="mod_oidc_login">services</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
+    </files>
+
+    <languages>
+        <language tag="en-GB">language/en-GB/mod_oidc_login.ini</language>
+        <language tag="en-GB">language/en-GB/mod_oidc_login.sys.ini</language>
+        <language tag="pt-BR">language/pt-BR/mod_oidc_login.ini</language>
+        <language tag="pt-BR">language/pt-BR/mod_oidc_login.sys.ini</language>
+    </languages>
+
+    <media destination="mod_oidc_login" folder="media">
+        <filename>joomla.asset.json</filename>
+        <filename>mod_oidc_login.css</filename>
+    </media>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="button_text"
+                    type="text"
+                    label="MOD_OIDC_LOGIN_BUTTON_TEXT"
+                    default="Entrar com GOV.BR"
+                    filter="string"
+                />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

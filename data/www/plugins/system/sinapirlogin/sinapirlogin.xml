@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="upgrade">
+    <name>PLG_SYSTEM_SINAPIRLOGIN</name>
+    <author>SINAPIR</author>
+    <version>1.0.0</version>
+    <description>Redirecionamento pós-login baseado no perfil do usuário (MIR/Ente)</description>
+    <namespace path="src">Sinapir\Plugin\System\SinapirLogin</namespace>
+    <files>
+        <folder>src</folder>
+        <filename plugin="sinapirlogin">sinapirlogin.xml</filename>
+    </files>
+</extension>

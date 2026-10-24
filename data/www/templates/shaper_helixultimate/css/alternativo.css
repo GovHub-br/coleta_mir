@@ -1,0 +1,138 @@
+:root {
+    --primary: #13386d !important;
+    --primary-dark: #112a53 !important;
+    --secondary: #b6c1d2 !important;
+    --secondary-dark: #13386d !important;
+    --secondary-light: #e7ebf0 !important;
+    --surface-accent: #FFDCC5 !important;
+    --success: #00D000 !important;
+    --success-dark: #009600 !important;
+    --danger: #FF0000 !important;
+    --danger-dark: #9B0000 !important;
+    --warning: #FFD000 !important;
+    --info: #183EFF !important;
+    --accent-warm: #FF7D00 !important;
+    --accent-soft: #FFA0B4 !important;
+    --white: #ffffff !important;
+}
+.itemid-101 #sp-main-body{
+    padding: 0px !important;
+}
+.item-gn strong {
+    color: var(--primary) !important;
+}
+.fortaleca-racial {
+    min-height: 540px !important;
+}
+.sinapir-text h1 span {
+    color: var(--primary-dark) !important;
+    font-size: 36px !important;
+    font-weight: 400;
+}
+.sinapir-text .sinapir-sub-text {
+    color: var(--primary-dark) !important;
+    font-size: 36px !important;
+    font-weight: 400;
+}
+.sinapir-text h1 {
+    color: var(--primary) !important;
+    font-size: 40px !important;
+}
+.n2-bullet {
+    background: var(--secondary) !important;
+}
+.n2-bullet.n2-active {
+    background: var(--primary-dark) !important;
+}
+.card-benefit .icon-box {
+    background-color: var(--secondary-light) !important;
+}
+#sp-passos-para-adesao .step-number {
+    background: var(--secondary-light) !important;
+    color: var(--primary-dark) !important;
+}
+#sp-passos-para-adesao .info-box {
+    background: var(--secondary-light) !important;
+}
+#sp-footer {
+    background-color: #283581 !important;
+}
+#sp-copyright {
+    background-color: #283581 !important;
+}
+
+
+/* ── Section CTA – background decorativo com ondas SVG ── */
+#sp-ajuda {
+    background-color: #212d72 !important;
+}
+/*
+.section-cta {
+    background-color: #5260ae !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 400' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L80,0 C100,50 130,130 180,220 C240,320 340,380 440,400 L0,400 Z' fill='%23f96354'/%3E%3Cpath d='M0,200 C40,170 100,180 150,250 C200,320 220,380 260,400 L0,400 Z' fill='%233cc3e1'/%3E%3Cpath d='M1440,0 L1360,0 C1340,50 1310,130 1260,220 C1200,320 1100,380 1000,400 L1440,400 Z' fill='%23f96354'/%3E%3Cpath d='M1440,200 C1400,170 1340,180 1290,250 C1240,320 1220,380 1180,400 L1440,400 Z' fill='%233cc3e1'/%3E%3Cpath d='M1340,400 L1370,310 L1400,400 Z' fill='%233cc3e1'/%3E%3Cpath d='M1385,400 L1412,325 L1440,400 Z' fill='%233cc3e1'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+}
+*/
+/* Ícone circular com interrogação */
+.section-cta .icon-circle-lg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Textos */
+.section-cta p {
+    color: rgba(255, 255, 255, .85);
+}
+.section-cta .contact-link {
+    color: #fff;
+    text-decoration: none;
+    transition: opacity .2s;
+}
+.section-cta .contact-link:hover {
+    opacity: .8;
+    text-decoration: underline;
+}
+
+/* Botão */
+.section-cta .btn-surface {
+    display: inline-block;
+    padding: 12px 32px;
+    border: 2px solid #fff;
+    border-radius: 30px;
+    color: var(--primary-dark) !important;
+    background: var(--white) !important;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .25s, color .25s;
+}
+.section-cta .btn-surface:hover {
+    background: var(--white) !important;
+    color: var(--primary-dark) !important;
+}
+
+/* ── Backgrounds laterais – nova identidade visual em SVG ── */
+#sp-fortaleca-a-igualdade-racial {
+    background: var(--primary) !important;
+}
+/*
+#sp-fortaleca-a-igualdade-racial {
+    background-image: url(../../../images/backgrounds/bg-esquerda.svg), url(../../../images/backgrounds/bg-direita.svg) !important;
+    background-size: 30% 100%, 40% 100%;
+    background-position: right center, left center;
+}
+*/
+#sp-passos-para-adesao .passos-adesao{
+    background: none !important;
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+	<fields name="params">
+		<fieldset name="task_params">
+			<field
+				name="reason"
+				type="textarea"
+				label="PLG_TASK_EDITALAUTORREJECT_FIELD_REASON_LABEL"
+				description="PLG_TASK_EDITALAUTORREJECT_FIELD_REASON_DESC"
+				rows="3"
+				default="Prazo de complementacao expirado automaticamente pelo sistema."
+				required="true"
+			/>
+			<field
+				name="recurso_days"
+				type="number"
+				label="PLG_TASK_EDITALAUTORREJECT_FIELD_RECURSO_DAYS_LABEL"
+				description="PLG_TASK_EDITALAUTORREJECT_FIELD_RECURSO_DAYS_DESC"
+				default="30"
+				min="1"
+				step="1"
+				filter="int"
+				required="true"
+			/>
+			<field
+				name="batch_size"
+				type="number"
+				label="PLG_TASK_EDITALAUTORREJECT_FIELD_BATCH_SIZE_LABEL"
+				description="PLG_TASK_EDITALAUTORREJECT_FIELD_BATCH_SIZE_DESC"
+				default="200"
+				min="1"
+				step="1"
+				filter="int"
+				required="true"
+			/>
+			<field
+				name="updated_by"
+				type="number"
+				label="PLG_TASK_EDITALAUTORREJECT_FIELD_UPDATED_BY_LABEL"
+				description="PLG_TASK_EDITALAUTORREJECT_FIELD_UPDATED_BY_DESC"
+				default="0"
+				min="0"
+				step="1"
+				filter="int"
+			/>
+		</fieldset>
+	</fields>
+</form>

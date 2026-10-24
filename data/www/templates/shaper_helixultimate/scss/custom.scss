@@ -1,0 +1,213 @@
+// =========================================
+// PONTE DE VARIÁVEIS
+// =========================================
+$primary:         var(--primary);
+$primary-dark:    var(--primary-dark);
+$secondary:       var(--secondary);
+$surface-accent:  var(--surface-accent);
+
+$success:         var(--success);
+$danger:          var(--danger);
+$info:            var(--info);
+$warning:         var(--warning);
+
+$white:           var(--white);
+
+// =========================================
+// BOOTSTRAP
+// =========================================
+
+.toast {
+  --bs-toast-bg: #D4E5FF;
+  --bs-toast-header-border-color: #c5d9f5;
+}
+
+// =========================================
+// COMPONENTES
+// =========================================
+
+.icon-circle-lg {
+  width: 48px;
+  height: 48px;
+  background-color: $white;
+  color: $primary; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+
+  span {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+// Seção de Chamada (Call to Action)
+.section-cta {
+  color: $white;
+
+  // Links de contato dentro da seção
+  .contact-link {
+    color: $white;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      color: $surface-accent;
+    }
+  }
+}
+
+.btn-custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem; 
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 50px;
+  border: 2px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  white-space: nowrap;
+
+  // -----------------------------------------
+  // VARIAÇÃO 1: PRIMÁRIA (Sólido Marrom)
+  // -----------------------------------------
+  &.btn-primary {
+    background-color: $primary;
+    color: $white;
+    border-color: $primary;
+
+    &:hover {
+      background-color: $primary-dark; 
+      border-color: $primary-dark;
+      transform: translateY(-2px); 
+    }
+  }
+
+  // -----------------------------------------
+  // VARIAÇÃO 2: OUTLINE (Borda Marrom)
+  // -----------------------------------------
+  &.btn-outline {
+    background-color: transparent;
+    color: $primary;
+    border-color: $primary;
+
+    &:hover {
+      background-color: $primary;
+      color: $white;
+    }
+  }
+
+  // -----------------------------------------
+  // VARIAÇÃO 3: SURFACE (Branco sobre Fundo Escuro)
+  // -----------------------------------------
+  &.btn-surface {
+    background-color: $white;
+    color: $primary;
+    border-color: $white;
+
+    &:hover {
+      background-color: $surface-accent;
+      color: $primary;
+      border-color: $surface-accent;
+    }
+  }
+
+  &.btn-compact {
+    padding: 0.6rem 1.7rem; 
+    line-height: 1;
+  }
+}
+
+// =========================================
+// SEÇÃO: BENEFÍCIOS (Cards)
+// =========================================
+
+.section-benefits {
+  color: black;
+}
+
+.card-benefit {
+  background-color: $white;
+  border-radius: 12px;
+  padding: 2rem;
+  height: 100%; 
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;       
+  flex-direction: column;
+
+  .card-header-custom {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .icon-box {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    background-color: #EBE5E0;
+    color: $primary;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+
+    i, svg {
+      font-size: 1.5rem;
+    }
+  }
+
+  ul {
+    padding-left: 1rem;
+    margin-bottom: 0;
+    flex-grow: 1; 
+    list-style-position: inside;
+    text-align: center;
+    list-style: none;
+
+    li {
+      font-size: 1rem;
+      color: #333;
+      position: relative;
+      line-height: 1.5; 
+      display: flex;           
+      align-items: flex-start; 
+      gap: 10px;               
+      margin-bottom: 8px;     
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &::before {
+        content: "•";            
+        font-size: 1.5rem;       
+        line-height: 1;          
+        margin-top: -2px;        
+        color: #333;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.5rem; 
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+
+    }
+  }
+}
