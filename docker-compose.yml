@@ -85,7 +85,7 @@ services:
       - ${DB_PORT}:3306
     volumes:
       - ${DB_DATA_SERVER:-"./data/mysql_data"}:/var/lib/mysql
-      - ./sql/sinapir-dump.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./sql/coletamir-dump.sql:/docker-entrypoint-initdb.d/db.sql
     networks:
       internal:
         aliases:
