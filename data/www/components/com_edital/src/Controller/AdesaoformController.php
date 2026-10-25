@@ -264,40 +264,6 @@ class AdesaoformController extends FormController
 		$dadosEdital = EditalHelper::getEdital($dadosValidados['co_edital']);
 		$userAtual = Factory::getUser();
 
-		if (($dadosEdital->tp_edital ?? '') === 'formulario')
-		{
-			if ($userAtual->guest)
-			{
-				echo json_encode([
-					'success' => false,
-					'message' => Text::_('JERROR_ALERTNOAUTHOR'),
-				]);
-				$app->close();
-			}
-
-			$adesaoOrigem = AdesaoHelper::getAdesaoByUserEdital((int) $userAtual->id, (int) ($dadosEdital->co_edital_adesao ?? 0));
-
-			if (empty($adesaoOrigem) || ($adesaoOrigem->st_adesao  !== 'deferido' && $adesaoOrigem->tp_solicitacao  !== 'migracao'))
-			{
-				echo json_encode([
-					'success' => false,
-					'message' => Text::_('COM_EDITAL_ERROR_ADESAO_ORIGEM_NAO_DEFERIDA'),
-				]);
-				$app->close();
-			}
-
-			if (!EditalHelper::usuarioAtendeEsferaSolicitante($dadosEdital, $adesaoOrigem->tp_esfera_governamental ?? ''))
-			{
-				echo json_encode([
-					'success' => false,
-					'message' => Text::_('COM_EDITAL_ERROR_EDITAL_ESFERA_SOLICITANTE'),
-				]);
-				$app->close();
-			}
-
-			$dadosValidados['co_adesao_origem'] = (int) $adesaoOrigem->id;
-		}
-
 		//consulta usuario por username
 		$username = preg_replace('/[^0-9A-Za-z]/', '', $dadosValidados['ds_cpf']);
 		$emailResponsavel = $dadosValidados['ds_email_responsavel'];
@@ -308,7 +274,7 @@ class AdesaoformController extends FormController
 		if(!$user->guest && $user->id != ($userByCpf ? $userByCpf->id : 0)){
 			echo json_encode([
 				'success' => false,
-				'message' => 'Você não tem permissão para enviar adesão para este CNPJ.'
+				'message' => 'Você não tem permissão para enviar formulário para este CPF.'
 			]);
 			$app->close();
 		}
@@ -339,7 +305,7 @@ class AdesaoformController extends FormController
 			$password = $dadosValidados['ds_senha'] !== '' ? $dadosValidados['ds_senha'] : $this->generateRandomPassword();
 
 			$user = new User();
-			$user->name           = $dadosValidados['no_oficial'];
+			$user->name           = $dadosValidados['no_responsavel'];
 			$user->username       = $username;
 			$user->email          = $emailResponsavel;
 			//senha encriptada joomla
@@ -424,14 +390,6 @@ class AdesaoformController extends FormController
 					// If any response fails to save, rollback the entire transaction
 					if ($result === false) {
 						$db->transactionRollback();
-
-						//depois que a adesao foi dividida em passos e inserido o status rascunho isso nao faz mais sentido
-						// um erro poderia fazer perder os dados de todos os passos anteriores
-						// $data['id'] = $adesaoId;
-						// $data['state'] = -2; //coloca adesao na lixeira
-						// $table = $model->getTable();
-						// $table->load($adesaoId);
-						// $table->save($data);
 
 						echo json_encode([
 							'success' => false,
@@ -534,27 +492,16 @@ class AdesaoformController extends FormController
 	private function validarAdesao()
 	{
 		$dados = array();
-		$dados['tp_esfera_governamental'] = htmlspecialchars($this->input->getString('tp_esfera_governamental', ''), ENT_QUOTES, 'UTF-8');
-		$dados['ds_cnpj'] = preg_replace('/[^0-9a-zA-Z]/', '', $this->input->getString('ds_cnpj', '')); // Remove caracteres não numéricos e letras
 		$dados['ds_cpf'] = preg_replace('/[^0-9]/', '', $this->input->getString('ds_cpf', '')); // Remove caracteres não numéricos
-		$dados['no_oficial'] = htmlspecialchars($this->input->getString('no_oficial', ''), ENT_QUOTES, 'UTF-8')	;
-		$dados['sg_estado'] = htmlspecialchars($this->input->getString('sg_estado', ''), ENT_QUOTES, 'UTF-8');
-		$dados['co_municipios'] = array_map('htmlspecialchars', $this->input->get('ds_municipios', array(), ''), array_fill(0, count($this->input->get('ds_municipios', array(), '')), ENT_QUOTES));
-		$emailsMunicipiosInput = $this->input->get('ds_email_municipios', array(), 'array');
-		$dados['ds_email_municipios'] = array();
-		if (is_array($emailsMunicipiosInput)) {
-			foreach ($emailsMunicipiosInput as $coIbge => $email) {
-				$dados['ds_email_municipios'][(int) $coIbge] = htmlspecialchars(trim((string) $email), ENT_QUOTES, 'UTF-8');
-			}
-		}
+		$dados['ds_cnpj'] = preg_replace('/[^0-9]/', '', $this->input->getString('ds_cpf', '')); // Remove caracteres não numéricos
+		$dados['no_responsavel'] = htmlspecialchars($this->input->getString('no_responsavel', ''), ENT_QUOTES, 'UTF-8')	;
+		$dados['no_oficial'] = htmlspecialchars($this->input->getString('no_responsavel', ''), ENT_QUOTES, 'UTF-8');
 		$dados['ds_email_responsavel'] = htmlspecialchars($this->input->getString('ds_email_responsavel', ''), ENT_QUOTES, 'UTF-8');
-		$dados['ds_emails_alternativos'] = htmlspecialchars($this->input->getString('ds_emails_alternativos', ''), ENT_QUOTES, 'UTF-8');
 		$dados['ds_senha'] = $this->input->getString('ds_senha', '');
 		$dados['ds_confirma_senha'] = $this->input->getString('ds_confirma_senha', '');
 		$dados['co_edital'] = $this->input->getInt('co_edital', 0);
 		$dados['id'] = $this->input->getInt('co_adesao', 0);
-		$dados['co_adesao_origem'] = $this->input->getInt('co_adesao_origem', null);
-
+		
 		$edital = EditalHelper::getEdital($dados['co_edital']);
 
 		// Validação dos campos obrigatórios
@@ -573,54 +520,10 @@ class AdesaoformController extends FormController
 				}
 			}
 		}
-
-		if (empty($dados['tp_esfera_governamental'])) {
-			$errors[] = 'Tipo da esfera governamental é obrigatório';
-		}
-
-		if (empty($dados['ds_cnpj'])) {
-			$errors[] = 'CNPJ é obrigatório';
-		}
-
 		if(empty($dados['ds_cpf'])) {
 			$errors[] = 'CPF é obrigatório';
 		}
 
-		// Nome oficial é preenchido pelo usuário somente no consórcio.
-		// Para Estado e Município o valor é derivado da localidade selecionada.
-		if ($dados['tp_esfera_governamental'] === 'consorcio') {
-			if (empty($dados['no_oficial'])) {
-				$errors[] = 'Nome oficial é obrigatório';
-			}
-		} else {
-			$nomeDerivado = $this->resolverNomeOficialPorLocalidade($dados);
-			if ($nomeDerivado !== '') {
-				$dados['no_oficial'] = $nomeDerivado;
-			}
-		}
-
-		if (empty($dados['sg_estado'])) {
-			$errors[] = 'Estado é obrigatório';
-		}
-
-		//so valida municipio se esfera for diferente de estadual
-		if($dados['tp_esfera_governamental'] != 'estadual'){
-			if (empty($dados['co_municipios']) || !is_array($dados['co_municipios']) || count($dados['co_municipios']) == 0) {
-				$errors[] = 'Pelo menos um município deve ser selecionado';
-				}
-		}
-
-		//no caso de consórcio, cada município selecionado deve ter um email válido informado
-		if ($dados['tp_esfera_governamental'] == 'consorcio' && !empty($dados['co_municipios']) && $edital->tp_edital != 'formulario') {
-			foreach ($dados['co_municipios'] as $coIbge) {
-				$email = $dados['ds_email_municipios'][(int) $coIbge] ?? '';
-				if (empty($email)) {
-					$errors[] = 'Email do município ' . $coIbge . ' é obrigatório';
-				} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-					$errors[] = 'Email do município ' . $coIbge . ' inválido';
-				}
-			}
-		}
 
 		if (empty($dados['ds_email_responsavel'])) {
 			$errors[] = 'Email do responsável é obrigatório';
@@ -628,15 +531,6 @@ class AdesaoformController extends FormController
 
 		if( !empty($dados['ds_email_responsavel']) && !filter_var($dados['ds_email_responsavel'], FILTER_VALIDATE_EMAIL)) {
 			$errors[] = 'Email do responsável inválido';
-		}
-
-		if( !empty($dados['ds_emails_alternativos'])) {
-			if (!filter_var($dados['ds_emails_alternativos'], FILTER_VALIDATE_EMAIL)) {
-				$errors[] = 'Email alternativo inválido: ' . $dados['ds_emails_alternativos'];
-			}
-			if( $dados['ds_emails_alternativos'] == $dados['ds_email_responsavel']) {
-				$errors[] = 'Email alternativo não pode ser igual ao email do responsável: ' . $dados['ds_emails_alternativos'];
-			}
 		}
 
 		// Validação de senha apenas quando o usuário ainda não está autenticado
@@ -658,8 +552,6 @@ class AdesaoformController extends FormController
 		if ($resEditalPermiteAdesao['success'] === false) {
 			$errors[] = 'Edital não permite adesão. ' . $resEditalPermiteAdesao['message'];
 		}
-
-		$dados['ds_municipios'] = $dados['co_municipios'];
 
 		$rascunho = $this->input->getInt('rascunho', 0) === 1;
 		$dados['rascunho'] = $rascunho;
