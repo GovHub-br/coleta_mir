@@ -308,7 +308,7 @@ class AdesaoHelper
         $db->setQuery($query);
         $adesao = $db->loadObject();
 
-        $protocolo = 'SINAPIR-' . HTMLHelper::_('date', $adesao->dt_criacao, 'Y') . '-' . str_pad($adesao->id, 4, '0', STR_PAD_LEFT);
+        $protocolo = 'COLETAMIR-' . HTMLHelper::_('date', $adesao->dt_criacao, 'Y') . '-' . str_pad($adesao->id, 4, '0', STR_PAD_LEFT);
 
         return $protocolo;
     }
