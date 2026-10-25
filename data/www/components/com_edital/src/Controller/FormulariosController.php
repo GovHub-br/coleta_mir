@@ -135,7 +135,8 @@ class FormulariosController extends FormController
 	{
 		// Load HTML template
 		$templatePath = JPATH_SITE . '/components/com_edital/tmpl/pdf/comprovante-formulario-enviado.html';
-		
+		$app = Factory::getApplication();
+		$noSite = $app->get('sitename');
 		if (!file_exists($templatePath)) {
 			throw new \Exception('Template PDF não encontrado: ' . $templatePath);
 		}
@@ -150,6 +151,7 @@ class FormulariosController extends FormController
 			'{{DATA_ENVIO}}'       => $dataEnvio,
 			'{{DATA_GERACAO}}'     => HTMLHelper::_('date', date('Y-m-d H:i:s'), 'd/m/Y \à\s H:i'),
 			'{{NO_EDITAL}}'        => htmlspecialchars($noEdital ?? ''),
+			'{{NO_SITE}}'           => $noSite,
 		];
 		
 		// Replace variables in template
