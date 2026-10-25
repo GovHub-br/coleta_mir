@@ -1,0 +1,109 @@
+services:
+
+  coletamir_joomla:
+    build:
+      context: ./docker/php
+    image: sinapir-joomla:php8.4.27
+    restart: unless-stopped
+    depends_on:
+      coletamir_db:
+        condition: service_healthy
+    environment:
+      JOOMLA_DB_HOST: ${JOOMLA_DB_HOST}
+      JOOMLA_DB_USER: ${JOOMLA_DB_USER}
+      JOOMLA_DB_PASSWORD: ${JOOMLA_DB_PASSWORD}
+      JOOMLA_DB_NAME: ${JOOMLA_DB_NAME}
+      JOOMLA_SITE_NAME: ${JOOMLA_SITE_NAME}
+      JOOMLA_ADMIN_USER: ${JOOMLA_ADMIN_USER}
+      JOOMLA_ADMIN_USERNAME: ${JOOMLA_ADMIN_USERNAME}
+      JOOMLA_ADMIN_PASSWORD: ${JOOMLA_ADMIN_PASSWORD}
+      JOOMLA_ADMIN_EMAIL: ${JOOMLA_ADMIN_EMAIL}
+      JOOMLA_ADMIN_ACCESS_KEY: ${JOOMLA_ADMIN_ACCESS_KEY:-}
+      JOOMLA_MAIL_FROM: ${JOOMLA_MAIL_FROM}
+      JOOMLA_MAIL_FROMNAME: ${JOOMLA_MAIL_FROMNAME}
+      JOOMLA_MAIL_SENDMAIL: ${JOOMLA_MAIL_SENDMAIL}
+      JOOMLA_MAILER: ${JOOMLA_MAILER}
+      JOOMLA_SMTP_AUTH: ${JOOMLA_SMTP_AUTH}
+      JOOMLA_SMTP_USER: ${JOOMLA_SMTP_USER}
+      JOOMLA_SMTP_PASS: ${JOOMLA_SMTP_PASS}
+      JOOMLA_SMTP_HOST: ${JOOMLA_SMTP_HOST}
+      JOOMLA_SMTP_SECURE: ${JOOMLA_SMTP_SECURE}
+      JOOMLA_SMTP_PORT: ${JOOMLA_SMTP_PORT}
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+      OIDC_PROVIDER_PROFILE: ${OIDC_PROVIDER_PROFILE}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OIDC_PUBLIC_BASE_URL: ${OIDC_PUBLIC_BASE_URL}
+      OIDC_REDIRECT_URI_MODE: ${OIDC_REDIRECT_URI_MODE:-component_route}
+      SINAPIRMAIL_URL_BASE_API: ${SINAPIRMAIL_URL_BASE_API}
+      SINAPIRMAIL_API_TOKEN: ${SINAPIRMAIL_API_TOKEN}
+      SINAPIRMAIL_FROM_ADDRESS: ${SINAPIRMAIL_FROM_ADDRESS}
+    volumes:
+      - ./data/www:/var/www/html
+      - ./data/uploads:/var/www/uploads
+      - ./config/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./config/php/security.ini:/usr/local/etc/php/conf.d/security.ini:ro
+      - ./config/security.conf:/etc/apache2/conf-enabled/security.conf:ro
+    command: >
+      bash -c "
+        a2enmod rewrite headers &&
+        mkdir -p /var/www/html/cache /var/www/html/administrator/cache/language &&
+        chown -R www-data:www-data /var/www/html &&
+        chown -R www-data:www-data /var/www/uploads &&
+        (
+          while true; do
+            su -s /bin/bash www-data -c 'php /var/www/html/cli/joomla.php scheduler:run --all'
+            sleep 300
+          done
+        ) &
+        docker-php-entrypoint apache2-foreground
+      "
+    networks:
+      - internal
+      - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  coletamir_db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    # Em produção, se apenas o Joomla acessar o banco, remova ou comente o bloco ports abaixo para não expor o MySQL no host.
+    ports:
+      - ${DB_PORT}:3306
+    volumes:
+      - ${DB_DATA_SERVER:-"./data/mysql_data"}:/var/lib/mysql
+      - ./sql/coletamir-dump.sql:/docker-entrypoint-initdb.d/db.sql
+    networks:
+      internal:
+        aliases:
+          - ${JOOMLA_DB_ALIAS:-coletamir_db}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  internal:
+    name: sinapir-${ENVIRONMENT:-local}-internal
+    driver: bridge
+  proxy:
+    name: proxy-net
+    external: true
