@@ -34,8 +34,8 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
     private const GROUP_ENTE = 11;
 
     // Alias dos itens de menu — estáveis entre ambientes (não usar Itemid fixo)
-    private const ROUTE_PAINEL = 'painel-de-gestao';
-    private const ROUTE_ADESAO = 'minha-adesao';
+    private const ROUTE_PAINEL = 'gestao-de-formularios';
+    private const ROUTE_ADESAO = 'formularios';
     private const ROUTE_ESCOLHA = 'escolha-de-perfil';
 
     // Destino que o com_users usa quando o formulário de login não informa "return"
@@ -108,9 +108,7 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
         $isMir = \in_array(self::GROUP_MIR, $groups, true);
         $isEnte = \in_array(self::GROUP_ENTE, $groups, true);
 
-        if ($isMir && $isEnte) {
-            $alias = self::ROUTE_ESCOLHA;
-        } elseif ($isMir) {
+        if ($isMir) {
             $alias = self::ROUTE_PAINEL;
         } elseif ($isEnte) {
             $alias = self::ROUTE_ADESAO;
