@@ -47,21 +47,6 @@ var AdesaoForm = {
                 return false;
             }
 
-            // Validar CNPJ de forma assíncrona antes de submeter
-            var validacaoCNPJ;
-            try {
-                validacaoCNPJ = await AdesaoForm.validateCnpj();
-            } catch (error) {
-                console.error('Erro na validação do CNPJ:', error);
-                AdesaoForm.showAlert('danger', 'Erro na validação do CNPJ. Tente novamente.');
-                return false;
-            }
-
-            if (!validacaoCNPJ) {
-                AdesaoForm.activateTab('solicitante');
-                AdesaoForm.showAlert('danger', 'Por favor, corrija o CNPJ antes de enviar o formulário.');
-                return false;
-            }
             
             var btnClicado = $(document.activeElement);
             if (btnClicado.val() == "rascunho") {
@@ -1107,17 +1092,10 @@ var AdesaoForm = {
             AdesaoForm.validateEmail('ds_email_responsavel', true);
         });
 
-        // Validação em tempo real para o e-mail alternativo (opcional)
-        $('#ds_emails_alternativos').on('blur input', function () {
-            AdesaoForm.validateEmail('ds_emails_alternativos', false);
-        });
 
         // Validar e-mails iniciais se já tiverem valores
         if ($('#ds_email_responsavel').val()) {
             AdesaoForm.validateEmail('ds_email_responsavel', true);
-        }
-        if ($('#ds_emails_alternativos').val()) {
-            AdesaoForm.validateEmail('ds_emails_alternativos', false);
         }
     },
 
@@ -1163,12 +1141,6 @@ var AdesaoForm = {
             return false;
         }
 
-        if($('#ds_emails_alternativos').val().trim().toLowerCase() === $('#ds_email_responsavel').val().trim().toLowerCase()) {
-            $input.addClass('is-invalid');
-            $groupText.addClass('is-invalid');
-            $formGroup.append('<small class="form-text text-danger email-error  d-block">O e-mail alternativo não pode ser igual ao e-mail do responsável.</small>');
-            return false;
-        }
 
         // E-mail válido
         $input.addClass('is-valid');
@@ -1178,9 +1150,8 @@ var AdesaoForm = {
 
     validateEmails: function () {
         var emailResponsavelValid = AdesaoForm.validateEmail('ds_email_responsavel', true);
-        var emailAlternativoValid = AdesaoForm.validateEmail('ds_emails_alternativos', false);
 
-        return emailResponsavelValid && emailAlternativoValid;
+        return emailResponsavelValid;
     },
 
     validateSolicitanteFields: function () {
@@ -1197,32 +1168,7 @@ var AdesaoForm = {
         $('#municipios-select-group').removeClass('is-invalid');
         $('#municipios-select-group .municipios-input-wrapper .form-control, #municipios-select-group .municipios-input-wrapper .form-select').removeClass('is-invalid');
 
-        // 1. Tipo de solicitante obrigatório
-        if (!esfera) {
-            AdesaoForm.activateTab('solicitante');
-            AdesaoForm.showAlert('danger', 'Selecione o tipo de solicitante (Estado, Município ou Consórcios/Associações de Municípios).');
-            $('html, body').animate({ scrollTop: $solicitante.offset().top - 80 }, 300);
-            return false;
-        }
 
-        // 2. CNPJ obrigatório e válido (quando formSolicitante visível)
-        var cnpj = $('#ds_cnpj').val().replace(/\D/g, '');
-        if (cnpj.length === 0) {
-            $('#ds_cnpj').addClass('is-invalid').closest('.form-group').find('.input-group-text').addClass('is-invalid');
-            $('#cnpj-error').text('CNPJ é obrigatório.').show();
-            AdesaoForm.activateTab('solicitante');
-            AdesaoForm.showAlert('danger', 'Preencha o CNPJ do Solicitante.');
-            $('html, body').animate({ scrollTop: $('.formSolicitante').offset().top - 80 }, 300);
-            return false;
-        }
-        // Validação síncrona básica do CNPJ primeiro
-        var cnpjValidationResult = AdesaoForm.validateCnpjSync();
-        if (!cnpjValidationResult) {
-            AdesaoForm.activateTab('solicitante');
-            AdesaoForm.showAlert('danger', 'Por favor, corrija o CNPJ antes de enviar o formulário.');
-            $('html, body').animate({ scrollTop: $('.formSolicitante').offset().top - 80 }, 300);
-            return false;
-        }
 
         // 3. CPF do Solicitante obrigatório e válido
         var cpf = $('#ds_cpf').val().replace(/\D/g, '');
@@ -1233,68 +1179,6 @@ var AdesaoForm = {
             AdesaoForm.showAlert('danger', cpf.length ? 'Informe um CPF do Solicitante válido.' : 'Preencha o CPF do Solicitante.');
             $('html, body').animate({ scrollTop: $('#ds_cpf').offset().top - 80 }, 300);
             return false;
-        }
-
-        // 4. Nome oficial é informado manualmente apenas para consórcio.
-        // Para Estado e Município, o valor é derivado das seleções abaixo.
-        var noOficial = $('#no_oficial').val().trim();
-        if (esfera === 'consorcio' && !noOficial) {
-            $('#no_oficial').addClass('is-invalid');
-            $('#no_oficial').closest('.form-group').append('<small class="form-text text-danger solicitante-field-error d-block">Este campo é obrigatório.</small>');
-            AdesaoForm.activateTab('solicitante');
-            AdesaoForm.showAlert('danger', 'Preencha o Nome Oficial do Solicitante.');
-            $('html, body').animate({ scrollTop: $('.formSolicitante').offset().top - 80 }, 300);
-            return false;
-        }
-
-        // 4. Estado obrigatório
-        var sgEstado = $('#sg_estado').val();
-        if (!sgEstado) {
-            $('#sg_estado').addClass('is-invalid');
-            $('#sg_estado').closest('.form-group').append('<small class="form-text text-danger solicitante-field-error d-block">Este campo é obrigatório.</small>');
-            AdesaoForm.activateTab('solicitante');
-            AdesaoForm.showAlert(
-                'danger',
-                esfera === 'consorcio'
-                    ? 'Selecione ao menos um Estado do Solicitante.'
-                    : 'Selecione a UF do Solicitante.'
-            );
-            $('html, body').animate({ scrollTop: $('.formSolicitante').offset().top - 80 }, 300);
-            return false;
-        }
-
-        // 5. Municípios obrigatório apenas se NÃO for Estado
-        if (esfera !== 'estadual') {
-            var nMunicipios = $('input[name="ds_municipios[]"]').length;
-            if (nMunicipios === 0) {
-                var $mg = $('#municipios-select-group');
-                $mg.addClass('is-invalid');
-                $mg.find('.municipios-input-wrapper .form-control, .municipios-input-wrapper .form-select').addClass('is-invalid');
-                $mg.append('<small class="form-text text-danger solicitante-field-error d-block">Selecione ao menos um município.</small>');
-                AdesaoForm.activateTab('solicitante');
-                AdesaoForm.showAlert('danger', 'Selecione ao menos um município.');
-                $('html, body').animate({ scrollTop: $mg.offset().top - 80 }, 300);
-                return false;
-            }
-        }
-
-        // 6. E-mail responsável obrigatório e formato (validado em validateEmails)
-
-        // 7. valida senhas se houver campos de senha(usuario novo)
-        // No consórcio, cada município deve possuir um e-mail válido.
-        if (esfera === 'consorcio') {
-            var emailMunicipioInvalido = false;
-            $('#municipios-emails-container input[type="email"]').each(function () {
-                var email = $(this).val().trim();
-                var valido = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-                $(this).toggleClass('is-invalid', !valido);
-                if (!valido) emailMunicipioInvalido = true;
-            });
-            if (emailMunicipioInvalido) {
-                AdesaoForm.activateTab('solicitante');
-                AdesaoForm.showAlert('danger', 'Corrija o e-mail informado para o município.');
-                return false;
-            }
         }
 
         var senha = $('#ds_senha').val();

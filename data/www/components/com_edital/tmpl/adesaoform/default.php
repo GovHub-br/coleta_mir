@@ -237,13 +237,7 @@ if ($travado) {
             <fieldset class="adesao-preview-fieldset" disabled>
         <?php endif;
         
-        if($this->edital->tp_edital == 'formulario'){
             include __DIR__ . '/solicitante_formulario.php';
-        }elseif(!empty($this->item->adesaoOrigem) && !empty($this->item->adesaoOrigem->co_edital)){
-            include __DIR__ . '/solicitante_municipio_consorcio.php';
-        }else{
-            include __DIR__ . '/solicitante.php';
-        }
         ?>
 
         
