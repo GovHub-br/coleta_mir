@@ -13,7 +13,9 @@
                                     <p class="text-muted small"><?php echo $this->escape(preg_replace('/\d(?=\d{2})/', '*', $this->user->username ?? '')); ?></p>
                                     <p class="mb-1"><small><i class="fa-solid fa-envelope"></i> E-mail Institucional do Responsável</small></p>
                                     <p class="text-muted small"><?php echo $this->escape($this->user->email ?? ''); ?></p>
-                                
+                                    <input type="hidden" id="ds_cpf" name="ds_cpf" value="<?php echo $this->escape($this->user->username ?? ''); ?>">
+                                    <input type="hidden" id="no_responsavel" name="no_responsavel" value="<?php echo $this->escape($this->user->name ?? ''); ?>">
+                                    <input type="hidden" id="ds_email_responsavel" name="ds_email_responsavel" value="<?php echo $this->escape($this->user->email ?? ''); ?>">
                                 </div>
                             </div>
                         </div>
