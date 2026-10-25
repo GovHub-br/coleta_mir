@@ -50,13 +50,13 @@ class HtmlView extends BaseHtmlView
 		$app = Factory::getApplication();
 		$user = $app->getIdentity();
 
-		if (empty($user->id))
-		{
-			$loginUrl = Route::_('index.php?option=com_users&view=login&return=' . base64_encode(Route::_('index.php?option=com_edital&view=formularios', false)), false);
-			$app->redirect($loginUrl);
+		// if (empty($user->id))
+		// {
+		// 	$loginUrl = Route::_('index.php?option=com_users&view=login&return=' . base64_encode(Route::_('index.php?option=com_edital&view=formularios', false)), false);
+		// 	$app->redirect($loginUrl);
 
-			return;
-		}
+		// 	return;
+		// }
 
 		$this->state = $this->get('State');
 		$this->items = $this->get('Items');
