@@ -139,7 +139,6 @@ class HtmlView extends BaseHtmlView
 		$menu->getParams()->set('helixultimate_page_title_alt', $this->edital->no_edital);
 		$this->tituloNoTemplate = true;
 
-		EditalHelper::addMinhaAdesaoPathway();
 		$app->getPathway()->addItem($this->edital->no_edital);
 	}
 
