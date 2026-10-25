@@ -128,41 +128,7 @@ $userId = Factory::getApplication()->getIdentity()->id;
 					</div>
 				</div>
 
-				<!-- Habilitado para quem -->
-				<?php $coEditalAdesao = (int) ($this->item->co_edital_adesao ?? 2) === 3 ? 3 : 2; ?>
-				<div class="form-group row mb-3">
-					<span class="col-md-3 col-form-label">
-						Habilitado para quem
-					</span>
-					<div class="col-md-9 pt-2">
-						<div class="form-check">
-							<input
-								class="form-check-input"
-								type="radio"
-								id="co_edital_adesao_2"
-								name="co_edital_adesao"
-								value="2"
-								<?php echo $coEditalAdesao === 2 ? 'checked' : ''; ?>
-							/>
-							<label class="form-check-label" for="co_edital_adesao_2">
-								Geral, exceto municípios dos consórcios
-							</label>
-						</div>
-						<div class="form-check">
-							<input
-								class="form-check-input"
-								type="radio"
-								id="co_edital_adesao_3"
-								name="co_edital_adesao"
-								value="3"
-								<?php echo $coEditalAdesao === 3 ? 'checked' : ''; ?>
-							/>
-							<label class="form-check-label" for="co_edital_adesao_3">
-								Somente municípios dos consórcios
-							</label>
-						</div>
-					</div>
-				</div>
+				
 
 				<!-- Hidden fields -->
 				<?php $isPublicado = (int) ($this->item->state ?? 0) === 1; ?>
