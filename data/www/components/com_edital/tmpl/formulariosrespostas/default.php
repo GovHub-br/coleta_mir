@@ -86,17 +86,25 @@ $statusConfig = [
 			<div class="fr-proto-row">
 				<span class="fr-protocolo"><?php echo htmlspecialchars($protocolo); ?></span>
 			</div>
-			<div class="fr-ente-nome"><?php echo htmlspecialchars($this->item->no_oficial ?? '—'); ?></div>
-			<div class="fr-meta-row">
-				<i class="fas fa-city"></i> <?php echo htmlspecialchars($esferaLabel); ?>
-			</div>
+			<div class="fr-ente-nome"><?php echo htmlspecialchars($this->item->edital->no_edital ?? '—'); ?></div>
 			<div class="fr-meta-row">
 				<i class="far fa-clock"></i> Enviado em: <?php echo HTMLHelper::_('date', $this->item->created_at ?? $this->item->dt_criacao, 'd/m/Y'); ?>
 			</div>
 		</div>
 		<div class="fr-info-right">
-			<div class="fr-dados-titulo">Dados do Ente</div>
-			<div class="fr-dado-row">CNPJ: <span><?php echo htmlspecialchars($this->item->ds_cnpj ?? '—'); ?></span></div>
+			<div class="fr-dados-titulo">Dados do Responsável</div>
+			<?php
+				$documento = preg_replace('/\D/', '', (string) ($this->item->ds_cnpj ?? ''));
+				$documentoMascarado = match (strlen($documento)) {
+					14 => '**.***.***/****-' . substr($documento, -2),
+					11 => '***.***.***-' . substr($documento, -2),
+					default => $documento !== ''
+						? str_repeat('*', max(0, strlen($documento) - 2)) . substr($documento, -2)
+						: '—',
+				};
+			?>
+			<div class="fr-dado-row">Nome: <span><?php echo htmlspecialchars($this->item->no_responsavel ?? '—'); ?></span></div>
+			<div class="fr-dado-row">Documento: <span><?php echo htmlspecialchars($documentoMascarado); ?></span></div>
 			<div class="fr-dado-row">E-mail: <span><?php echo htmlspecialchars($this->item->ds_email_responsavel ?? '—'); ?></span></div>
 		</div>
 	</div>
