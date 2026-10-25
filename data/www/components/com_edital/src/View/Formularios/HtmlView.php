@@ -108,8 +108,6 @@ class HtmlView extends BaseHtmlView
 			throw new \Exception(implode("\n", $errors));
 		}
 
-		// Breadcrumb: Início > Minha Adesão > Meus Formulários
-		\Comedital\Component\Edital\Site\Helper\EditalHelper::addMinhaAdesaoPathway();
 
 
 		parent::display($tpl);
