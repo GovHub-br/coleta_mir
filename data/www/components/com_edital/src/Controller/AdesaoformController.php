@@ -400,33 +400,6 @@ class AdesaoformController extends FormController
 				}
 			}
 
-			// Salva a associacao de municipios (e e-mails, quando consorcio) a adesao
-			if (!empty($adesaoId)) {
-				$municipiosParaSalvar = array();
-
-				if ($data['tp_esfera_governamental'] === 'municipal') {
-					foreach ($data['co_municipios'] as $coIbge) {
-						$municipiosParaSalvar[] = ['co_ibge' => $coIbge, 'ds_email' => null];
-					}
-				} elseif ($data['tp_esfera_governamental'] === 'consorcio') {
-					foreach ($data['co_municipios'] as $coIbge) {
-						$municipiosParaSalvar[] = [
-							'co_ibge' => $coIbge,
-							'ds_email' => $data['ds_email_municipios'][(int) $coIbge] ?? null
-						];
-					}
-				}
-				// 'estadual' não possui municípios vinculados
-
-				$municipioAdesaoModel = new MunicipioAdesaoModel();
-				if (method_exists($municipioAdesaoModel, 'setDbo')) {
-					$municipioAdesaoModel->setDbo($db);
-				}
-
-				$municipioAdesaoModel->saveMunicipiosAdesao($adesaoId, $municipiosParaSalvar, $db);
-			
-			}
-
 			// Commit transaction if everything succeeded
 			$db->transactionCommit();
 
@@ -439,26 +412,20 @@ class AdesaoformController extends FormController
 			$this->app->setUserState('com_edital.edit.adesao.data', null);
 
 			//se nao for rascunho envia email de confirmacao
-			if($data['rascunho'] == 0 && $dadosEdital->tp_edital != 'formulario'){
-				// Enviar email de confirmação
-				$this->enviarEmailConfirmacao($adesaoId, $data, $password);
-				$this->enviarEmailNotificacaoGestor($adesaoId, $data);
-			}
+			// if($data['rascunho'] == 0 && $dadosEdital->tp_edital != 'formulario'){
+			// 	// Enviar email de confirmação
+			// 	$this->enviarEmailConfirmacao($adesaoId, $data, $password);
+			// 	$this->enviarEmailNotificacaoGestor($adesaoId, $data);
+			// }
 
 			// Return success response
 			$menu = Factory::getApplication()->getMenu();
 			$item = $menu->getActive();
-			// $redirectUrl = (empty($item->link) ? 'index.php?option=com_edital&view=adesoes' : $item->link);
-			if (($dadosEdital->tp_edital ?? '') === 'formulario')
-			{
-				$redirectUrl = ((int) ($data['rascunho'] ?? 0) === 0)
-					? 'index.php?option=com_edital&view=formulariosrespostas&id=' . $adesaoId
-					: 'index.php?option=com_edital&view=formularios';
-			}
-			else
-			{
-				$redirectUrl = 'index.php?option=com_edital&view=adesao&id=' . $adesaoId.'&pubkey=' . AdesaoHelper::getAdesaoPubKey($adesaoId);
-			}
+
+			$redirectUrl = ((int) ($data['rascunho'] ?? 0) === 0)
+				? 'index.php?option=com_edital&view=formulariosrespostas&id=' . $adesaoId
+				: 'index.php?option=com_edital&view=formularios';
+			
 
 			echo json_encode([
 				'success' => true,
