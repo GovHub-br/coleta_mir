@@ -103,7 +103,7 @@ $statusConfig = [
 						: '—',
 				};
 			?>
-			<div class="fr-dado-row">Nome: <span><?php echo htmlspecialchars($this->item->no_responsavel ?? '—'); ?></span></div>
+			<div class="fr-dado-row">Nome: <span><?php echo htmlspecialchars($this->item->no_oficial ?? '—'); ?></span></div>
 			<div class="fr-dado-row">Documento: <span><?php echo htmlspecialchars($documentoMascarado); ?></span></div>
 			<div class="fr-dado-row">E-mail: <span><?php echo htmlspecialchars($this->item->ds_email_responsavel ?? '—'); ?></span></div>
 		</div>
