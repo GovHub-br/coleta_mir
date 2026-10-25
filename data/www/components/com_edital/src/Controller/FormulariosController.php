@@ -106,7 +106,7 @@ class FormulariosController extends FormController
 
 
 		// Build HTML content
-		$html = $this->buildPdfContent($item, $protocolNumber, $dataEnvio, $esfera, $itensEsfera, $noEdital); 
+		$html = $this->buildPdfContent($item, $protocolNumber, $dataEnvio, $noEdital); 
 
 		// echo $html;die;
 		// Write HTML content
@@ -146,9 +146,8 @@ class FormulariosController extends FormController
 		$variables = [
 			'{{PROTOCOL_NUMBER}}'  => $protocolNumber,
 			'{{STATUS}}'           => 'Enviado',
+			'{{NOME_RESPONSAVEL}}' => htmlspecialchars($item->no_oficial ?? '—'),
 			'{{DATA_ENVIO}}'       => $dataEnvio,
-			'{{ORGAO_ENTIDADE}}'   => htmlspecialchars($item->no_orgao_entidade ?? ''),
-			'{{CNPJ}}'             => htmlspecialchars($item->nu_cnpj ?? ''),
 			'{{DATA_GERACAO}}'     => HTMLHelper::_('date', date('Y-m-d H:i:s'), 'd/m/Y \à\s H:i'),
 			'{{NO_EDITAL}}'        => htmlspecialchars($noEdital ?? ''),
 		];
