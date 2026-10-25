@@ -91,18 +91,6 @@ include __DIR__ . '/../parts/_menu_formularios_gestao.php';
 		<div class="controls-row">
 			<div class="control-dropdown-wrapper">
 				<div class="control-dropdown">
-					<span>Exibir Entes</span>
-					<i class="fas fa-chevron-down"></i>
-				</div>
-				<select class="control-dropdown-select" name="ente" id="selectEnte">
-					<option value="">Todos</option>
-					<option value="municipal">Municípios</option>
-					<option value="estadual">Estados</option>
-					<option value="consorcio">Consórcios/Associações</option>
-				</select>
-			</div>
-			<div class="control-dropdown-wrapper">
-				<div class="control-dropdown">
 					<span>Organizar por</span>
 					<i class="fas fa-chevron-down"></i>
 				</div>

@@ -337,13 +337,6 @@ var Formularioadesoes = {
             var esferaLabel = esfera.label + estado;
             var motivoBloqueio = a.motivoBloqueio || '';
 
-            if(a.tp_esfera_governamental === 'municipal' && a.municipios ) {
-                esferaLabel = a.municipios;
-            }
-
-            if(a.tp_esfera_governamental === 'consorcio' && a.municipios ) {
-                esferaLabel = a.municipios;
-            }
 
             var item =
                 '<div class="adesao-item">' +
@@ -354,8 +347,7 @@ var Formularioadesoes = {
                                 '<span class="adesao-status ' + st.cls + '"><i class="' + st.icon + '"></i> ' + st.label + '</span>' +
                             '</div>' +
                             '<div class="adesao-nome">' + a.no_oficial + '</div>' +
-                            '<div class="adesao-meta">' +
-                                '<span><i class="' + esfera.icon + '"></i> ' + esferaLabel +  '</span>' ;
+                            '<div class="adesao-meta">';
                                     item +=
                                 '<span><i class="far fa-clock"></i> ' + a.dt_criacao_formatado + '</span>' +
                             '</div></div>'
