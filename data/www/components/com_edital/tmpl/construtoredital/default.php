@@ -96,21 +96,6 @@ $userId = Factory::getApplication()->getIdentity()->id;
 					</div>
 				</div>
 
-				<!-- Esfera Solicitante -->
-				<div class="form-group row mb-3">
-					<label for="tp_esfera_solicitante" class="col-md-3 col-form-label">
-						Esfera Solicitante
-					</label>
-					<div class="col-md-9">
-						<select id="tp_esfera_solicitante" name="tp_esfera_solicitante" class="form-control">
-							<option value="">Todos</option>
-							<option value="estadual" <?php echo ($this->item->tp_esfera_solicitante ?? '') === 'estadual' ? 'selected' : ''; ?>>Estadual</option>
-							<option value="municipal" <?php echo ($this->item->tp_esfera_solicitante ?? '') === 'municipal' ? 'selected' : ''; ?>>Municipal</option>
-							<option value="consorcio" <?php echo ($this->item->tp_esfera_solicitante ?? '') === 'consorcio' ? 'selected' : ''; ?>>Consórcio</option>
-						</select>
-					</div>
-				</div>
-
 				<!-- Versão do Edital -->
 				<div class="form-group row mb-3">
 					<label for="ds_versao" class="col-md-3 col-form-label">
@@ -136,6 +121,7 @@ $userId = Factory::getApplication()->getIdentity()->id;
 				<input type="hidden" name="id" value="<?php echo (int) $this->item->id; ?>" />
 				<input type="hidden" name="tp_edital" value="formulario" />
 				<input type="hidden" name="created_by" value="<?php echo (int) $userId; ?>" />
+				<input type="hidden" id="tp_esfera_solicitante" name="tp_esfera_solicitante" class="form-control" value="<?php echo htmlspecialchars($this->item->tp_esfera_solicitante ?? '', ENT_QUOTES, 'UTF-8'); ?>">
 				<?php echo HTMLHelper::_('form.token'); ?>
 
 			</div>
