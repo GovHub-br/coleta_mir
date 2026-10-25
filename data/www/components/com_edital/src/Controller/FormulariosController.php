@@ -104,13 +104,6 @@ class FormulariosController extends FormController
 		// Format date
 		$dataEnvio = HTMLHelper::_('date', $item->dt_criacao, 'd \d\e F \d\e Y, \à\s H:i');
 
-		$esfera = $item->tp_esfera_governamental == 'municipal' ? 'Município' : ($item->tp_esfera_governamental == 'estadual' ? 'Estado' : 'Consórcio de Municípios');
-
-		if($esfera != 'Estado'){
-			$itensEsfera = $item->ds_municipios;
-		}else{			
-			$itensEsfera = $item->sg_estado;
-		}
 
 		// Build HTML content
 		$html = $this->buildPdfContent($item, $protocolNumber, $dataEnvio, $esfera, $itensEsfera, $noEdital); 
@@ -138,7 +131,7 @@ class FormulariosController extends FormController
 	 *
 	 * @return string HTML content for PDF
 	 */
-	private function buildPdfContent($item, $protocolNumber, $dataEnvio, $esfera, $itensEsfera, $noEdital)
+	private function buildPdfContent($item, $protocolNumber, $dataEnvio, $noEdital)
 	{
 		// Load HTML template
 		$templatePath = JPATH_SITE . '/components/com_edital/tmpl/pdf/comprovante-formulario-enviado.html';
@@ -157,9 +150,6 @@ class FormulariosController extends FormController
 			'{{ORGAO_ENTIDADE}}'   => htmlspecialchars($item->no_orgao_entidade ?? ''),
 			'{{CNPJ}}'             => htmlspecialchars($item->nu_cnpj ?? ''),
 			'{{DATA_GERACAO}}'     => HTMLHelper::_('date', date('Y-m-d H:i:s'), 'd/m/Y \à\s H:i'),
-			'{{ESFERA}}'          => $esfera,
-			'{{LABEL_ITENS_ESFERA}}' => $esfera,
-			'{{ITENS_ESFERA}}'          => $itensEsfera,
 			'{{NO_EDITAL}}'        => htmlspecialchars($noEdital ?? ''),
 		];
 		
