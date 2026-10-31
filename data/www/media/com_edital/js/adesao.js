@@ -496,6 +496,21 @@ var AdesaoForm = {
             return;
         }
 
+        // Checkbox: marca a alternativa vinda do DW; só mexe se nada foi marcado pela pessoa.
+        var $checkboxes = $destino.find('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
+        if ($checkboxes.length > 0) {
+            var $marcados = $checkboxes.filter(':checked');
+            var soAutomatico = $marcados.length === 1 && $marcados.val() === anterior;
+            if ($marcados.length > 0 && !(sobrescrever && soAutomatico)) {
+                return;
+            }
+            $marcados.prop('checked', false);
+            $checkboxes.filter(function () { return this.value === valor; }).prop('checked', true);
+            $checkboxes.first().trigger('change');
+            $destino.data('dwValor', valor);
+            return;
+        }
+
         var $input = $destino.find('#pergunta_' + perguntaId);
         if ($input.length === 0) {
             return;
