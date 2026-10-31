@@ -126,9 +126,67 @@ class DwHelper
                    nr_processo_sei,
                    no_parceiro || COALESCE(' (' || upper(tp_identificador) || ' ' || co_identificador || ')', '') AS parceiro,
                    CASE WHEN qt_aditivos > 0 THEN 'Sim' WHEN qt_aditivos = 0 THEN 'Não' END AS existem_aditivos,
-                   ds_situacao
+                   ds_situacao,
+                   CASE
+                       WHEN tp_instrumento <> 'convenio' THEN NULL
+                       WHEN ds_situacao = 'Proposta/Plano de Trabalho Aprovado' THEN 'Plano de trabalho aprovado, sem início da execução'
+                       WHEN ds_situacao = 'Em execução' THEN 'Em execução'
+                       WHEN ds_situacao ILIKE '%prestação de contas%' THEN 'Execução concluída, em prestação de contas'
+                       WHEN ds_situacao IN ('Cancelado', 'Convênio Anulado') THEN 'Extinta / rescindida'
+                   END AS situacao_execucao
             FROM coleta_mir.coleta_instrumento
             WHERE chave = :chave",
+    ];
+
+    /**
+     * Complementos temporários, fora do contrato coleta_mir: para cada registro, consultas
+     * cujas colunas preenchem os campos que o contrato não traz (nunca sobrescrevem o
+     * contrato). Cada uma roda à parte e, se falhar (ex.: coleta_leitor sem acesso ao
+     * schema), é ignorada. Remover cada uma quando o contrato passar a trazer os campos.
+     */
+    private const COMPLEMENTOS = [
+        'instrumento' => [
+            // Processo SEI de TEDs publicado no gov.br (cobre 25 dos 31 TEDs sem processo no
+            // contrato, dump de 31/10/2026). Só o num_transf principal: casar pelos
+            // num_transf_alternativos atribui o processo de outro TED.
+            "SELECT processo AS nr_processo_sei
+             FROM siafi_dbt.teds_gov_br
+             WHERE 'ted:' || ltrim(trim(num_transf), '0') = :chave
+               AND NULLIF(trim(processo), '') IS NOT NULL
+             ORDER BY dt_ingest DESC NULLS LAST
+             LIMIT 1",
+            // TED: unidade do MIR que acompanha, programa orçamentário e justificativa do plano de ação.
+            "SELECT r.sigla_unidade_responsavel_acompanhamento AS unidade_mir,
+                    NULLIF(concat_ws(' - ', r.programa_governo, r.programa_governo_descricao), '') AS programa_orcamentario,
+                    p.tx_justificativa_plano_acao AS justificativa
+             FROM siafi_dbt.ted_resumo_orcamentario r
+             LEFT JOIN LATERAL (
+                 SELECT pa.tx_justificativa_plano_acao
+                 FROM siafi_dbt.planos_acao_ted pa
+                 WHERE pa.id_plano_acao::text = r.plano_acao::text
+                 ORDER BY pa.dt_ingest DESC NULLS LAST
+                 LIMIT 1
+             ) p ON true
+             WHERE r.tipo_instrumento = 'TED' AND 'ted:' || r.num_transf = :chave
+             LIMIT 1",
+            // Convênio: valores separados, publicação, natureza do convenente e origem dos recursos,
+            // já nos valores das alternativas dos formulários.
+            "SELECT CASE WHEN m.modalidade = 'CONVENIO' THEN 'Convênio' END AS tipo_instrumento,
+                    m.valor_repasse,
+                    m.valor_contrapartida,
+                    m.data_publicacao AS dt_publicacao,
+                    CASE
+                        WHEN m.convenente_natureza_juridica = 'Organização da Sociedade Civil' THEN 'Entidade privada sem fins lucrativos'
+                        WHEN m.convenente_natureza_juridica = 'Administração Pública Municipal' THEN 'Administração pública municipal'
+                        WHEN m.convenente_natureza_juridica = 'Administração Pública Estadual ou do Distrito Federal'
+                            THEN CASE WHEN m.uf = 'DF' THEN 'Administração pública distrital' ELSE 'Administração pública estadual' END
+                    END AS natureza_convenente,
+                    CASE WHEN m.origem_recurso = 'Recurso próprio' THEN 'Programação própria do MIR' END AS origem_programacao,
+                    CASE WHEN m.valor_contrapartida > 0 THEN 'Sim' WHEN m.valor_contrapartida = 0 THEN 'Não' END AS contrapartida_pactuada
+             FROM mir_silver.convenio_mir m
+             WHERE 'convenio:' || m.nr_convenio = :chave
+             LIMIT 1",
+        ],
     ];
 
     private static $conexao = null;
@@ -248,6 +306,23 @@ class DwHelper
             return null;
         }
 
+        foreach (self::COMPLEMENTOS[$registro] ?? [] as $i => $sqlComplemento) {
+            try {
+                $stmt = $db->prepare($sqlComplemento);
+                $stmt->execute([':chave' => $chave]);
+                $complemento = $stmt->fetch() ?: [];
+            } catch (\Throwable $e) {
+                Log::add('Complemento ' . $i . ' de "' . $registro . '" indisponível no DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
+                continue;
+            }
+
+            foreach ($complemento as $campo => $valor) {
+                if (($linha[$campo] ?? null) === null || $linha[$campo] === '') {
+                    $linha[$campo] = $valor;
+                }
+            }
+        }
+
         $dados = [];
 
         foreach ($linha as $campo => $valor) {
@@ -259,6 +334,9 @@ class DwHelper
 
             if (preg_match('/^(\d{4})-(\d{2})-(\d{2})(?:[ T][\d:.+-]+)?$/', $valor, $m)) {
                 $valor = $m[3] . '/' . $m[2] . '/' . $m[1];
+            } elseif ($campo === 'nr_processo_sei' && preg_match('/^(\d{5})(\d{6})(\d{4})(\d{2})$/', $valor, $m)) {
+                // Processos sem máscara (comuns nos convênios e termos de fomento): 00000.000000/0000-00.
+                $valor = $m[1] . '.' . $m[2] . '/' . $m[3] . '-' . $m[4];
             }
 
             $dados[$campo] = $valor;
