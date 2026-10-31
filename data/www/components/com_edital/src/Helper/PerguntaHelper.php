@@ -72,6 +72,42 @@ class PerguntaHelper
         return is_object($opcao) && ($opcao->nome ?? null) === self::OUTRO_PARAM;
     }
 
+    /** Entradas de ds_opcoes que configuram a pergunta e não são alternativas. */
+    public static function ehParametro($opcao): bool
+    {
+        return self::ehParametroOutro($opcao)
+            || (is_object($opcao) && in_array($opcao->nome ?? null, DwHelper::PARAMETROS, true));
+    }
+
+    /** Valor de um parâmetro de ds_opcoes (ex.: fonte_dw), ou '' se ausente. */
+    public static function getParametro($pergunta, string $nome): string
+    {
+        $decoded = !empty($pergunta->ds_opcoes) ? json_decode($pergunta->ds_opcoes) : null;
+
+        foreach ((is_array($decoded) || is_object($decoded)) ? $decoded : [] as $opcao) {
+            if (is_object($opcao) && ($opcao->nome ?? null) === $nome) {
+                return trim((string) ($opcao->valor ?? ''));
+            }
+        }
+
+        return '';
+    }
+
+    /** Opções do DW da pergunta (fonte_dw), ou vazio para usar as opções fixas. */
+    protected static function getOpcoesDw($pergunta): array
+    {
+        $fonte = self::getParametro($pergunta, DwHelper::PARAM_FONTE);
+
+        return $fonte !== '' ? DwHelper::getOpcoes($fonte) : [];
+    }
+
+    protected static function atributoFiltro(array $opcao): string
+    {
+        return ($opcao['filtro'] ?? '') !== ''
+            ? ' data-filtro="' . htmlspecialchars($opcao['filtro'], ENT_QUOTES, 'UTF-8') . '"'
+            : '';
+    }
+
     public static function permiteOutro($pergunta): bool
     {
         if (!in_array($pergunta->tp_pergunta ?? '', ['radio', 'checkbox'], true) || empty($pergunta->ds_opcoes)) {
@@ -93,12 +129,16 @@ class PerguntaHelper
         return false;
     }
 
-    /** Opções de radio/checkbox sem a entrada de parâmetro. */
+    /** Opções de radio/checkbox sem as entradas de parâmetro; as do DW têm precedência. */
     protected static function getOpcoesComValor($pergunta): array
     {
+        if ($opcoesDw = self::getOpcoesDw($pergunta)) {
+            return array_map(static fn ($opcao) => (object) $opcao, $opcoesDw);
+        }
+
         $options = !empty($pergunta->ds_opcoes) ? json_decode($pergunta->ds_opcoes) : [];
 
-        return array_values(array_filter((array) $options, static fn ($opcao) => !self::ehParametroOutro($opcao)));
+        return array_values(array_filter((array) $options, static fn ($opcao) => !self::ehParametro($opcao)));
     }
 
     protected static function renderOutroOpcao($pergunta, string $tipo, bool $marcado, string $texto, bool $obrigatorio): string
@@ -202,7 +242,7 @@ class PerguntaHelper
             . ' data-tipo-pergunta="' . htmlspecialchars($pergunta->tp_pergunta) . '"'
             . ' data-pergunta-chave="' . htmlspecialchars(self::getValueAlias($pergunta->ds_titulo)) . '"'
             . ' data-obrigatorio="' . ($pergunta->tp_requerida === 'sim' ? '1' : '0') . '"'
-            . $dsDependeAttr . '>';
+            . $dsDependeAttr . self::getIntegracaoDwAttr($pergunta) . '>';
 
         switch ($pergunta->tp_pergunta) {
             case 'linha':
@@ -308,12 +348,19 @@ class PerguntaHelper
             . '</label>';
         $html .= self::renderInformacaoComplementar2($pergunta);
 
+        // Sugestões vindas do DW (sugestoes_dw): o adesao.js preenche o datalist.
+        $listaSugestoes = self::getParametro($pergunta, DwHelper::PARAM_SUGESTOES) !== ''
+            ? 'sugestoes_pergunta_' . (int) $pergunta->id
+            : '';
+
         $html .= '<input type="text" '
         . 'id="pergunta_' . $pergunta->id . '" '
         . 'name="pergunta[' . $pergunta->id . ']" '
         . 'class="form-control" '
+        . ($listaSugestoes ? 'list="' . $listaSugestoes . '" autocomplete="off" ' : '')
         . 'value="' . ($resposta) . '"'
         . $required . ' />';
+        $html .= $listaSugestoes ? '<datalist id="' . $listaSugestoes . '"></datalist>' : '';
         $html .= !empty($pergunta->ds_descricao) ? '<small class="form-text text-muted">' . $pergunta->ds_descricao . '</small>' : '';
         $html .= '</div></div>';
 
@@ -371,9 +418,15 @@ class PerguntaHelper
 
     /**
      * Normaliza opções nome/valor e mantém suporte ao formato legado separado por vírgulas.
+     * Com $incluirDw, as opções do DW (fonte_dw) substituem as fixas quando disponíveis;
+     * o construtor de formulários passa false para editar só as alternativas fixas.
      */
-    public static function getOpcoesSelecao($pergunta): array
+    public static function getOpcoesSelecao($pergunta, bool $incluirDw = true): array
     {
+        if ($incluirDw && ($opcoesDw = self::getOpcoesDw($pergunta))) {
+            return $opcoesDw;
+        }
+
         if (empty($pergunta->ds_opcoes)) {
             return [];
         }
@@ -388,7 +441,7 @@ class PerguntaHelper
                     continue;
                 }
 
-                if (self::ehParametroOutro($opcao)) {
+                if (self::ehParametro($opcao)) {
                     continue;
                 }
 
@@ -431,6 +484,12 @@ class PerguntaHelper
         $isObrigatorio = !empty($pergunta->tp_requerida) && $pergunta->tp_requerida == 'sim';
         $required = $isObrigatorio ? ' required' : '';
         $options = self::getOpcoesSelecao($pergunta);
+
+        // Lista alimentada só pelo DW e sem opções (DW fora do ar): campo de texto para não travar o preenchimento.
+        if (empty($options) && self::getParametro($pergunta, DwHelper::PARAM_FONTE) !== '') {
+            return self::renderLinhaField($pergunta, htmlspecialchars((string) $resposta, ENT_QUOTES, 'UTF-8'), $index);
+        }
+
         $indexHtml = $index > 0 ? '<div class="pergunta-index"><span>' . $index . '</span></div>' : '';
 
         $html = '<div class="pergunta-content d-flex gap-3 pt-2 pb-2">';
@@ -452,7 +511,7 @@ class PerguntaHelper
 
         foreach ($options as $option) {
             $selected = ((string) $option['valor'] === (string) $resposta) ? ' selected' : '';
-            $html .= '<option value="' . htmlspecialchars($option['valor']) . '"' . $selected . '>'
+            $html .= '<option value="' . htmlspecialchars($option['valor']) . '"' . $selected . self::atributoFiltro($option) . '>'
                 . htmlspecialchars($option['nome'])
                 . '</option>';
         }
@@ -903,7 +962,7 @@ class PerguntaHelper
                 $value   = isset($opcao->valor) ? $opcao->valor : $label;
                 $checked = ((string) $resposta === (string) $value) ? ' checked' : '';
                 $fieldId = 'pergunta_' . $pergunta->id . '_' . md5($value);
-                $html .= '<div class="form-check">';
+                $html .= '<div class="form-check"' . self::atributoFiltro((array) $opcao) . '>';
                 $html .= '<input class="form-check-input" type="radio"'
                     . ' id="' . $fieldId . '"'
                     . ' name="pergunta[' . $pergunta->id . ']"'
@@ -974,7 +1033,7 @@ class PerguntaHelper
                 $value   = isset($opcao->valor) ? $opcao->valor : $label;
                 $checked = in_array((string) $value, $selectedValues) ? ' checked' : '';
                 $fieldId = 'pergunta_' . $pergunta->id . '_' . md5($value);
-                $html .= '<div class="form-check">';
+                $html .= '<div class="form-check"' . self::atributoFiltro((array) $opcao) . '>';
                 $html .= '<input class="form-check-input" type="checkbox"'
                     . ' id="' . $fieldId . '"'
                     . ' name="pergunta[' . $pergunta->id . '][]"'
@@ -1753,6 +1812,22 @@ class PerguntaHelper
         }
 
         return false;
+    }
+
+    /** Atributos lidos pelo adesao.js para filtrar opções e pré-preencher a partir do DW. */
+    public static function getIntegracaoDwAttr($pergunta): string
+    {
+        $atributos = '';
+
+        foreach (array_combine(DwHelper::PARAMETROS, ['data-fonte-dw', 'data-chave-dw', 'data-campo-dw', 'data-sugestoes-dw', 'data-filtro-dw']) as $parametro => $atributo) {
+            $valor = self::getParametro($pergunta, $parametro);
+
+            if ($valor !== '') {
+                $atributos .= ' ' . $atributo . '="' . htmlspecialchars($valor, ENT_QUOTES, 'UTF-8') . '"';
+            }
+        }
+
+        return $atributos;
     }
 
     public static function getDependenciaAttr($pergunta){

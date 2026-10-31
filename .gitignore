@@ -13,3 +13,4 @@ tools/__pycache__/
 .local/oidc/
 test/
 docs/
+*.dump

@@ -94,7 +94,7 @@ class RespostaHelper
                     continue;
                 }
 
-                if (PerguntaHelper::ehParametroOutro($opcao)) {
+                if (PerguntaHelper::ehParametro($opcao)) {
                     continue;
                 }
 

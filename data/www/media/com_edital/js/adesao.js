@@ -21,6 +21,9 @@ var AdesaoForm = {
         // Alternativa "Outro" (texto livre) de perguntas de seleção única/múltipla
         AdesaoForm.initOutroOpcoes();
 
+        // Opções filtradas e pré-preenchimento a partir do data warehouse
+        AdesaoForm.initIntegracaoDw();
+
         // Customizações visuais da etapa Estrutura e Gestão
         AdesaoForm.initEstruturaGestaoFrontend();
 
@@ -189,33 +192,7 @@ var AdesaoForm = {
             });
         };
 
-        // Retorna o(s) valor(es) atualmente selecionado(s)/preenchido(s) para uma pergunta de origem
-        var getValorPergunta = function (perguntaId) {
-            if (perguntaId === 'solicitante') {
-                var esfera = $('input[type="radio"][name="tp_esfera_governamental"]:checked').val()
-                    || $('input[type="hidden"][name="tp_esfera_governamental"]').val()
-                    || '';
-
-                return [esfera];
-            }
-
-            var $radios = $('input[type="radio"][name="pergunta[' + perguntaId + ']"]');
-            if ($radios.length > 0) {
-                return [$radios.filter(':checked').val() || ''];
-            }
-
-            var $checkboxes = $('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
-            if ($checkboxes.length > 0) {
-                return $checkboxes.filter(':checked').map(function () { return $(this).val(); }).get();
-            }
-
-            var $campo = $('#pergunta_' + perguntaId);
-            if ($campo.length > 0) {
-                return [$campo.val() || ''];
-            }
-
-            return [''];
-        };
+        var getValorPergunta = AdesaoForm.valoresPergunta;
 
         var getPerguntaField = function (perguntaId) {
             return $('.pergunta-field[data-pergunta-id="' + perguntaId + '"]');
@@ -320,6 +297,217 @@ var AdesaoForm = {
         });
 
         AdesaoForm.updateSubmitButtonState();
+    },
+
+    // Retorna o(s) valor(es) atualmente selecionado(s)/preenchido(s) para uma pergunta de origem
+    valoresPergunta: function (perguntaId) {
+        if (perguntaId === 'solicitante') {
+            var esfera = $('input[type="radio"][name="tp_esfera_governamental"]:checked').val()
+                || $('input[type="hidden"][name="tp_esfera_governamental"]').val()
+                || '';
+
+            return [esfera];
+        }
+
+        var $radios = $('input[type="radio"][name="pergunta[' + perguntaId + ']"]');
+        if ($radios.length > 0) {
+            return [$radios.filter(':checked').val() || ''];
+        }
+
+        var $checkboxes = $('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
+        if ($checkboxes.length > 0) {
+            return $checkboxes.filter(':checked').map(function () { return $(this).val(); }).get();
+        }
+
+        var $campo = $('#pergunta_' + perguntaId);
+        if ($campo.length > 0) {
+            return [$campo.val() || ''];
+        }
+
+        return [''];
+    },
+
+    // Integração com o data warehouse (data-application-mir):
+    // - perguntas com data-fonte-dw e depende-de mostram só as opções cujo data-filtro
+    //   corresponde à resposta da pergunta-pai ("5802 - Políticas..." casa com "5802");
+    // - perguntas com data-chave-dw identificam um registro; ao mudar, as perguntas com
+    //   data-campo-dw="registro.campo" são preenchidas com os dados do DW.
+    initIntegracaoDw: function () {
+        var seletorResposta = function (perguntaId) {
+            return '[name="pergunta[' + perguntaId + ']"], [name="pergunta[' + perguntaId + '][]"]';
+        };
+
+        var filtroCorresponde = function (filtro, valores) {
+            return valores.some(function (valor) {
+                valor = String(valor || '');
+                return valor === filtro || valor.indexOf(filtro + ' ') === 0;
+            });
+        };
+
+        $('.pergunta-field[data-fonte-dw][data-depende-de]').each(function () {
+            var $campo = $(this);
+            var origem = $campo.attr('data-depende-de');
+
+            var aplicarFiltro = function () {
+                var valores = AdesaoForm.valoresPergunta(origem);
+
+                $campo.find('option[data-filtro]').each(function () {
+                    var corresponde = filtroCorresponde(this.getAttribute('data-filtro'), valores);
+                    this.hidden = !corresponde;
+                    this.disabled = !corresponde;
+                    if (!corresponde && this.selected) {
+                        $(this).closest('select').val('').trigger('change');
+                    }
+                });
+
+                $campo.find('.form-check[data-filtro]').each(function () {
+                    var $item = $(this);
+                    var corresponde = filtroCorresponde($item.attr('data-filtro'), valores);
+                    $item.toggleClass('d-none', !corresponde);
+                    if (!corresponde) {
+                        $item.find('input:checked').prop('checked', false).trigger('change');
+                    }
+                });
+            };
+
+            $(document).on('change', seletorResposta(origem), aplicarFiltro);
+            aplicarFiltro();
+        });
+
+        // Sugestões (datalist) filtradas pela resposta da pergunta cuja fonte é data-filtro-dw,
+        // ex.: metas do plano de trabalho do instrumento selecionado.
+        $('.pergunta-field[data-sugestoes-dw][data-filtro-dw]').each(function () {
+            var $campo = $(this);
+            var fonte = $campo.attr('data-sugestoes-dw');
+            var $origem = $('.pergunta-field[data-fonte-dw="' + $campo.attr('data-filtro-dw') + '"]').first();
+            var $lista = $campo.find('datalist');
+
+            if ($origem.length === 0 || $lista.length === 0) {
+                return;
+            }
+
+            var origemId = $origem.attr('data-pergunta-id');
+
+            var carregar = function () {
+                var filtro = AdesaoForm.valoresPergunta(origemId)[0] || '';
+                $lista.empty();
+                if (!filtro) {
+                    return;
+                }
+
+                var ajaxData = {
+                    option: 'com_edital',
+                    task: 'adesaoform.opcoesDw',
+                    fonte: fonte,
+                    filtro: filtro
+                };
+                ajaxData[window.adesaoConfig.token] = 1;
+
+                $.ajax({
+                    url: window.adesaoConfig.baseUrl + 'index.php',
+                    type: 'GET',
+                    data: ajaxData,
+                    dataType: 'json'
+                }).done(function (response) {
+                    if (!response || !response.success) {
+                        return;
+                    }
+                    $.each(response.data, function (i, opcao) {
+                        $('<option>').attr('value', opcao.valor).appendTo($lista);
+                    });
+                }).fail(function (xhr, status, error) {
+                    console.debug('Sugestões do DW indisponíveis:', error);
+                });
+            };
+
+            $(document).on('change', seletorResposta(origemId), carregar);
+            carregar();
+        });
+
+        $('.pergunta-field[data-chave-dw]').each(function () {
+            var registro = $(this).attr('data-chave-dw');
+            var perguntaId = $(this).attr('data-pergunta-id');
+            var $destinos = $('.pergunta-field[data-campo-dw^="' + registro + '."]');
+
+            if ($destinos.length === 0) {
+                return;
+            }
+
+            var preencher = function (sobrescrever) {
+                var chave = AdesaoForm.valoresPergunta(perguntaId)[0] || '';
+                if (!chave) {
+                    return;
+                }
+
+                var ajaxData = {
+                    option: 'com_edital',
+                    task: 'adesaoform.dadosDw',
+                    registro: registro,
+                    chave: chave
+                };
+                ajaxData[window.adesaoConfig.token] = 1;
+
+                $.ajax({
+                    url: window.adesaoConfig.baseUrl + 'index.php',
+                    type: 'GET',
+                    data: ajaxData,
+                    dataType: 'json'
+                }).done(function (response) {
+                    // Registro não encontrado conta como "sem dados": limpa o que foi preenchido automaticamente antes.
+                    var dados = (response && response.success) ? response.data : {};
+                    $destinos.each(function () {
+                        var campo = $(this).attr('data-campo-dw').split('.')[1];
+                        var valor = dados[campo] !== undefined ? String(dados[campo]) : '';
+                        if (valor !== '' || sobrescrever) {
+                            AdesaoForm.preencherCampoDw($(this), valor, sobrescrever);
+                        }
+                    });
+                }).fail(function (xhr, status, error) {
+                    console.debug('Dados do DW indisponíveis:', error);
+                });
+            };
+
+            $(document).on('change', seletorResposta(perguntaId), function () {
+                preencher(true);
+            });
+            preencher(false);
+        });
+    },
+
+    // Preenche a pergunta com o valor vindo do DW. Só altera campos vazios ou, quando
+    // sobrescrever, campos que ainda guardam o valor preenchido automaticamente antes.
+    preencherCampoDw: function ($destino, valor, sobrescrever) {
+        var perguntaId = $destino.attr('data-pergunta-id');
+        var anterior = $destino.data('dwValor');
+        var $radios = $destino.find('input[type="radio"][name="pergunta[' + perguntaId + ']"]');
+
+        if ($radios.length > 0) {
+            var $marcado = $radios.filter(':checked');
+            if ($marcado.length > 0 && !(sobrescrever && $marcado.val() === anterior)) {
+                return;
+            }
+            var $alvo = $radios.filter(function () { return this.value === valor; });
+            if ($alvo.length > 0) {
+                $alvo.prop('checked', true).trigger('change');
+            } else if (valor === '' && $marcado.length > 0) {
+                $marcado.prop('checked', false).trigger('change');
+            }
+            $destino.data('dwValor', valor);
+            return;
+        }
+
+        var $input = $destino.find('#pergunta_' + perguntaId);
+        if ($input.length === 0) {
+            return;
+        }
+
+        var atual = $input.val() || '';
+        if (atual === valor || (atual !== '' && !(sobrescrever && atual === anterior))) {
+            return;
+        }
+
+        $input.val(valor).trigger('input').trigger('change');
+        $destino.data('dwValor', valor);
     },
 
     initOutroOpcoes: function () {

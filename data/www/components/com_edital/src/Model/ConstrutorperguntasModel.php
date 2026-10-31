@@ -6,6 +6,7 @@ defined('_JEXEC') or die;
 
 use Comedital\Component\Edital\Administrator\Table\AgrupamentoTable;
 use Comedital\Component\Edital\Administrator\Table\PerguntaTable;
+use Comedital\Component\Edital\Site\Helper\DwHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filter\InputFilter;
@@ -107,7 +108,7 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 				'tipo'         => $tipo,
 				'obrigatoria'  => $pergunta->tp_requerida === 'sim',
 				'alternativas' => in_array($tipo, self::TIPOS_SELECAO, true)
-					? array_column(PerguntaHelper::getOpcoesSelecao($pergunta), 'nome')
+					? array_column(PerguntaHelper::getOpcoesSelecao($pergunta, false), 'nome')
 					: [],
 				'permiteOutro' => PerguntaHelper::permiteOutro($pergunta),
 				'chave'        => 'p' . (int) $pergunta->id,
@@ -267,9 +268,12 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 						throw new \InvalidArgumentException("A pergunta {$m} da seção {$n} precisa de ao menos 2 alternativas distintas.");
 					}
 
-					if (in_array(PerguntaHelper::OUTRO_PARAM, $alternativas, true))
+					foreach (array_merge([PerguntaHelper::OUTRO_PARAM], DwHelper::PARAMETROS) as $reservada)
 					{
-						throw new \InvalidArgumentException("A alternativa \"" . PerguntaHelper::OUTRO_PARAM . "\" é reservada (pergunta {$m} da seção {$n}).");
+						if (in_array($reservada, $alternativas, true))
+						{
+							throw new \InvalidArgumentException("A alternativa \"" . $reservada . "\" é reservada (pergunta {$m} da seção {$n}).");
+						}
 					}
 				}
 
@@ -532,6 +536,17 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 			if (!empty($pergunta['permiteOutro']))
 			{
 				$opcoes['ds_opcoes' . count($opcoes)] = ['nome' => PerguntaHelper::OUTRO_PARAM, 'valor' => 'sim'];
+			}
+
+			// Integração com o DW não é editada no construtor: mantém a configuração existente.
+			foreach (DwHelper::PARAMETROS as $parametro)
+			{
+				$valor = PerguntaHelper::getParametro($table, $parametro);
+
+				if ($valor !== '')
+				{
+					$opcoes['ds_opcoes' . count($opcoes)] = ['nome' => $parametro, 'valor' => $valor];
+				}
 			}
 
 			$array['ds_opcoes'] = json_encode($opcoes, JSON_UNESCAPED_UNICODE);

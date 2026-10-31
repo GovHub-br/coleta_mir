@@ -24,6 +24,7 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Comedital\Component\Edital\Site\Helper\EditalHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Comedital\Component\Edital\Site\Helper\AdesaoHelper;
+use Comedital\Component\Edital\Site\Helper\DwHelper;
 use Comedital\Component\Edital\Site\Model\RespostaModel;
 use Comedital\Component\Edital\Site\Model\MunicipioAdesaoModel;
 use Joomla\CMS\Mail\MailerFactoryInterface;
@@ -188,6 +189,53 @@ class AdesaoformController extends FormController
 			echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 		}
 
+		$app->close();
+	}
+
+	/**
+	 * Dados de um registro do data warehouse (TED, convênio, programa do PPA) para
+	 * pré-preencher perguntas com campo_dw via AJAX.
+	 *
+	 * @return  void
+	 */
+	public function dadosDw()
+	{
+		// Check for request forgeries.
+		$this->checkToken('get');
+
+		$app = Factory::getApplication();
+		$registro = $app->input->getCmd('registro', '');
+		$chave = $app->input->getString('chave', '');
+
+		$dados = DwHelper::getRegistro($registro, $chave);
+
+		echo json_encode($dados === null ? ['success' => false] : ['success' => true, 'data' => $dados], JSON_UNESCAPED_UNICODE);
+		$app->close();
+	}
+
+	/**
+	 * Opções de uma fonte do data warehouse que depende de outra resposta
+	 * (ex.: metas do instrumento selecionado), para sugestões via AJAX.
+	 *
+	 * @return  void
+	 */
+	public function opcoesDw()
+	{
+		// Check for request forgeries.
+		$this->checkToken('get');
+
+		$app = Factory::getApplication();
+		$fonte = $app->input->getCmd('fonte', '');
+		$filtro = $app->input->getString('filtro', '');
+
+		if (!DwHelper::fonteComFiltro($fonte)) {
+			echo json_encode(['success' => false]);
+			$app->close();
+		}
+
+		$opcoes = array_map(static fn ($opcao) => ['nome' => $opcao['nome'], 'valor' => $opcao['valor']], DwHelper::getOpcoes($fonte, $filtro));
+
+		echo json_encode(['success' => true, 'data' => $opcoes], JSON_UNESCAPED_UNICODE);
 		$app->close();
 	}
 
