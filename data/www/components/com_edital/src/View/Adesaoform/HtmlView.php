@@ -17,6 +17,7 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use \Joomla\CMS\Factory;
 use \Joomla\CMS\Language\Text;
 use Comedital\Component\Edital\Site\Helper\EditalHelper;
+use Comedital\Component\Edital\Site\Helper\OrigemHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
@@ -53,6 +54,18 @@ class HtmlView extends BaseHtmlView
 	 * @var array|null
 	 */
 	protected $prefill;
+
+	/**
+	 * Formulário de execução: valores travados vindos do formulário de origem, por id de pergunta.
+	 *
+	 * @var array
+	 */
+	public $valoresOrigem = [];
+
+	/** Link de execução (resposta nova): chave da resposta de origem e posição do projeto. */
+	public $origemKey = '';
+
+	public $projeto = -1;
 
 	/**
 	 * Display the view
@@ -248,6 +261,10 @@ class HtmlView extends BaseHtmlView
 		$perguntas = PerguntaHelper::getPerguntasByEdital($editalId, 'adesao');
 		$this->perguntas = $perguntas;
 
+		if (!$this->previewMode && OrigemHelper::ehExecucao($this->edital)) {
+			$this->prepararOrigem($perguntas);
+		}
+
 		$perguntasAjuda = PerguntaHelper::getPerguntasByEdital($editalId, 'ajuda_adesao');
 		$this->perguntasAjuda = $perguntasAjuda;
 	}
@@ -286,6 +303,39 @@ class HtmlView extends BaseHtmlView
 			$this->item->no_responsavel = $user->name;
 			$this->item->ds_email_responsavel = $user->email;
 		}
+	}
+
+	/**
+	 * Formulário de execução: perguntas preenchidas e travadas a partir do formulário de origem.
+	 * Resposta nova: vem do link do projeto (origem_key e projeto); resposta salva: mantém os
+	 * valores gravados.
+	 *
+	 * @param   array  $perguntas  Perguntas do formulário
+	 *
+	 * @return void
+	 */
+	protected function prepararOrigem(array $perguntas)
+	{
+		if (!empty($this->item->id)) {
+			$respostas = (new \Comedital\Component\Edital\Site\Model\RespostaModel())->getRespostasMapByAdesao((int) $this->item->id);
+			$this->valoresOrigem = OrigemHelper::getValoresSalvos($perguntas, $respostas);
+
+			return;
+		}
+
+		$this->origemKey = $this->input->getString('origem_key', '');
+		$this->projeto = $this->input->getInt('projeto', -1);
+		$origem = $this->origemKey !== '' ? OrigemHelper::resolver($this->edital, $this->origemKey, $this->projeto) : null;
+
+		if ($origem === null || $origem['erro'] !== null) {
+			$this->avisoMinhaAdesao = $origem['erro']
+				?? 'Este formulário é preenchido a partir do link de execução enviado pelo gestor do instrumento, um por projeto.';
+
+			return;
+		}
+
+		$this->item->co_adesao_origem = (int) $origem['adesao']->id;
+		$this->valoresOrigem = $origem['valores'];
 	}
 
 	public function isPreviewMode(): bool

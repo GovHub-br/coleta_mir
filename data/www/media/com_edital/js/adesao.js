@@ -27,6 +27,9 @@ var AdesaoForm = {
         // Perguntas do tipo lista de itens (tabela)
         AdesaoForm.initTabelas();
 
+        // Formulário de execução: perguntas preenchidas a partir do formulário de origem
+        AdesaoForm.initPerguntasTravadas();
+
         // Customizações visuais da etapa Estrutura e Gestão
         AdesaoForm.initEstruturaGestaoFrontend();
 
@@ -335,6 +338,18 @@ var AdesaoForm = {
     //   corresponde à resposta da pergunta-pai ("5802 - Políticas..." casa com "5802");
     // - perguntas com data-chave-dw identificam um registro; ao mudar, as perguntas com
     //   data-campo-dw="registro.campo" são preenchidas com os dados do DW.
+    // Valores vindos do formulário de origem (o servidor ignora alterações): somente leitura,
+    // mas ainda enviados (disabled não seria). O <select> não tem readonly: sai do foco e do clique.
+    initPerguntasTravadas: function () {
+        var $travadas = $('.pergunta-field.pergunta-travada');
+        $travadas.find('input, textarea').prop('readonly', true);
+        $travadas.find('select').attr({ tabindex: '-1', 'aria-readonly': 'true' })
+            .on('mousedown keydown', function (e) { e.preventDefault(); });
+        $travadas.each(function () {
+            $(this).find('label').first().append(' <span class="badge text-bg-light fw-normal">definido pelo gestor</span>');
+        });
+    },
+
     initIntegracaoDw: function () {
         var seletorResposta = function (perguntaId) {
             return '[name="pergunta[' + perguntaId + ']"], [name="pergunta[' + perguntaId + '][]"]';

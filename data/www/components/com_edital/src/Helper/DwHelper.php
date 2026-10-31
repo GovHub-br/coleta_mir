@@ -201,6 +201,23 @@ class DwHelper
              ) p ON true
              WHERE r.tipo_instrumento = 'TED' AND 'ted:' || r.num_transf = :chave
              LIMIT 1",
+            // TED: UG da unidade do MIR que acompanha, pela sigla (SEPAR -> "238024 - SEPAR/MIR").
+            // Sem UG quando a sigla é só "MIR" ou está vazia.
+            "SELECT u.ug_codigo || ' - ' || u.ug_nome AS ug_mir
+             FROM siafi_dbt.ted_resumo_orcamentario r
+             JOIN mir.ugs_mir u ON u.ug_nome = split_part(r.sigla_unidade_responsavel_acompanhamento, '-', 1) || '/MIR'
+             WHERE r.tipo_instrumento = 'TED' AND 'ted:' || r.num_transf = :chave
+             LIMIT 1",
+            // Convênio: UG responsável (ou emitente) no SIAFI; quando vêm várias ("238022, 810008"),
+            // a primeira.
+            "SELECT concat_ws(' - ', c.ug, u.ug_nome) AS ug_mir
+             FROM mir_silver.convenio_mir m
+             CROSS JOIN LATERAL (SELECT trim(split_part(coalesce(m.ug_responsavel_codigo, m.ug_emitente), ',', 1)) AS ug) c
+             LEFT JOIN mir.ugs_mir u ON u.ug_codigo = c.ug
+             WHERE 'convenio:' || m.nr_convenio = :chave
+               AND coalesce(m.ug_responsavel_codigo, m.ug_emitente) IS NOT NULL
+             ORDER BY (m.ug_responsavel_codigo IS NULL), (m.ug_responsavel_codigo = '810008')
+             LIMIT 1",
             // Convênio: valores separados, publicação, natureza do convenente e origem dos recursos,
             // já nos valores das alternativas dos formulários.
             "SELECT CASE WHEN m.modalidade = 'CONVENIO' THEN 'Convênio' END AS tipo_instrumento,
