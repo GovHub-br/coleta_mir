@@ -46,6 +46,8 @@ class RespostaHelper
                 return self::renderOpcaoMultipla($resposta, $valor);
             case 'distribuicao_numerica':
                 return self::renderDistribuicaoNumerica($resposta, $valor);
+            case 'tabela':
+                return self::renderTabela($resposta, $valor);
             case 'texto':
                 return self::renderTextoMultilinha($valor);
             case 'arquivo':
@@ -279,6 +281,43 @@ class RespostaHelper
         $html .= '</ul>';
 
         return $html;
+    }
+
+    /**
+     * Lista de itens (tipo "tabela"), gravada como JSON: tabela numerada com as colunas da pergunta.
+     */
+    protected static function renderTabela($resposta, $valor)
+    {
+        $pergunta = (object) [
+            'ds_opcoes'  => $resposta->pergunta_opcoes ?? '',
+            'ds_titulo'  => $resposta->pergunta_titulo ?? '',
+        ];
+        $colunas = PerguntaHelper::getColunasTabela($pergunta);
+        $itens = PerguntaHelper::normalizarTabela($pergunta, $valor);
+
+        if (empty($colunas) || empty($itens)) {
+            return '<span class="text-muted">Não informado</span>';
+        }
+
+        $html = '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Nº</th>';
+        foreach ($colunas as $coluna) {
+            $html .= '<th>' . htmlspecialchars($coluna['rotulo']) . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($itens as $i => $item) {
+            $html .= '<tr><td>' . ($i + 1) . '</td>';
+            foreach ($colunas as $coluna) {
+                $celula = $item[$coluna['chave']] ?? '';
+                if ($coluna['tipo'] === 'moeda' && $celula !== '') {
+                    $celula = 'R$ ' . number_format((float) $celula, 2, ',', '.');
+                }
+                $html .= '<td>' . htmlspecialchars($celula) . '</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        return $html . '</tbody></table>';
     }
 
     /**

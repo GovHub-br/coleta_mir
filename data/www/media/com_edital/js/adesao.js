@@ -24,6 +24,9 @@ var AdesaoForm = {
         // Opções filtradas e pré-preenchimento a partir do data warehouse
         AdesaoForm.initIntegracaoDw();
 
+        // Perguntas do tipo lista de itens (tabela)
+        AdesaoForm.initTabelas();
+
         // Customizações visuais da etapa Estrutura e Gestão
         AdesaoForm.initEstruturaGestaoFrontend();
 
@@ -545,6 +548,103 @@ var AdesaoForm = {
         $destino.data('dwValor', valor);
     },
 
+    // Lista de itens (pergunta do tipo "tabela"): a pessoa preenche os campos de entrada e
+    // adiciona o item à lista; os itens ficam em JSON no campo oculto pergunta[id].
+    initTabelas: function () {
+        var formatarCnpj = function (valor) {
+            var d = String(valor || '').replace(/\D/g, '').substring(0, 14);
+            return d.replace(/^(\d{2})(\d)/, '$1.$2')
+                .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d)/, '.$1/$2')
+                .replace(/(\d{4})(\d)/, '$1-$2');
+        };
+
+        var formatarMoeda = function (valor) {
+            var numero = parseFloat(valor);
+            return isNaN(numero) ? valor : numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
+        $('.pergunta-field[data-tipo-pergunta="tabela"] .pergunta-tabela').each(function () {
+            var $tabela = $(this);
+            var colunas = JSON.parse($tabela.attr('data-colunas') || '[]');
+            var $oculto = $tabela.children('input[type="hidden"]');
+            var $corpo = $tabela.find('.pergunta-tabela-lista tbody');
+            var $erro = $tabela.find('.pergunta-tabela-erro');
+            var itens = [];
+
+            try {
+                itens = JSON.parse($oculto.val() || '[]');
+            } catch (e) {
+                itens = [];
+            }
+
+            var atualizar = function () {
+                $corpo.empty();
+                $.each(itens, function (i, item) {
+                    var $linha = $('<tr>').append($('<td>').text(i + 1));
+                    $.each(colunas, function (j, coluna) {
+                        var valor = item[coluna.chave] || '';
+                        $linha.append($('<td>').text(coluna.tipo === 'moeda' && valor !== '' ? formatarMoeda(valor) : valor));
+                    });
+                    $linha.append($('<td class="text-end">').append(
+                        $('<button type="button" class="btn btn-sm btn-outline-danger pergunta-tabela-remover">')
+                            .attr('data-indice', i)
+                            .attr('aria-label', 'Remover item ' + (i + 1))
+                            .html('<i class="fas fa-trash" aria-hidden="true"></i> Remover')
+                    ));
+                    $corpo.append($linha);
+                });
+                $tabela.find('.pergunta-tabela-lista').toggleClass('d-none', itens.length === 0);
+                $tabela.find('.pergunta-tabela-vazia').toggleClass('d-none', itens.length > 0);
+                $oculto.val(itens.length ? JSON.stringify(itens) : '').trigger('change');
+            };
+
+            $tabela.on('input', 'input[data-tipo-coluna="cnpj"]', function () {
+                this.value = formatarCnpj(this.value);
+            });
+
+            // Enter num campo de entrada adiciona o item em vez de enviar o formulário.
+            $tabela.on('keydown', 'input[data-coluna]', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $tabela.find('.pergunta-tabela-adicionar').trigger('click');
+                }
+            });
+
+            $tabela.on('click', '.pergunta-tabela-adicionar', function () {
+                var item = {};
+                var faltando = [];
+
+                $.each(colunas, function (i, coluna) {
+                    var valor = $.trim($tabela.find('[data-coluna="' + coluna.chave + '"]').val() || '');
+                    if (coluna.tipo === 'cnpj' && valor !== '' && valor.replace(/\D/g, '').length !== 14) {
+                        faltando.push(coluna.rotulo + ' (14 dígitos)');
+                    } else if (coluna.obrigatoria && valor === '') {
+                        faltando.push(coluna.rotulo);
+                    }
+                    item[coluna.chave] = valor;
+                });
+
+                if (faltando.length) {
+                    $erro.text('Preencha: ' + faltando.join(', ') + '.').removeClass('d-none');
+                    return;
+                }
+
+                $erro.addClass('d-none').text('');
+                itens.push(item);
+                $tabela.find('[data-coluna]').val('');
+                atualizar();
+            });
+
+            $tabela.on('click', '.pergunta-tabela-remover', function () {
+                itens.splice(parseInt($(this).attr('data-indice'), 10), 1);
+                atualizar();
+            });
+
+            atualizar();
+        });
+    },
+
     initOutroOpcoes: function () {
         // Registrado depois de initDependenciaPerguntas para reaplicar o required após a reexibição.
         $('#form-adesao').on('change', '.pergunta-field input[type="radio"], .pergunta-field input[type="checkbox"]', function () {
@@ -659,6 +759,10 @@ var AdesaoForm = {
             var $arquivo = $campos.filter('input[type="file"]').first();
             return ($arquivo[0] && $arquivo[0].files.length > 0)
                 || $arquivo.attr('data-tem-resposta-rascunho') === 'Sim';
+        }
+
+        if (tipoPergunta === 'tabela') {
+            return $.trim($pergunta.find('.pergunta-tabela > input[type="hidden"]').val() || '') !== '';
         }
 
         if (tipoPergunta === 'distribuicao_numerica') {
