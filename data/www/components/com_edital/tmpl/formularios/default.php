@@ -47,7 +47,7 @@ $itemidPreenchimento   = $itemidMeusFormularios ? '&Itemid=' . $itemidMeusFormul
 									<i class="fa fa-check-circle"></i> Aberto para preenchimento
 								</span>
                                 <?php
-                                    if(!empty($item->adesao)):
+                                    if(array_filter($item->respostas, static fn ($r) => $r->st_adesao === 'rascunho')):
                                 ?>
                                         <span class="badge badge-warning">
                                             <i class="fa fa-clock-o"></i> Em preenchimento
@@ -104,38 +104,16 @@ $itemidPreenchimento   = $itemidMeusFormularios ? '&Itemid=' . $itemidMeusFormul
 							
 
 							<?php
-							$total = (int) ($item->progresso->total ?? 0);
-							$respondidos = (int) ($item->progresso->respondidos ?? 0);
-							$pct = $total > 0 ? (int) round(($respondidos / $total) * 100) : 0;
+							$podeEditar = true;
+							include __DIR__ . '/default_respostas.php';
 							?>
-							<div class="formulario-progress">
-								<div class="progress-bar">
-									<div class="progress-fill" style="width: <?php echo $pct; ?>%"></div>
-								</div>
-								<div class="progress-text">
-									<span><?php echo $pct; ?>% concluído · <?php echo $respondidos; ?> de <?php echo $total; ?> quesitos respondidos</span>
-								</div>
-							</div>
-
-							
 						</div>
 
 						<div class="card-footer">
-                            <?php
-                                if(empty($item->adesao)):
-                            ?>
-                                <a href="<?php echo Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . $item->id . $itemidPreenchimento); ?>" class="btn btn-primary btn-action">
-									<i class="fas fa-play" aria-hidden="true"></i>
-                                    Iniciar Preenchimento
-                                </a>
-                            <?php else: ?>
-                                <a href="<?php echo Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . $item->id . $itemidPreenchimento); ?>" class="btn btn-primary btn-action">
-									<i class="fas fa-arrow-right" aria-hidden="true"></i>
-                                    <?php echo Text::_('COM_EDITAL_FORMULARIO_CONTINUAR'); ?>
-                                </a>
-                            <?php
-                                endif;
-                            ?>
+                            <a href="<?php echo Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . $item->id . $itemidPreenchimento); ?>" class="btn btn-primary btn-action">
+								<i class="fas fa-plus" aria-hidden="true"></i>
+                                <?php echo empty($item->respostas) ? 'Iniciar Preenchimento' : 'Nova resposta'; ?>
+                            </a>
 						</div>
 					</div>
 				<?php endforeach; ?>
@@ -159,7 +137,7 @@ $itemidPreenchimento   = $itemidMeusFormularios ? '&Itemid=' . $itemidMeusFormul
 									<i class="fa fa-clock"></i> <?php echo Text::_('COM_EDITAL_FORMULARIO_ENCERRADO'); ?>
 								</span>
                                 <?php
-                                    if (!empty($item->adesao) && $item->adesao->st_adesao != 'rascunho'):
+                                    if (array_filter($item->respostas, static fn ($r) => $r->st_adesao !== 'rascunho')):
                                 ?>
                                 <span class="badge badge-success">
                                     <i class="fas fa-check-circle"></i> <?php echo Text::_('COM_EDITAL_FORMULARIO_ENVIADO'); ?>
@@ -203,43 +181,11 @@ $itemidPreenchimento   = $itemidMeusFormularios ? '&Itemid=' . $itemidMeusFormul
 								</div>
 							</div>
 
-							<?php if (!empty($item->adesao)) : ?>
-								<?php
-								$total = (int) ($item->progresso->total ?? 0);
-								$respondidos = (int) ($item->progresso->respondidos ?? 0);
-								$pct = $total > 0 ? (int) round(($respondidos / $total) * 100) : 0;
-								$pendencias = max(0, $total - $respondidos);
-								?>
-								<div class="formulario-progress">
-									<div class="progress-text progress-text-split">
-										<span><?php echo $pct; ?>% concluído · <?php echo $respondidos; ?> de <?php echo $total; ?> quesitos respondidos</span>
-										<?php if ($pendencias > 0) : ?>
-											<span class="progress-pendencias"><?php echo $pendencias; ?> <?php echo $pendencias === 1 ? 'pendência' : 'pendências'; ?></span>
-										<?php endif; ?>
-									</div>
-									<div class="progress-bar complete">
-										<div class="progress-fill" style="width: <?php echo $pct; ?>%"></div>
-									</div>
-								</div>
-							<?php endif; ?>
+							<?php
+							$podeEditar = false;
+							include __DIR__ . '/default_respostas.php';
+							?>
 						</div>
-
-                        <?php
-                            if(!empty($item->adesao)){
-                        ?>
-						<div class="card-footer">
-							<a href="<?php echo Route::_('index.php?option=com_edital&view=formulariosrespostas&id=' . $item->adesao->id); ?>" class="btn btn-secondary btn-action">
-								<i class="fas fa-eye" aria-hidden="true"></i>
-								<?php echo Text::_('COM_EDITAL_FORMULARIO_VISUALIZAR'); ?>
-							</a>
-							<a href="<?php echo Route::_('index.php?option=com_edital&task=formularios.pdfcomprovante&id=' . $item->adesao->id); ?>" class="btn btn-primary btn-action">
-								<i class="fas fa-download" aria-hidden="true"></i>
-								<?php echo Text::_('COM_EDITAL_FORMULARIO_BAIXAR_COMPROVANTE'); ?>
-							</a>
-						</div>
-                        <?php
-                            }
-                        ?>
 					</div>
 				<?php endforeach; ?>
 			</div>

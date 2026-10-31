@@ -398,7 +398,11 @@ class AdesaoformController extends FormController
 			}
 
 			$data['state'] = 1; // Define o estado como publicado
-			if($data['rascunho']){
+			$adesaoExistente = !empty($data['id']) ? AdesaoHelper::getAdesaoById($data['id']) : null;
+			if ($adesaoExistente && $adesaoExistente->st_adesao !== 'rascunho' && ($dadosEdital->tp_edital ?? '') === 'formulario') {
+				// Atualização de resposta já enviada: salvar (inclusive como rascunho) não a reabre.
+				$data['st_adesao'] = $adesaoExistente->st_adesao;
+			} elseif($data['rascunho']){
 				$data['st_adesao'] = 'rascunho'; // Define o estado como rascunho
 			}else{
 				$data['st_adesao'] = 'pendente'; // Define a situação como pendente
@@ -530,7 +534,10 @@ class AdesaoformController extends FormController
 				$user = Factory::getUser();
 				if($user->id != $adesao->created_by){
 					$errors[] = 'Você não tem permissão para editar esta adesão.';
-				} elseif ($adesao->st_adesao !== 'rascunho') {
+				} elseif ((int) $adesao->co_edital !== $dados['co_edital']) {
+					$errors[] = 'Esta resposta pertence a outro formulário.';
+				} elseif ($adesao->st_adesao !== 'rascunho' && ($edital->tp_edital ?? '') !== 'formulario') {
+					// Respostas de formulário seguem editáveis depois de enviadas (atualizações periódicas).
 					$errors[] = 'Apenas adesões em rascunho podem ser alteradas por este formulário.';
 				}
 			}
@@ -590,6 +597,13 @@ class AdesaoformController extends FormController
 		);
 		$errors = array_merge($errors, $resValidacaoPerguntas['errors']);
 		$dados['respostas'] = $resValidacaoPerguntas['respostas'];
+
+		$errors = array_merge($errors, PerguntaHelper::validarRespostasUnicas(
+			$resPerguntas,
+			$dados['respostas'],
+			$dados['co_edital'],
+			$dados['id']
+		));
 
 		// Se houver erros, retorna com mensagens
 		if (!empty($errors)) {
