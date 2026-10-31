@@ -16,6 +16,8 @@ use \Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use \Joomla\CMS\Factory;
 use \Joomla\CMS\Language\Text;
 use \Joomla\CMS\Router\Route;
+use \Comedital\Component\Edital\Site\Helper\DwHelper;
+use \Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 
 /**
  * View class for a list of Formulario records.
@@ -75,23 +77,21 @@ class HtmlView extends BaseHtmlView
 			foreach ($this->items as $item)
 			{
 
-				$adesoesDoEdital = $MinhaAdesaoModel->getAdesoesByUserIdEdital((int) $user->id, $item->id);
-				$item->adesao = $adesoesDoEdital[0] ?? null;
 				$item->tamanho = $model->getTamanhoFormulario($item->id);
 
-				if (!empty($item->adesao) && !empty($item->adesao->id))
+				// Um formulário aceita várias respostas do usuário (ex.: uma por TED/convênio),
+				// todas editáveis enquanto o formulário estiver no prazo.
+				$item->respostas = $user->guest ? [] : $MinhaAdesaoModel->getAdesoesByUserIdEdital((int) $user->id, $item->id);
+				usort($item->respostas, static fn ($a, $b) => (int) $b->id <=> (int) $a->id);
+				$perguntaIdentificacao = $this->getPerguntaIdentificacao($item->id);
+
+				foreach ($item->respostas as $resposta)
 				{
-					$item->progresso = $MinhaAdesaoModel->getProgressoPreenchimentoAdesao($item->adesao->id, $item->id);
-				}
-				else
-				{
-					$item->progresso = (object) [
-						'respondidos' => 0,
-						'total' => (int) ($item->tamanho['qtPerguntas'] ?? 0),
-					];
+					$resposta->progresso = $MinhaAdesaoModel->getProgressoPreenchimentoAdesao($resposta->id, $item->id);
+					$resposta->rotulo = $this->getRotuloResposta($perguntaIdentificacao, (int) $resposta->id);
 				}
 
-				if ($model->isAvailable($item) && (empty($item->adesao) || $item->adesao->st_adesao == 'rascunho'))
+				if ($model->isAvailable($item))
 				{
 					$this->available[] = $item;
 				}
@@ -111,5 +111,63 @@ class HtmlView extends BaseHtmlView
 
 
 		parent::display($tpl);
+	}
+
+	/**
+	 * Pergunta que identifica cada resposta na listagem: a que escolhe o instrumento
+	 * (chave do DW ou resposta única), se houver.
+	 *
+	 * @param   int  $editalId  Formulário
+	 *
+	 * @return  object|null
+	 */
+	protected function getPerguntaIdentificacao(int $editalId)
+	{
+		foreach (PerguntaHelper::getPerguntasByEdital($editalId, 'adesao') ?: [] as $pergunta)
+		{
+			if (PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_CHAVE) !== ''
+				|| PerguntaHelper::getParametro($pergunta, PerguntaHelper::PARAM_RESPOSTA_UNICA) === 'sim'
+				|| PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_FONTE) !== '')
+			{
+				return $pergunta;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Rótulo da resposta: a alternativa escolhida na pergunta de identificação
+	 * (ex.: "931295 - Universidade Federal da Bahia - ..."), ou vazio.
+	 *
+	 * @param   object|null  $pergunta  Pergunta de identificação
+	 * @param   int          $adesaoId  Resposta
+	 *
+	 * @return  string
+	 */
+	protected function getRotuloResposta($pergunta, int $adesaoId): string
+	{
+		if (!$pergunta)
+		{
+			return '';
+		}
+
+		$resposta = PerguntaHelper::getRespostaByAdesaoPergunta($adesaoId, $pergunta->id);
+		$valor = is_object($resposta) ? trim((string) $resposta->ds_resposta) : '';
+
+		if ($valor === '')
+		{
+			return '';
+		}
+
+		foreach (PerguntaHelper::getOpcoesSelecao($pergunta) as $opcao)
+		{
+			if ((string) $opcao['valor'] === $valor)
+			{
+				return $opcao['nome'];
+			}
+		}
+
+		return $valor;
 	}
 }

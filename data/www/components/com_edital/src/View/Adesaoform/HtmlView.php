@@ -213,11 +213,13 @@ class HtmlView extends BaseHtmlView
 			throw new \Exception(Text::_('Edital não permite adesão. '. $resPermiteAdesao['message']), 403);
 		}
 
-		if(!$this->previewMode && $user->authorise('minhaadesao.manage', 'com_edital')) {
+		if (!$this->previewMode && ($this->edital->tp_edital ?? '') === 'formulario') {
+			$this->prepararRespostaFormulario($user, $editalId);
+		} elseif(!$this->previewMode && $user->authorise('minhaadesao.manage', 'com_edital')) {
 			$MinhaAdesaoModel = new \Comedital\Component\Edital\Site\Model\MinhaadesaoModel();
 			$adesoes = $MinhaAdesaoModel->getAdesoesByUserIdEdital($user->id, $editalId);
 
-			
+
 			foreach($adesoes as $adesao){
 				if($adesao->co_edital == $editalId && $adesao->st_adesao == 'rascunho'){
 					$this->item = $adesao;
@@ -248,6 +250,42 @@ class HtmlView extends BaseHtmlView
 
 		$perguntasAjuda = PerguntaHelper::getPerguntasByEdital($editalId, 'ajuda_adesao');
 		$this->perguntasAjuda = $perguntasAjuda;
+	}
+
+	/**
+	 * Formulários aceitam várias respostas por usuário (ex.: uma por TED/convênio), editáveis
+	 * mesmo depois de enviadas: abre a resposta pedida em adesao_id, se for do usuário e deste
+	 * formulário, ou uma resposta nova com os dados do responsável vindos da conta.
+	 *
+	 * @param   object  $user      Usuário logado
+	 * @param   int     $editalId  Formulário
+	 *
+	 * @return void
+	 */
+	protected function prepararRespostaFormulario($user, int $editalId)
+	{
+		$adesaoId = $this->input->getInt('adesao_id', 0);
+
+		if ($adesaoId > 0 && !$user->guest) {
+			$MinhaAdesaoModel = new \Comedital\Component\Edital\Site\Model\MinhaadesaoModel();
+
+			foreach ($MinhaAdesaoModel->getAdesoesByUserIdEdital($user->id, $editalId) as $adesao) {
+				if ((int) $adesao->id === $adesaoId) {
+					$adesao->no_responsavel = $adesao->no_responsavel ?? $adesao->no_oficial;
+					$this->item = $adesao;
+					$this->municipios = $MinhaAdesaoModel->getMunicipiosAdesao($adesao->id);
+
+					return;
+				}
+			}
+
+			throw new \Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		if (!$user->guest) {
+			$this->item->no_responsavel = $user->name;
+			$this->item->ds_email_responsavel = $user->email;
+		}
 	}
 
 	public function isPreviewMode(): bool

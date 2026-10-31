@@ -136,7 +136,37 @@ class DwHelper
                    END AS situacao_execucao
             FROM coleta_mir.coleta_instrumento
             WHERE chave = :chave",
+        // Fora do contrato: objetivo geral, objetivo estratégico e público-alvo do programa do PPA
+        // (chave = código do programa, ex.: "5802"). Sem acesso ao ppa_dbt, fica sem pré-preenchimento.
+        'ppa_programa' => "
+            SELECT NULLIF(concat_ws(E'\\n\\n',
+                       (SELECT 'Objetivo geral: ' || g.enunciado
+                        FROM ppa_dbt.objetivo_geral_filtrado_mir g
+                        WHERE g.programa::text = :chave
+                        ORDER BY g.ano_ppa DESC NULLS LAST, g.exercicio DESC NULLS LAST LIMIT 1),
+                       (SELECT 'Objetivo estratégico: ' || o.titulo_objetivo_estrategico
+                        FROM ppa_dbt.objetivo_estrategico_programa_filtrado_mir o
+                        WHERE o.programa::text = :chave
+                        ORDER BY o.exercicio DESC NULLS LAST LIMIT 1),
+                       (SELECT 'Público-alvo: ' || p.publico_alvo
+                        FROM ppa_dbt.programa_filtrado_mir p
+                        WHERE p.programa::text = :chave
+                        ORDER BY p.exercicio DESC NULLS LAST LIMIT 1)
+                   ), '') AS objetivo_geral",
     ];
+
+    /** Normaliza a chave recebida, por registro. */
+    private static function normalizarChave(string $registro, string $chave): string
+    {
+        $chave = trim($chave);
+
+        // "5802 - Políticas para..." -> "5802"
+        if ($registro === 'ppa_programa' && preg_match('/^(\d+)/', $chave, $m)) {
+            return $m[1];
+        }
+
+        return $chave;
+    }
 
     /**
      * Complementos temporários, fora do contrato coleta_mir: para cada registro, consultas
@@ -155,8 +185,10 @@ class DwHelper
                AND NULLIF(trim(processo), '') IS NOT NULL
              ORDER BY dt_ingest DESC NULLS LAST
              LIMIT 1",
-            // TED: unidade do MIR que acompanha, programa orçamentário e justificativa do plano de ação.
+            // TED: unidade do MIR que acompanha, programa do PPA (código), programa orçamentário e
+            // justificativa do plano de ação.
             "SELECT r.sigla_unidade_responsavel_acompanhamento AS unidade_mir,
+                    NULLIF(trim(r.programa_governo::text), '') AS programa_ppa,
                     NULLIF(concat_ws(' - ', r.programa_governo, r.programa_governo_descricao), '') AS programa_orcamentario,
                     p.tx_justificativa_plano_acao AS justificativa
              FROM siafi_dbt.ted_resumo_orcamentario r
@@ -186,6 +218,14 @@ class DwHelper
              FROM mir_silver.convenio_mir m
              WHERE 'convenio:' || m.nr_convenio = :chave
              LIMIT 1",
+            // Convênio: programa do PPA pela ação orçamentária das notas de empenho (só convênios
+            // com empenho vinculado no DW: 30 de 409 no dump de 31/10/2026).
+            "SELECT max(a.codigo_programa::text) AS programa_ppa
+             FROM mir_convenios.fato_execucao_orcamentaria f
+             JOIN mir_convenios.dim_convenio c ON c.sk_convenio = f.sk_convenio
+             JOIN mir_convenios.dim_acao_orcamentaria a ON a.sk_acao_orcamentaria = f.sk_acao_orcamentaria
+             WHERE 'convenio:' || c.nr_convenio = :chave
+             HAVING max(a.codigo_programa::text) IS NOT NULL",
         ],
     ];
 
@@ -286,7 +326,7 @@ class DwHelper
     public static function getRegistro(string $registro, string $chave): ?array
     {
         $sql = self::REGISTROS[$registro] ?? null;
-        $chave = trim($chave);
+        $chave = self::normalizarChave($registro, $chave);
 
         if ($sql === null || $chave === '' || !($db = self::conexao())) {
             return null;

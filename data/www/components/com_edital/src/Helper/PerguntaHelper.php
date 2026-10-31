@@ -72,11 +72,65 @@ class PerguntaHelper
         return is_object($opcao) && ($opcao->nome ?? null) === self::OUTRO_PARAM;
     }
 
+    /** Parâmetro de ds_opcoes: a mesma resposta não pode se repetir em outro preenchimento do formulário. */
+    public const PARAM_RESPOSTA_UNICA = 'resposta_unica';
+
+    /** Nomes de ds_opcoes que configuram a pergunta (não são alternativas nem editáveis no construtor). */
+    public static function parametrosConfiguracao(): array
+    {
+        return array_merge(DwHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA]);
+    }
+
     /** Entradas de ds_opcoes que configuram a pergunta e não são alternativas. */
     public static function ehParametro($opcao): bool
     {
         return self::ehParametroOutro($opcao)
-            || (is_object($opcao) && in_array($opcao->nome ?? null, DwHelper::PARAMETROS, true));
+            || (is_object($opcao) && in_array($opcao->nome ?? null, self::parametrosConfiguracao(), true));
+    }
+
+    /**
+     * Perguntas com resposta_unica (ex.: o instrumento no formulário do MIR, um preenchimento
+     * por TED/convênio): erro se outro preenchimento do mesmo formulário já tem o mesmo valor.
+     *
+     * @param   array  $perguntas  Perguntas do formulário
+     * @param   array  $respostas  Respostas validadas (pergunta_id => valor)
+     * @param   int    $editalId   Formulário
+     * @param   int    $adesaoId   Preenchimento sendo salvo (0 = novo)
+     *
+     * @return  array  Mensagens de erro
+     */
+    public static function validarRespostasUnicas(array $perguntas, array $respostas, int $editalId, int $adesaoId): array
+    {
+        $db = Factory::getContainer()->get('DatabaseDriver');
+        $erros = [];
+
+        foreach ($perguntas as $pergunta) {
+            $valor = $respostas[$pergunta->id] ?? '';
+
+            if (!is_scalar($valor) || trim((string) $valor) === '' || self::getParametro($pergunta, self::PARAM_RESPOSTA_UNICA) !== 'sim') {
+                continue;
+            }
+
+            $valor = (string) $valor;
+            $query = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__tb_resposta', 'r'))
+                ->join('INNER', $db->quoteName('#__tb_adesao', 'a') . ' ON a.id = r.co_adesao')
+                ->where('r.co_pergunta = ' . (int) $pergunta->id)
+                ->where('r.ds_resposta = :valor')
+                ->where('a.co_edital = ' . (int) $editalId)
+                ->where('a.state = 1')
+                ->where('a.id <> ' . (int) $adesaoId)
+                ->bind(':valor', $valor);
+            $db->setQuery($query);
+
+            if ((int) $db->loadResult() > 0) {
+                $erros[] = 'Já existe um preenchimento deste formulário para "' . $pergunta->ds_titulo . '" com o valor informado. '
+                    . 'Para atualizá-lo, abra-o na lista de Formulários.';
+            }
+        }
+
+        return $erros;
     }
 
     /** Valor de um parâmetro de ds_opcoes (ex.: fonte_dw), ou '' se ausente. */

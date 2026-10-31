@@ -6,7 +6,6 @@ defined('_JEXEC') or die;
 
 use Comedital\Component\Edital\Administrator\Table\AgrupamentoTable;
 use Comedital\Component\Edital\Administrator\Table\PerguntaTable;
-use Comedital\Component\Edital\Site\Helper\DwHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filter\InputFilter;
@@ -268,7 +267,7 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 						throw new \InvalidArgumentException("A pergunta {$m} da seção {$n} precisa de ao menos 2 alternativas distintas.");
 					}
 
-					foreach (array_merge([PerguntaHelper::OUTRO_PARAM], DwHelper::PARAMETROS) as $reservada)
+					foreach (array_merge([PerguntaHelper::OUTRO_PARAM], PerguntaHelper::parametrosConfiguracao()) as $reservada)
 					{
 						if (in_array($reservada, $alternativas, true))
 						{
@@ -538,8 +537,8 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 				$opcoes['ds_opcoes' . count($opcoes)] = ['nome' => PerguntaHelper::OUTRO_PARAM, 'valor' => 'sim'];
 			}
 
-			// Integração com o DW não é editada no construtor: mantém a configuração existente.
-			foreach (DwHelper::PARAMETROS as $parametro)
+			// Configuração (integração com o DW, resposta única) não é editada no construtor: mantém a existente.
+			foreach (PerguntaHelper::parametrosConfiguracao() as $parametro)
 			{
 				$valor = PerguntaHelper::getParametro($table, $parametro);
 

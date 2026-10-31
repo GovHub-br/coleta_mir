@@ -347,18 +347,27 @@ var AdesaoForm = {
         $('.pergunta-field[data-fonte-dw][data-depende-de]').each(function () {
             var $campo = $(this);
             var origem = $campo.attr('data-depende-de');
+            // Cópia de todas as opções filtráveis: as que não valem para a resposta da
+            // pergunta-pai saem do <select> (o Safari ignora hidden em <option>).
+            var $select = $campo.find('select');
+            var valorSalvo = $select.val();
+            var $opcoesFiltraveis = $select.find('option[data-filtro]').detach();
 
             var aplicarFiltro = function () {
                 var valores = AdesaoForm.valoresPergunta(origem);
 
-                $campo.find('option[data-filtro]').each(function () {
-                    var corresponde = filtroCorresponde(this.getAttribute('data-filtro'), valores);
-                    this.hidden = !corresponde;
-                    this.disabled = !corresponde;
-                    if (!corresponde && this.selected) {
-                        $(this).closest('select').val('').trigger('change');
+                if ($select.length > 0) {
+                    var selecionado = $select.val() || valorSalvo;
+                    valorSalvo = null;
+                    $select.find('option[data-filtro]').detach();
+                    $select.append($opcoesFiltraveis.filter(function () {
+                        return filtroCorresponde(this.getAttribute('data-filtro'), valores);
+                    }));
+                    $select.val(selecionado);
+                    if (($select.val() || '') !== (selecionado || '')) {
+                        $select.val('').trigger('change');
                     }
-                });
+                }
 
                 $campo.find('.form-check[data-filtro]').each(function () {
                     var $item = $(this);
@@ -514,6 +523,17 @@ var AdesaoForm = {
         var $input = $destino.find('#pergunta_' + perguntaId);
         if ($input.length === 0) {
             return;
+        }
+
+        // Lista: o DW pode trazer só o código ("5802") de uma opção "5802 - Políticas...".
+        if ($input.is('select') && valor !== '') {
+            var $opcao = $input.find('option').filter(function () {
+                return this.value === valor || this.value.indexOf(valor + ' ') === 0;
+            }).first();
+            if ($opcao.length === 0) {
+                return;
+            }
+            valor = $opcao.val();
         }
 
         var atual = $input.val() || '';
