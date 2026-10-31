@@ -75,10 +75,117 @@ class PerguntaHelper
     /** Parâmetro de ds_opcoes: a mesma resposta não pode se repetir em outro preenchimento do formulário. */
     public const PARAM_RESPOSTA_UNICA = 'resposta_unica';
 
+    /**
+     * Parâmetro de ds_opcoes das perguntas do tipo "tabela" (lista de itens): JSON com as colunas,
+     * ex.: [{"chave":"nome","rotulo":"Nome","tipo":"linha","obrigatoria":true},
+     *       {"chave":"posicao","rotulo":"Posição","tipo":"lista","opcoes":["A","B"]}].
+     * Tipos de coluna: linha, cnpj, moeda e lista.
+     */
+    public const PARAM_COLUNAS = 'colunas';
+
+    public const TIPOS_COLUNA_TABELA = ['linha', 'cnpj', 'moeda', 'lista'];
+
+    /** Limites de uma lista de itens, para não gravar respostas desproporcionais. */
+    private const TABELA_MAX_LINHAS = 500;
+
+    private const TABELA_MAX_CARACTERES = 1000;
+
     /** Nomes de ds_opcoes que configuram a pergunta (não são alternativas nem editáveis no construtor). */
     public static function parametrosConfiguracao(): array
     {
-        return array_merge(DwHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA]);
+        return array_merge(DwHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
+    }
+
+    /**
+     * Colunas normalizadas de uma pergunta do tipo "tabela".
+     *
+     * @return  array  Lista de ['chave', 'rotulo', 'tipo', 'opcoes', 'obrigatoria']
+     */
+    public static function getColunasTabela($pergunta): array
+    {
+        $definicao = json_decode(self::getParametro($pergunta, self::PARAM_COLUNAS), true);
+        $colunas = [];
+
+        foreach (is_array($definicao) ? $definicao : [] as $coluna) {
+            $chave = preg_replace('/[^a-z0-9_]/', '', strtolower((string) ($coluna['chave'] ?? '')));
+
+            if ($chave === '' || isset($colunas[$chave])) {
+                continue;
+            }
+
+            $tipo = in_array($coluna['tipo'] ?? '', self::TIPOS_COLUNA_TABELA, true) ? $coluna['tipo'] : 'linha';
+            $colunas[$chave] = [
+                'chave'       => $chave,
+                'rotulo'      => trim((string) ($coluna['rotulo'] ?? $chave)),
+                'tipo'        => $tipo,
+                'opcoes'      => $tipo === 'lista' ? array_values(array_map('strval', (array) ($coluna['opcoes'] ?? []))) : [],
+                'obrigatoria' => !empty($coluna['obrigatoria']),
+            ];
+        }
+
+        return array_values($colunas);
+    }
+
+    /**
+     * Itens de uma resposta do tipo "tabela", limpos conforme as colunas: só chaves conhecidas,
+     * texto sem HTML, opções de lista válidas, CNPJ com 14 dígitos e valores numéricos.
+     * Erros de preenchimento vão para $erros (ex.: coluna obrigatória vazia).
+     *
+     * @param   object  $pergunta  Pergunta do tipo tabela
+     * @param   mixed   $valor     JSON recebido do formulário (ou já gravado)
+     * @param   array   $erros     Recebe as mensagens de erro
+     *
+     * @return  array  Itens válidos
+     */
+    public static function normalizarTabela($pergunta, $valor, array &$erros = []): array
+    {
+        $colunas = self::getColunasTabela($pergunta);
+        $linhas = is_string($valor) && trim($valor) !== '' ? json_decode($valor, true) : $valor;
+        $itens = [];
+
+        foreach (is_array($linhas) ? array_slice(array_values($linhas), 0, self::TABELA_MAX_LINHAS) : [] as $i => $linha) {
+            if (!is_array($linha)) {
+                continue;
+            }
+
+            $item = [];
+
+            foreach ($colunas as $coluna) {
+                $texto = is_scalar($linha[$coluna['chave']] ?? null) ? (string) $linha[$coluna['chave']] : '';
+                $texto = mb_substr(trim(strip_tags($texto)), 0, self::TABELA_MAX_CARACTERES);
+
+                if ($texto !== '' && $coluna['tipo'] === 'lista' && !in_array($texto, $coluna['opcoes'], true)) {
+                    $texto = '';
+                } elseif ($texto !== '' && $coluna['tipo'] === 'cnpj') {
+                    $digitos = preg_replace('/\D/', '', $texto);
+                    $texto = strlen($digitos) === 14
+                        ? vsprintf('%s.%s.%s/%s-%s', [substr($digitos, 0, 2), substr($digitos, 2, 3), substr($digitos, 5, 3), substr($digitos, 8, 4), substr($digitos, 12, 2)])
+                        : '';
+                    if ($texto === '') {
+                        $erros[] = 'CNPJ inválido no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
+                    }
+                } elseif ($texto !== '' && $coluna['tipo'] === 'moeda') {
+                    $numero = str_replace(',', '.', preg_replace('/[^\d,.-]/', '', $texto));
+                    $texto = is_numeric($numero) ? number_format((float) $numero, 2, '.', '') : '';
+                }
+
+                $item[$coluna['chave']] = $texto;
+            }
+
+            if (implode('', $item) === '') {
+                continue;
+            }
+
+            foreach ($colunas as $coluna) {
+                if ($coluna['obrigatoria'] && $item[$coluna['chave']] === '') {
+                    $erros[] = 'Preencha "' . $coluna['rotulo'] . '" no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
+                }
+            }
+
+            $itens[] = $item;
+        }
+
+        return $itens;
     }
 
     /** Entradas de ds_opcoes que configuram a pergunta e não são alternativas. */
@@ -343,6 +450,9 @@ class PerguntaHelper
                 break;
             case 'distribuicao_numerica':
                 $html .= self::renderDistribuicaoNumericaField($pergunta, $resposta, $index);
+                break;
+            case 'tabela':
+                $html .= self::renderTabelaField($pergunta, $resposta);
                 break;
             case 'uf':
                 $html .= self::renderUfField($pergunta, $resposta, $index);
@@ -1358,6 +1468,76 @@ class PerguntaHelper
         return $html;
     }
 
+    /**
+     * Lista de itens (tipo "tabela"): campos de entrada por coluna, botão "Adicionar à lista"
+     * e a lista numerada com remoção. Os itens vão em JSON num campo oculto, montado pelo adesao.js.
+     */
+    protected static function renderTabelaField($pergunta, $resposta)
+    {
+        $isObrigatorio = !empty($pergunta->tp_requerida) && $pergunta->tp_requerida == 'sim';
+        $colunas = self::getColunasTabela($pergunta);
+        $fieldId = 'pergunta_' . (int) $pergunta->id;
+        $esc = static fn ($texto) => htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
+
+        $html = '<div class="pergunta-content pt-2 pb-2">';
+        $html .= '<p class="form-label mb-2">' . $esc($pergunta->ds_titulo)
+            . ($isObrigatorio ? ' <span class="text-danger">*</span>' : '') . '</p>';
+        $html .= self::renderInformacaoComplementar2($pergunta);
+
+        if (empty($colunas)) {
+            return $html . '<p class="text-warning">Nenhuma coluna configurada para esta pergunta.</p></div>';
+        }
+
+        $html .= '<div class="pergunta-tabela" data-colunas="' . $esc(json_encode($colunas, JSON_UNESCAPED_UNICODE)) . '">';
+        $html .= '<div class="row g-2 align-items-end pergunta-tabela-entrada">';
+
+        foreach ($colunas as $coluna) {
+            $entradaId = $fieldId . '_' . $coluna['chave'];
+            $html .= '<div class="col-md">';
+            $html .= '<label class="form-label small mb-1" for="' . $entradaId . '">' . $esc($coluna['rotulo'])
+                . ($coluna['obrigatoria'] ? ' <span class="text-danger">*</span>' : '') . '</label>';
+
+            if ($coluna['tipo'] === 'lista') {
+                $html .= '<select class="form-select" id="' . $entradaId . '" data-coluna="' . $coluna['chave'] . '">'
+                    . '<option value="">Selecione</option>';
+                foreach ($coluna['opcoes'] as $opcao) {
+                    $html .= '<option value="' . $esc($opcao) . '">' . $esc($opcao) . '</option>';
+                }
+                $html .= '</select>';
+            } else {
+                $atributos = $coluna['tipo'] === 'moeda'
+                    ? 'type="number" min="0" step="0.01" inputmode="decimal"'
+                    : ($coluna['tipo'] === 'cnpj' ? 'type="text" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00"' : 'type="text"');
+                $html .= '<input class="form-control" id="' . $entradaId . '" data-coluna="' . $coluna['chave']
+                    . '" data-tipo-coluna="' . $coluna['tipo'] . '" ' . $atributos . ' />';
+            }
+
+            $html .= '</div>';
+        }
+
+        $html .= '<div class="col-md-auto"><button type="button" class="btn btn-outline-primary pergunta-tabela-adicionar">'
+            . '<i class="fas fa-plus" aria-hidden="true"></i> Adicionar à lista</button></div>';
+        $html .= '</div>';
+        $html .= '<small class="form-text text-danger pergunta-tabela-erro d-none" role="alert"></small>';
+
+        $html .= '<div class="table-responsive mt-2"><table class="table table-sm table-bordered align-middle pergunta-tabela-lista">';
+        $html .= '<thead><tr><th scope="col">Nº</th>';
+        foreach ($colunas as $coluna) {
+            $html .= '<th scope="col">' . $esc($coluna['rotulo']) . '</th>';
+        }
+        $html .= '<th scope="col"><span class="visually-hidden">Ações</span></th></tr></thead><tbody></tbody></table></div>';
+        $html .= '<p class="text-muted small pergunta-tabela-vazia">Nenhum item adicionado.</p>';
+
+        $itens = self::normalizarTabela($pergunta, $resposta);
+        $html .= '<input type="hidden" id="' . $fieldId . '" name="pergunta[' . (int) $pergunta->id . ']" value="'
+            . $esc($itens ? json_encode($itens, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '') . '" />';
+        $html .= '</div>';
+        $html .= !empty($pergunta->ds_descricao) ? '<small class="form-text text-muted d-block mt-1">' . $pergunta->ds_descricao . '</small>' : '';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public static function saveResposta($adesaoId, $perguntaId, $resposta, $db = null)
     {
         try {
@@ -1664,6 +1844,17 @@ class PerguntaHelper
                         && $resp[$chave] !== '';
                 }
                 $respostas[$perguntaId] = json_encode($resp, JSON_UNESCAPED_UNICODE);
+            } elseif ($pergunta->tp_pergunta === 'tabela') {
+                $errosTabela = [];
+                $itens = self::normalizarTabela($pergunta, $inputPerguntas[$perguntaId] ?? '', $errosTabela);
+
+                if (!$rascunho) {
+                    $errors = array_merge($errors, $errosTabela);
+                }
+
+                $preenchida = $itens !== [];
+                // Lista vazia é gravada como '' para não contar como respondida no progresso.
+                $respostas[$perguntaId] = $itens ? json_encode($itens, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
             } elseif ($pergunta->tp_pergunta === 'radio') {
                 $valorRecebido = $inputPerguntas[$perguntaId] ?? '';
                 $resp = is_scalar($valorRecebido) ? trim((string) $valorRecebido) : '';
