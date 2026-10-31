@@ -42,6 +42,15 @@ services:
       SINAPIRMAIL_URL_BASE_API: ${SINAPIRMAIL_URL_BASE_API}
       SINAPIRMAIL_API_TOKEN: ${SINAPIRMAIL_API_TOKEN}
       SINAPIRMAIL_FROM_ADDRESS: ${SINAPIRMAIL_FROM_ADDRESS}
+      # Data warehouse do data-application-mir (Postgres). Vazio = integração desligada.
+      DB_DW_HOST_MIR: ${DB_DW_HOST_MIR:-}
+      DB_DW_PORT_MIR: ${DB_DW_PORT_MIR:-5432}
+      DB_DW_DBNAME_MIR: ${DB_DW_DBNAME_MIR:-analytics}
+      DB_DW_USER_MIR: ${DB_DW_USER_MIR:-}
+      DB_DW_PASSWORD_MIR: ${DB_DW_PASSWORD_MIR:-}
+    # Permite DB_DW_HOST_MIR=host.docker.internal quando o DW roda na mesma máquina.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./data/www:/var/www/html
       - ./data/uploads:/var/www/uploads
