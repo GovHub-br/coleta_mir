@@ -93,7 +93,7 @@ class PerguntaHelper
     /** Nomes de ds_opcoes que configuram a pergunta (não são alternativas nem editáveis no construtor). */
     public static function parametrosConfiguracao(): array
     {
-        return array_merge(DwHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
+        return array_merge(DwHelper::PARAMETROS, OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
     }
 
     /**

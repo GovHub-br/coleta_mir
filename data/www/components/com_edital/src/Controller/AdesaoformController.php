@@ -25,6 +25,7 @@ use Comedital\Component\Edital\Site\Helper\EditalHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Comedital\Component\Edital\Site\Helper\AdesaoHelper;
 use Comedital\Component\Edital\Site\Helper\DwHelper;
+use Comedital\Component\Edital\Site\Helper\OrigemHelper;
 use Comedital\Component\Edital\Site\Model\RespostaModel;
 use Comedital\Component\Edital\Site\Model\MunicipioAdesaoModel;
 use Joomla\CMS\Mail\MailerFactoryInterface;
@@ -586,6 +587,27 @@ class AdesaoformController extends FormController
 		if ($dados['id'] > 0) {
 			$respostaModel = new RespostaModel();
 			$respostasExistentes = $respostaModel->getRespostasMapByAdesao($dados['id']);
+		}
+
+		// Formulário de execução: as perguntas ligadas ao formulário de origem valem o que veio
+		// da origem (resposta nova, pelo link do projeto) ou o que já foi gravado (edição).
+		if (OrigemHelper::ehExecucao($edital)) {
+			if ($dados['id'] > 0) {
+				$valoresOrigem = OrigemHelper::getValoresSalvos($resPerguntas, $respostasExistentes);
+				$dados['co_adesao_origem'] = (int) ($adesao->co_adesao_origem ?? 0);
+			} else {
+				$origem = OrigemHelper::resolver($edital, $this->input->getString('origem_key', ''), $this->input->getInt('projeto', -1));
+				$valoresOrigem = $origem['valores'];
+				$dados['co_adesao_origem'] = (int) ($origem['adesao']->id ?? 0);
+
+				if ($origem['erro'] !== null) {
+					$errors[] = $origem['erro'];
+				}
+			}
+
+			foreach ($valoresOrigem as $perguntaId => $valor) {
+				$inputPerguntas[$perguntaId] = $valor;
+			}
 		}
 
 		$resValidacaoPerguntas = PerguntaHelper::validarRespostasPerguntas(

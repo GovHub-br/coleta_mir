@@ -12,6 +12,7 @@ namespace Comedital\Component\Edital\Site\View\FormulariosRespostas;
 
 defined('_JEXEC') or die;
 
+use Comedital\Component\Edital\Site\Helper\OrigemHelper;
 use Comedital\Component\Edital\Site\Model\AdesaorespostasModel;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Factory;
@@ -28,6 +29,9 @@ class HtmlView extends BaseHtmlView
 	protected $state;
 	protected $item;
 	protected $params;
+
+	/** Links do formulário de execução, por projeto (posição 0 = execução pela própria unidade). */
+	public $linksExecucao = [];
 	protected $municipios;
 
 	/**
@@ -79,6 +83,17 @@ class HtmlView extends BaseHtmlView
 		if (!empty($this->item->id)) {
 			$municipioAdesaoModel = new \Comedital\Component\Edital\Site\Model\MunicipioAdesaoModel();
 			$this->municipios = $municipioAdesaoModel->getMunicipiosByAdesao($idAdesao);
+		}
+
+		// Formulário com formulário de execução ligado: links por projeto (resposta já enviada).
+		$editalExecucao = OrigemHelper::getEditalExecucao((int) $this->item->co_edital_id);
+
+		if ($editalExecucao && $this->item->st_adesao !== 'rascunho') {
+			foreach (OrigemHelper::getProjetos((int) $this->item->id) as $projeto => $dados) {
+				$this->linksExecucao[$projeto] = $dados + [
+					'url' => OrigemHelper::getLinkExecucao((int) $editalExecucao->id, (int) $this->item->id, $projeto),
+				];
+			}
 		}
 
 		// Check for errors.
