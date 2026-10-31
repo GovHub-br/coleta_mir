@@ -57,6 +57,8 @@ services:
       - ./config/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./config/php/security.ini:/usr/local/etc/php/conf.d/security.ini:ro
       - ./config/security.conf:/etc/apache2/conf-enabled/security.conf:ro
+      # Só no dev: tira o Secure dos cookies para o Safari manter a sessão em http://localhost.
+      - ./config/security-dev.conf:/etc/apache2/conf-enabled/zz-security-dev.conf:ro
     command: >
       bash -c "
         a2enmod rewrite headers &&
