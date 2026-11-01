@@ -468,7 +468,8 @@ ted.p("texto", "Objeto do TED", "Descrição resumida do objeto pactuado conform
 ted.p("checkbox", "Palavras-chave / Tags", "Até 5 termos temáticos para indexação.", TAGS, outro=True)
 ted.p("numero", "Valor total (R$)", AUTO, moeda_dw("instrumento.vl_firmado"))
 ted.p("numero", "Valor empenhado até a data de coleta (R$)", AUTO, moeda_dw("instrumento.vl_empenhado"))
-ted.p("numero", "Valor liquidado / pago (R$)", "Puxado do SIAFI. " + AUTO, moeda_dw("instrumento.vl_liquidado"))
+ted.p("numero", "Valor liquidado (R$)", "Puxado do SIAFI. " + AUTO, moeda_dw("instrumento.vl_liquidado"))
+ted.p("numero", "Valor pago (R$)", "Puxado do SIAFI. " + AUTO, moeda_dw("instrumento.vl_pago"))
 ted.p("linha", "Data de início da vigência para execução", DATA, dw("instrumento.dt_inicio_vigencia"))
 ted.p("linha", "Data de término", DATA, dw("instrumento.dt_fim_vigencia"))
 ted.p("radio", "Existem termos aditivos?",
