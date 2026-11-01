@@ -20,36 +20,43 @@ $primeiroNome = $this->user->guest ? '' : strtok(trim($this->user->name), ' ');
 ?>
 <div class="coleta-inicio">
 
-	<section class="coleta-inicio-hero">
-		<p class="coleta-inicio-sobretitulo">Ministério da Igualdade Racial</p>
-		<h1>Coleta MIR</h1>
-		<p class="coleta-inicio-lead">
-			Acompanhamento da execução dos TEDs e convênios do MIR. Aqui o MIR, os gestores dos instrumentos
-			e os responsáveis pelos projetos registram como cada instrumento está sendo executado: projetos apoiados,
-			atividades realizadas e pessoas beneficiadas.
-		</p>
-		<p class="coleta-inicio-nota">Os dados de cada TED e convênio já vêm da base do MIR. A atualização sugerida é trimestral.</p>
+	<div class="row g-3 coleta-inicio-topo">
+		<div class="col-lg-8">
+			<section class="coleta-inicio-hero">
+				<p class="coleta-inicio-sobretitulo">Ministério da Igualdade Racial</p>
+				<h1>Coleta MIR</h1>
+				<p class="coleta-inicio-lead">
+					Acompanhamento da execução dos TEDs e convênios do MIR. Aqui o MIR, os gestores dos instrumentos
+					e os responsáveis pelos projetos registram como cada instrumento está sendo executado: projetos apoiados,
+					atividades realizadas e pessoas beneficiadas.
+				</p>
+			</section>
+		</div>
 
-		<?php if ($this->user->guest) : ?>
-			<div class="d-flex flex-wrap gap-2 mt-4">
-				<button type="button" class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#loginModal">
-					<i class="fas fa-sign-in-alt" aria-hidden="true"></i> Entrar
-				</button>
-				<a class="btn btn-outline-light btn-lg" href="<?php echo $link('solicitacaoacesso'); ?>">
-					<i class="fas fa-user-plus" aria-hidden="true"></i> Solicitar acesso
-				</a>
+		<div class="col-lg-4">
+			<div class="coleta-inicio-acoes">
+				<?php if ($this->user->guest) : ?>
+					<button type="button" class="coleta-inicio-acao coleta-inicio-acao-principal" data-bs-toggle="modal" data-bs-target="#loginModal">
+						<i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+						<span><strong>Entrar</strong><small>Com CPF e senha</small></span>
+					</button>
+					<a class="coleta-inicio-acao" href="<?php echo $link('solicitacaoacesso'); ?>">
+						<i class="fas fa-user-plus" aria-hidden="true"></i>
+						<span><strong>Solicitar acesso</strong><small>Crie sua conta e peça seu perfil</small></span>
+					</a>
+				<?php else : ?>
+					<a class="coleta-inicio-acao coleta-inicio-acao-principal" href="<?php echo $link('formularios'); ?>">
+						<i class="fas fa-folder-open" aria-hidden="true"></i>
+						<span><strong>Meus instrumentos</strong><small>Instrumentos e projetos para preencher</small></span>
+					</a>
+					<a class="coleta-inicio-acao" href="<?php echo $link('solicitacaoacesso'); ?>">
+						<i class="fas fa-user-check" aria-hidden="true"></i>
+						<span><strong>Meus acessos</strong><small>Perfis liberados e pedidos</small></span>
+					</a>
+				<?php endif; ?>
 			</div>
-		<?php else : ?>
-			<div class="d-flex flex-wrap gap-2 mt-4">
-				<a class="btn btn-light btn-lg" href="<?php echo $link('formularios'); ?>">
-					<i class="fas fa-folder-open" aria-hidden="true"></i> Meus instrumentos
-				</a>
-				<a class="btn btn-outline-light btn-lg" href="<?php echo $link('solicitacaoacesso'); ?>">
-					<i class="fas fa-user-check" aria-hidden="true"></i> Meus acessos
-				</a>
-			</div>
-		<?php endif; ?>
-	</section>
+		</div>
+	</div>
 
 	<?php if (!$this->user->guest) : ?>
 		<section class="coleta-inicio-secao" aria-labelledby="coleta-situacao">
