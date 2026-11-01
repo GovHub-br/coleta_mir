@@ -7,6 +7,7 @@ defined('_JEXEC') or die;
 use Comedital\Component\Edital\Administrator\Table\AgrupamentoTable;
 use Comedital\Component\Edital\Administrator\Table\PerguntaTable;
 use Comedital\Component\Edital\Site\Helper\DwHelper;
+use Comedital\Component\Edital\Site\Helper\EspelhoDwHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filter\InputFilter;
@@ -99,7 +100,8 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 
 		foreach ($perguntas as $pergunta)
 		{
-			$tipo = (string) $pergunta->tp_pergunta;
+			$tipo   = (string) $pergunta->tp_pergunta;
+			$opcoes = in_array($tipo, self::TIPOS_SELECAO, true) ? PerguntaHelper::getOpcoesSelecao($pergunta) : [];
 
 			$resultado[(int) $pergunta->co_agrupamento]['perguntas'][] = [
 				'id'           => (int) $pergunta->id,
@@ -107,11 +109,11 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 				'ajuda'        => (string) $pergunta->ds_descricao,
 				'tipo'         => $tipo,
 				'obrigatoria'  => $pergunta->tp_requerida === 'sim',
-				'alternativas' => in_array($tipo, self::TIPOS_SELECAO, true)
-					? array_column(PerguntaHelper::getOpcoesSelecao($pergunta, false), 'nome')
-					: [],
+				'alternativas' => array_column($opcoes, 'nome'),
+				// Valor gravado de cada alternativa (ex.: "ted:931295"), preservado ao editar o nome.
+				'valores'      => array_column($opcoes, 'valor'),
 				'permiteOutro' => PerguntaHelper::permiteOutro($pergunta),
-				'listaDw'      => in_array($tipo, self::TIPOS_SELECAO, true) ? $this->listaDw($pergunta) : null,
+				'fonteDw'      => $opcoes ? PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_FONTE) : '',
 				'chave'        => 'p' . (int) $pergunta->id,
 				'exibir'       => $this->lerCondicao($pergunta->depende_de, $pergunta->depende_de_valor, $perguntas, (string) ($pergunta->depende_de_fonte ?? '')),
 				'ocultar'      => $this->lerCondicao($pergunta->depende_de_ocultar, $pergunta->depende_de_ocultar_valor, $perguntas, (string) ($pergunta->depende_de_ocultar_fonte ?? '')),
@@ -119,30 +121,6 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 		}
 
 		return array_values($resultado);
-	}
-
-	/**
-	 * Alternativas que o preenchimento mostra a partir do DW (parâmetro fonte_dw), só para exibição:
-	 * as alternativas fixas da pergunta continuam gravadas como reserva para quando o DW não responde.
-	 */
-	private function listaDw(object $pergunta): ?array
-	{
-		$fonte = PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_FONTE);
-
-		if ($fonte === '')
-		{
-			return null;
-		}
-
-		$porInstrumento = DwHelper::fonteComFiltro($fonte);
-		$opcoes         = $porInstrumento ? [] : DwHelper::getOpcoes($fonte);
-
-		return [
-			'fonte'          => $fonte,
-			'porInstrumento' => $porInstrumento,
-			'filtrada'       => (bool) array_filter(array_column($opcoes, 'filtro')),
-			'opcoes'         => array_column($opcoes, 'nome'),
-		];
 	}
 
 	/**
@@ -275,23 +253,24 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 				}
 
 				$alternativas = [];
+				$valores      = [];
 
 				if (in_array($tipo, self::TIPOS_SELECAO, true))
 				{
-					foreach ((array) ($pergunta['alternativas'] ?? []) as $alternativa)
+					$valoresEnviados = array_values((array) ($pergunta['valores'] ?? []));
+
+					foreach (array_values((array) ($pergunta['alternativas'] ?? [])) as $i => $alternativa)
 					{
 						$alternativa = trim((string) $alternativa);
 
 						if ($alternativa !== '')
 						{
 							$alternativas[] = $alternativa;
+							$valores[]      = trim((string) ($valoresEnviados[$i] ?? ''));
 						}
 					}
 
-					// Com lista do DW as alternativas fixas são só reserva e podem faltar.
-					$temListaDw = $pId && PerguntaHelper::getParametro($perguntasAtuais[$pId], DwHelper::PARAM_FONTE) !== '';
-
-					if ((!$temListaDw && count($alternativas) < 2) || count($alternativas) !== count(array_unique($alternativas)))
+					if (count($alternativas) < 2 || count($alternativas) !== count(array_unique($alternativas)))
 					{
 						throw new \InvalidArgumentException("A pergunta {$m} da seção {$n} precisa de ao menos 2 alternativas distintas.");
 					}
@@ -342,6 +321,7 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 					'tipo'         => $tipo,
 					'obrigatoria'  => !empty($pergunta['obrigatoria']),
 					'alternativas' => $alternativas,
+					'valores'      => $valores,
 					'permiteOutro' => $permiteOutro,
 				];
 			}
@@ -556,9 +536,30 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 		{
 			$opcoes = [];
 
+			// Alternativas que já existiam mantêm valor e filtro (ex.: "ted:931295" vindo do DW),
+			// mesmo com o nome editado; as novas usam o nome como valor.
+			$anteriores = [];
+
+			foreach ($atual ? PerguntaHelper::getOpcoesSelecao($table) : [] as $opcao)
+			{
+				$anteriores[$opcao['valor']] = $opcao;
+			}
+
+			$valoresNovos = [];
+
 			foreach ($pergunta['alternativas'] as $i => $nome)
 			{
-				$opcoes['ds_opcoes' . $i] = ['nome' => $nome, 'valor' => $nome];
+				$valor    = $pergunta['valores'][$i] ?? '';
+				$anterior = $valor !== '' && !isset($valoresNovos[$valor]) ? ($anteriores[$valor] ?? null) : null;
+				$opcao    = ['nome' => $nome, 'valor' => $anterior ? $valor : $nome];
+
+				if ($anterior && $anterior['filtro'] !== '')
+				{
+					$opcao['filtro'] = $anterior['filtro'];
+				}
+
+				$valoresNovos[$opcao['valor']] = true;
+				$opcoes['ds_opcoes' . $i] = $opcao;
 			}
 
 			if (!empty($pergunta['permiteOutro']))
@@ -566,8 +567,23 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 				$opcoes['ds_opcoes' . count($opcoes)] = ['nome' => PerguntaHelper::OUTRO_PARAM, 'valor' => 'sim'];
 			}
 
+			// Alternativas do DW excluídas aqui: a sincronização não as traz de volta.
+			$fonteDw = PerguntaHelper::getParametro($table, DwHelper::PARAM_FONTE);
+
+			if ($fonteDw !== '')
+			{
+				$doDw       = array_flip(array_column(EspelhoDwHelper::getOpcoes($fonteDw), 'valor'));
+				$excluidas  = array_keys(array_diff_key(array_intersect_key($anteriores, $doDw), $valoresNovos));
+				$removidos  = array_values(array_diff(array_unique(array_merge(EspelhoDwHelper::getRemovidos($table), $excluidas)), array_keys($valoresNovos)));
+
+				if ($removidos)
+				{
+					$opcoes['ds_opcoes' . count($opcoes)] = ['nome' => EspelhoDwHelper::PARAM_REMOVIDOS, 'valor' => json_encode($removidos, JSON_UNESCAPED_UNICODE)];
+				}
+			}
+
 			// Configuração (integração com o DW, resposta única) não é editada no construtor: mantém a existente.
-			foreach (PerguntaHelper::parametrosConfiguracao() as $parametro)
+			foreach (array_diff(PerguntaHelper::parametrosConfiguracao(), [EspelhoDwHelper::PARAM_REMOVIDOS]) as $parametro)
 			{
 				$valor = PerguntaHelper::getParametro($table, $parametro);
 

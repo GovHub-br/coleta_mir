@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `#__tb_pergunta` (
 `co_edital` INT(10)  NOT NULL  DEFAULT 0,
 `ds_descricao` TEXT NULL ,
 `tp_pergunta` VARCHAR(255)  NULL  DEFAULT "",
-`ds_opcoes` TEXT NULL ,
+`ds_opcoes` MEDIUMTEXT NULL ,
 `tp_requerida` VARCHAR(255)  NULL  DEFAULT "",
 `ds_informacao_complementar` TEXT NULL ,
 `qt_dias_complementacao` INT(11) NULL DEFAULT 5,
@@ -83,6 +83,38 @@ PRIMARY KEY (`id`)
 ) DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 CREATE INDEX `#__tb_adesao_co_edital` ON `#__tb_adesao`(`co_edital`);
+
+-- Espelho do data warehouse (EspelhoDwHelper).
+CREATE TABLE IF NOT EXISTS `#__coleta_dw_opcao` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`fonte` VARCHAR(64) NOT NULL,
+`valor` VARCHAR(1000) NOT NULL,
+`nome` TEXT NOT NULL,
+`filtro` VARCHAR(191) NOT NULL DEFAULT '',
+`ordem` INT NOT NULL DEFAULT 0,
+PRIMARY KEY (`id`),
+KEY `idx_fonte_filtro` (`fonte`, `filtro`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__coleta_dw_registro` (
+`registro` VARCHAR(32) NOT NULL,
+`chave` VARCHAR(191) NOT NULL,
+`dados` MEDIUMTEXT NOT NULL,
+`dt_sincronizacao` DATETIME NOT NULL,
+PRIMARY KEY (`registro`, `chave`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__coleta_dw_sincronizacao` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`dt_inicio` DATETIME NOT NULL,
+`dt_fim` DATETIME NULL,
+`st_sincronizacao` VARCHAR(20) NOT NULL,
+`qt_opcoes` INT NOT NULL DEFAULT 0,
+`qt_registros` INT NOT NULL DEFAULT 0,
+`qt_perguntas` INT NOT NULL DEFAULT 0,
+`ds_mensagem` TEXT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__tb_resposta` (
 `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,

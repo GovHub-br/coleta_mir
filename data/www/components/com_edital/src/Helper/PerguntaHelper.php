@@ -93,7 +93,7 @@ class PerguntaHelper
     /** Nomes de ds_opcoes que configuram a pergunta (não são alternativas nem editáveis no construtor). */
     public static function parametrosConfiguracao(): array
     {
-        return array_merge(DwHelper::PARAMETROS, OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
+        return array_merge(DwHelper::PARAMETROS, [EspelhoDwHelper::PARAM_REMOVIDOS], OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
     }
 
     /**
@@ -254,14 +254,6 @@ class PerguntaHelper
         return '';
     }
 
-    /** Opções do DW da pergunta (fonte_dw), ou vazio para usar as opções fixas. */
-    protected static function getOpcoesDw($pergunta): array
-    {
-        $fonte = self::getParametro($pergunta, DwHelper::PARAM_FONTE);
-
-        return $fonte !== '' ? DwHelper::getOpcoes($fonte) : [];
-    }
-
     protected static function atributoFiltro(array $opcao): string
     {
         return ($opcao['filtro'] ?? '') !== ''
@@ -290,13 +282,9 @@ class PerguntaHelper
         return false;
     }
 
-    /** Opções de radio/checkbox sem as entradas de parâmetro; as do DW têm precedência. */
+    /** Opções de radio/checkbox sem as entradas de parâmetro. */
     protected static function getOpcoesComValor($pergunta): array
     {
-        if ($opcoesDw = self::getOpcoesDw($pergunta)) {
-            return array_map(static fn ($opcao) => (object) $opcao, $opcoesDw);
-        }
-
         $options = !empty($pergunta->ds_opcoes) ? json_decode($pergunta->ds_opcoes) : [];
 
         return array_values(array_filter((array) $options, static fn ($opcao) => !self::ehParametro($opcao)));
@@ -581,16 +569,11 @@ class PerguntaHelper
     }
 
     /**
-     * Normaliza opções nome/valor e mantém suporte ao formato legado separado por vírgulas.
-     * Com $incluirDw, as opções do DW (fonte_dw) substituem as fixas quando disponíveis;
-     * o construtor de formulários passa false para editar só as alternativas fixas.
+     * Normaliza opções nome/valor (e o filtro das que vêm do DW) e mantém suporte ao formato
+     * legado separado por vírgulas.
      */
-    public static function getOpcoesSelecao($pergunta, bool $incluirDw = true): array
+    public static function getOpcoesSelecao($pergunta): array
     {
-        if ($incluirDw && ($opcoesDw = self::getOpcoesDw($pergunta))) {
-            return $opcoesDw;
-        }
-
         if (empty($pergunta->ds_opcoes)) {
             return [];
         }
@@ -613,7 +596,7 @@ class PerguntaHelper
                 $valor = trim((string) ($opcao->valor ?? $nome));
 
                 if ($nome !== '' || $valor !== '') {
-                    $options[] = ['nome' => $nome ?: $valor, 'valor' => $valor ?: $nome];
+                    $options[] = ['nome' => $nome ?: $valor, 'valor' => $valor ?: $nome, 'filtro' => trim((string) ($opcao->filtro ?? ''))];
                 }
             }
 

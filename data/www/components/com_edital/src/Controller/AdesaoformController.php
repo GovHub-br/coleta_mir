@@ -25,6 +25,7 @@ use Comedital\Component\Edital\Site\Helper\EditalHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Comedital\Component\Edital\Site\Helper\AdesaoHelper;
 use Comedital\Component\Edital\Site\Helper\DwHelper;
+use Comedital\Component\Edital\Site\Helper\EspelhoDwHelper;
 use Comedital\Component\Edital\Site\Helper\OrigemHelper;
 use Comedital\Component\Edital\Site\Model\RespostaModel;
 use Comedital\Component\Edital\Site\Model\MunicipioAdesaoModel;
@@ -194,7 +195,7 @@ class AdesaoformController extends FormController
 	}
 
 	/**
-	 * Dados de um registro do data warehouse (TED, convênio, programa do PPA) para
+	 * Dados de um registro do espelho do data warehouse (TED, convênio, programa do PPA) para
 	 * pré-preencher perguntas com campo_dw via AJAX.
 	 *
 	 * @return  void
@@ -208,14 +209,14 @@ class AdesaoformController extends FormController
 		$registro = $app->input->getCmd('registro', '');
 		$chave = $app->input->getString('chave', '');
 
-		$dados = DwHelper::getRegistro($registro, $chave);
+		$dados = EspelhoDwHelper::getRegistro($registro, $chave);
 
 		echo json_encode($dados === null ? ['success' => false] : ['success' => true, 'data' => $dados], JSON_UNESCAPED_UNICODE);
 		$app->close();
 	}
 
 	/**
-	 * Opções de uma fonte do data warehouse que depende de outra resposta
+	 * Opções do espelho do data warehouse que dependem de outra resposta
 	 * (ex.: metas do instrumento selecionado), para sugestões via AJAX.
 	 *
 	 * @return  void
@@ -229,12 +230,12 @@ class AdesaoformController extends FormController
 		$fonte = $app->input->getCmd('fonte', '');
 		$filtro = $app->input->getString('filtro', '');
 
-		if (!DwHelper::fonteComFiltro($fonte)) {
+		if (!DwHelper::fonteComFiltro($fonte) || trim($filtro) === '') {
 			echo json_encode(['success' => false]);
 			$app->close();
 		}
 
-		$opcoes = array_map(static fn ($opcao) => ['nome' => $opcao['nome'], 'valor' => $opcao['valor']], DwHelper::getOpcoes($fonte, $filtro));
+		$opcoes = array_map(static fn ($opcao) => ['nome' => $opcao['nome'], 'valor' => $opcao['valor']], EspelhoDwHelper::getOpcoes($fonte, $filtro));
 
 		echo json_encode(['success' => true, 'data' => $opcoes], JSON_UNESCAPED_UNICODE);
 		$app->close();
