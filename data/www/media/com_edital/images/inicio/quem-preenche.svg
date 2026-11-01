@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" role="img" font-family="Inter, Raleway, 'Segoe UI', Arial, sans-serif">
+<title>Quem preenche o quê no Coleta MIR</title><desc>Servidor do MIR cadastra o instrumento. Gestor de TED ou convenente abre o instrumento pela UG ou CNPJ, informa execução e contrapartida e lista os projetos com o CPF do responsável, ou registra as atividades quando a própria unidade executa. O responsável pelo projeto entra com o CPF, abre o projeto e registra cada atividade e os beneficiários.</desc>
+<defs><marker id="seta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9z" fill="context-stroke"/></marker></defs>
+<rect width="1200" height="640" fill="#FFFFFF"/>
+<text x="20" y="36" font-size="12" font-weight="700" fill="#202020" text-anchor="start" dominant-baseline="central">Legenda</text>
+<circle cx="99" cy="36" r="8" fill="#6B7280"/>
+<text x="114" y="36" font-size="12" font-weight="400" fill="#374151" text-anchor="start" dominant-baseline="central">Início e fim</text>
+<rect x="215.2" y="27" width="26" height="18" rx="4" fill="#5B21B6"/>
+<text x="249.2" y="36" font-size="12" font-weight="400" fill="#374151" text-anchor="start" dominant-baseline="central">Etapa (cor do ator)</text>
+<polygon points="409.59999999999997,25 422.59999999999997,36 409.59999999999997,47 396.59999999999997,36" fill="#C520A4"/>
+<text x="430.59999999999997" y="36" font-size="12" font-weight="400" fill="#374151" text-anchor="start" dominant-baseline="central">Decisão</text>
+<rect x="498.79999999999995" y="27" width="34" height="18" rx="9" fill="#FFF" stroke="#6B7280"/>
+<text x="540.8" y="36" font-size="12" font-weight="400" fill="#374151" text-anchor="start" dominant-baseline="central">Tela ou formulário</text>
+<rect x="681.5999999999999" y="27" width="30" height="18" rx="4" fill="#F8F9FA" stroke="#9CA3AF" stroke-dasharray="4 3"/>
+<text x="719.5999999999999" y="36" font-size="12" font-weight="400" fill="#374151" text-anchor="start" dominant-baseline="central">Observação</text>
+<rect x="807.5999999999999" y="27" width="30" height="18" rx="4" fill="#F8F9FA" stroke="#C520A4" stroke-dasharray="0"/>
+<text x="845.5999999999999" y="36" font-size="12" font-weight="400" fill="#374151" text-anchor="start" dominant-baseline="central">Dado pessoal (LGPD)</text>
+<rect x="20" y="80" width="1160" height="170" rx="10" fill="#EDE7F8" opacity="0.55"/>
+<rect x="20" y="80" width="160" height="170" rx="10" fill="#5B21B6"/>
+<text x="100" y="156.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Servidor</text>
+<text x="100" y="174.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">do MIR</text>
+<circle cx="222" cy="150" r="14" fill="#5B21B6"/>
+<text x="222" y="176" font-size="12" font-weight="600" fill="#202020" text-anchor="middle" dominant-baseline="central">Início</text>
+<path d="M236 150 H286" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="290" y="125" width="210" height="50" rx="8" fill="#5B21B6"/>
+<text x="395.0" y="150.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Abrir &quot;Novo instrumento&quot;</text>
+<path d="M500 150 H546" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="550" y="122" width="260" height="56" rx="8" fill="#5B21B6"/>
+<text x="680.0" y="141.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Preencher identificação,</text>
+<text x="680.0" y="159.0" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">responsáveis e fiscalização</text>
+<rect x="600" y="186" width="160" height="22" rx="11" fill="#FFFFFF" stroke="#5B21B6" stroke-width="1"/>
+<text x="680.0" y="197" font-size="12" font-weight="600" fill="#3B1578" text-anchor="middle" dominant-baseline="central">Formulário do MIR</text>
+<path d="M810 150 H852" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<circle cx="870" cy="150" r="14" fill="#5B21B6"/>
+<text x="870" y="176" font-size="12" font-weight="600" fill="#202020" text-anchor="middle" dominant-baseline="central">Fim</text>
+<rect x="290" y="186" width="240" height="46" rx="6" fill="#F8F9FA" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="304" cy="201" r="8" fill="#9CA3AF"/>
+<text x="304" y="201" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">i</text>
+<text x="318" y="201" font-size="12" font-weight="400" fill="#202020" text-anchor="start" dominant-baseline="central">Número e descrição do instrumento</text>
+<text x="318" y="217" font-size="12" font-weight="400" fill="#202020" text-anchor="start" dominant-baseline="central">vêm da base do MIR</text>
+<rect x="20" y="260" width="1160" height="190" rx="10" fill="#F3E6F8" opacity="0.55"/>
+<rect x="20" y="260" width="160" height="190" rx="10" fill="#9520B6"/>
+<text x="100" y="346.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Gestor de TED</text>
+<text x="100" y="364.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">ou convenente</text>
+<circle cx="222" cy="315" r="14" fill="#9520B6"/>
+<text x="222" y="341" font-size="12" font-weight="600" fill="#202020" text-anchor="middle" dominant-baseline="central">Início</text>
+<path d="M236 315 H286" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="290" y="290" width="180" height="50" rx="8" fill="#9520B6"/>
+<text x="380.0" y="315.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Abrir o instrumento</text>
+<rect x="285" y="348" width="190" height="22" rx="11" fill="#FFFFFF" stroke="#9520B6" stroke-width="1"/>
+<text x="380.0" y="359" font-size="12" font-weight="600" fill="#5E1473" text-anchor="middle" dominant-baseline="central">UG (TED) · CNPJ (convênio)</text>
+<path d="M470 315 H506" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="510" y="287" width="200" height="56" rx="8" fill="#9520B6"/>
+<text x="610.0" y="306.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Informar execução</text>
+<text x="610.0" y="324.0" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">e contrapartida</text>
+<rect x="525" y="351" width="170" height="22" rx="11" fill="#FFFFFF" stroke="#9520B6" stroke-width="1"/>
+<text x="610.0" y="362" font-size="12" font-weight="600" fill="#5E1473" text-anchor="middle" dominant-baseline="central">Formulário do gestor</text>
+<path d="M710 315 H726" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<polygon points="790,275 850,315 790,355 730,315" fill="#C520A4"/>
+<text x="790" y="307" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Executa por</text>
+<text x="790" y="323" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">parceiro?</text>
+<text x="890" y="300" font-size="12" font-weight="600" fill="#374151" text-anchor="middle" dominant-baseline="central">Sim ou ambos</text>
+<path d="M850 315 H926" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="930" y="287" width="190" height="56" rx="8" fill="#9520B6"/>
+<text x="1025.0" y="306.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Listar os projetos</text>
+<text x="1025.0" y="324.0" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">com CPF do responsável</text>
+<path d="M1120 315 H1138" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<circle cx="1156" cy="315" r="14" fill="#9520B6"/>
+<text x="1156" y="341" font-size="12" font-weight="600" fill="#202020" text-anchor="middle" dominant-baseline="central">Fim</text>
+<path d="M790 355 V378" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<text x="798" y="366" font-size="12" font-weight="600" fill="#374151" text-anchor="start" dominant-baseline="central">Não ou ambos</text>
+<rect x="690" y="382" width="200" height="56" rx="8" fill="#9520B6"/>
+<text x="790.0" y="401.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Registrar as atividades</text>
+<text x="790.0" y="419.0" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">da própria unidade</text>
+<path d="M1025 343 V470 H630 V502" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<text x="830" y="460" font-size="12" font-weight="600" fill="#374151" text-anchor="middle" dominant-baseline="central">o projeto aparece para o responsável pelo CPF</text>
+<rect x="20" y="460" width="1160" height="160" rx="10" fill="#FEEEE2" opacity="0.55"/>
+<rect x="20" y="460" width="160" height="160" rx="10" fill="#F97316"/>
+<text x="100" y="531.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Responsável</text>
+<text x="100" y="549.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">pelo projeto</text>
+<circle cx="222" cy="530" r="14" fill="#F97316"/>
+<text x="222" y="556" font-size="12" font-weight="600" fill="#202020" text-anchor="middle" dominant-baseline="central">Início</text>
+<path d="M236 530 H286" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="290" y="505" width="180" height="50" rx="8" fill="#F97316"/>
+<text x="380.0" y="530.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Entrar com o CPF</text>
+<path d="M470 530 H536" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="540" y="505" width="180" height="50" rx="8" fill="#F97316"/>
+<text x="630.0" y="530.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Abrir o projeto</text>
+<rect x="550" y="563" width="160" height="22" rx="11" fill="#FFFFFF" stroke="#F97316" stroke-width="1"/>
+<text x="630.0" y="574" font-size="12" font-weight="600" fill="#9A4A0E" text-anchor="middle" dominant-baseline="central">Meus instrumentos</text>
+<path d="M720 530 H766" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<rect x="770" y="502" width="230" height="56" rx="8" fill="#F97316"/>
+<text x="885.0" y="521.0" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">Registrar a atividade</text>
+<text x="885.0" y="539.0" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">e os beneficiários</text>
+<rect x="800" y="566" width="170" height="22" rx="11" fill="#FFFFFF" stroke="#F97316" stroke-width="1"/>
+<text x="885.0" y="577" font-size="12" font-weight="600" fill="#9A4A0E" text-anchor="middle" dominant-baseline="central">Formulário de execução</text>
+<path d="M1000 530 H1038" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#seta)"/>
+<circle cx="1056" cy="530" r="14" fill="#F97316"/>
+<text x="1056" y="556" font-size="12" font-weight="600" fill="#202020" text-anchor="middle" dominant-baseline="central">Fim</text>
+<rect x="1010" y="566" width="170" height="46" rx="6" fill="#F8F9FA" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="1024" cy="581" r="8" fill="#9CA3AF"/>
+<text x="1024" y="581" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">i</text>
+<text x="1038" y="581" font-size="12" font-weight="400" fill="#202020" text-anchor="start" dominant-baseline="central">Um preenchimento</text>
+<text x="1038" y="597" font-size="12" font-weight="400" fill="#202020" text-anchor="start" dominant-baseline="central">por atividade</text>
+<rect x="290" y="566" width="240" height="46" rx="6" fill="#F8F9FA" stroke="#C520A4" stroke-width="1" stroke-dasharray="0"/>
+<circle cx="304" cy="581" r="8" fill="#C520A4"/>
+<text x="304" y="581" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">!</text>
+<text x="318" y="581" font-size="12" font-weight="400" fill="#202020" text-anchor="start" dominant-baseline="central">O CPF é dado pessoal: serve só</text>
+<text x="318" y="597" font-size="12" font-weight="400" fill="#202020" text-anchor="start" dominant-baseline="central">para liberar o projeto</text>
+</svg>
