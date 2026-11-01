@@ -120,6 +120,8 @@ class Router extends RouterView
 			$this->registerView($solicitacaoacesso);
 			$solicitacoesacesso = new RouterViewConfiguration('solicitacoesacesso');
 			$this->registerView($solicitacoesacesso);
+			$inicio = new RouterViewConfiguration('inicio');
+			$this->registerView($inicio);
 
 		parent::__construct($app, $menu);
 
