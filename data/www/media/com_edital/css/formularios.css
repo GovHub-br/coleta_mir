@@ -273,3 +273,11 @@
 		margin-left: 0;
 	}
 }
+/* Descrição do instrumento no card: até 3 linhas; o texto completo fica no title */
+.instrumento-descricao {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	overflow: hidden;
+}
