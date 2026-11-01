@@ -1480,8 +1480,8 @@ class PerguntaHelper
     }
 
     /**
-     * Lista de itens (tipo "tabela"): campos de entrada por coluna, botão "Adicionar à lista"
-     * e a lista numerada com remoção. Os itens vão em JSON num campo oculto, montado pelo adesao.js.
+     * Lista de itens (tipo "tabela"): itens já adicionados em cartões (com edição e remoção) e,
+     * abaixo, o bloco "Novo item" com um campo por coluna e o botão "Adicionar à lista". Os itens vão em JSON num campo oculto, montado pelo adesao.js.
      */
     protected static function renderTabelaField($pergunta, $resposta)
     {
@@ -1500,11 +1500,16 @@ class PerguntaHelper
         }
 
         $html .= '<div class="pergunta-tabela" data-colunas="' . $esc(json_encode($colunas, JSON_UNESCAPED_UNICODE)) . '">';
-        $html .= '<div class="row g-2 align-items-end pergunta-tabela-entrada">';
+        $html .= '<div class="pergunta-tabela-lista d-flex flex-column gap-2 mb-3"></div>';
+        $html .= '<p class="text-muted small pergunta-tabela-vazia">Nenhum item adicionado.</p>';
+
+        $html .= '<fieldset class="pergunta-tabela-entrada border rounded p-3">';
+        $html .= '<legend class="float-none w-auto px-2 mb-0 fs-6 fw-semibold pergunta-tabela-entrada-titulo">Novo item</legend>';
+        $html .= '<div class="row g-3">';
 
         foreach ($colunas as $coluna) {
             $entradaId = $fieldId . '_' . $coluna['chave'];
-            $html .= '<div class="col-md">';
+            $html .= '<div class="col-12 col-md-6">';
             $html .= '<label class="form-label small mb-1" for="' . $entradaId . '">' . $esc($coluna['rotulo'])
                 . ($coluna['obrigatoria'] ? ' <span class="text-danger">*</span>' : '') . '</label>';
 
@@ -1527,18 +1532,14 @@ class PerguntaHelper
             $html .= '</div>';
         }
 
-        $html .= '<div class="col-md-auto"><button type="button" class="btn btn-outline-primary pergunta-tabela-adicionar">'
-            . '<i class="fas fa-plus" aria-hidden="true"></i> Adicionar à lista</button></div>';
         $html .= '</div>';
-        $html .= '<small class="form-text text-danger pergunta-tabela-erro d-none" role="alert"></small>';
-
-        $html .= '<div class="table-responsive mt-2"><table class="table table-sm table-bordered align-middle pergunta-tabela-lista">';
-        $html .= '<thead><tr><th scope="col">Nº</th>';
-        foreach ($colunas as $coluna) {
-            $html .= '<th scope="col">' . $esc($coluna['rotulo']) . '</th>';
-        }
-        $html .= '<th scope="col"><span class="visually-hidden">Ações</span></th></tr></thead><tbody></tbody></table></div>';
-        $html .= '<p class="text-muted small pergunta-tabela-vazia">Nenhum item adicionado.</p>';
+        $html .= '<div class="small text-danger pergunta-tabela-erro d-none mt-2" role="alert"></div>';
+        $html .= '<div class="d-flex flex-wrap gap-2 justify-content-end mt-3">';
+        $html .= '<button type="button" class="btn btn-outline-secondary pergunta-tabela-cancelar d-none">Cancelar edição</button>';
+        $html .= '<button type="button" class="btn btn-primary pergunta-tabela-adicionar">'
+            . '<i class="fas fa-plus" aria-hidden="true"></i> <span>Adicionar à lista</span></button>';
+        $html .= '</div>';
+        $html .= '</fieldset>';
 
         $itens = self::normalizarTabela($pergunta, $resposta);
         $html .= '<input type="hidden" id="' . $fieldId . '" name="pergunta[' . (int) $pergunta->id . ']" value="'
