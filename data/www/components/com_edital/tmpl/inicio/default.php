@@ -145,8 +145,8 @@ $primeiroNome = $this->user->guest ? '' : strtok(trim($this->user->name), ' ');
 	<section class="coleta-inicio-secao" aria-labelledby="coleta-passos">
 		<h2 id="coleta-passos">Como começar</h2>
 		<div class="coleta-inicio-fluxo">
-			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/como-comecar.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/como-comecar.svg'); ?>" width="1500" height="330" loading="lazy"
-				alt="Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil, informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos. Responsável por projeto pula os passos 2 e 3, porque o projeto aparece pelo CPF.">
+			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/como-comecar.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/como-comecar.svg'); ?>" width="1500" height="170" loading="lazy"
+				alt="Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil, informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos.">
 		</div>
 	</section>
 
