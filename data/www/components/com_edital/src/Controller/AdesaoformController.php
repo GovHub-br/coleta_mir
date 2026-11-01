@@ -468,6 +468,8 @@ class AdesaoformController extends FormController
 		$dados['ds_confirma_senha'] = $this->input->getString('ds_confirma_senha', '');
 		$dados['co_edital'] = $this->input->getInt('co_edital', 0);
 		$dados['id'] = $this->input->getInt('co_adesao', 0);
+		$dados['ds_instituicao'] = htmlspecialchars($this->input->getString('ds_instituicao', ''), ENT_QUOTES, 'UTF-8');
+		$dados['ds_cargo'] = htmlspecialchars($this->input->getString('ds_cargo', ''), ENT_QUOTES, 'UTF-8');
 		
 		$edital = EditalHelper::getEdital($dados['co_edital']);
 
@@ -498,6 +500,14 @@ class AdesaoformController extends FormController
 
 		if( !empty($dados['ds_email_responsavel']) && !filter_var($dados['ds_email_responsavel'], FILTER_VALIDATE_EMAIL)) {
 			$errors[] = 'Email do responsável inválido';
+		}
+
+		if (empty($dados['ds_instituicao'])) {
+			$errors[] = 'Instituição é obrigatória';
+		}
+		
+		if (empty($dados['ds_cargo'])) {
+			$errors[] = 'Cargo é obrigatório';
 		}
 
 		// Validação de senha apenas quando o usuário ainda não está autenticado

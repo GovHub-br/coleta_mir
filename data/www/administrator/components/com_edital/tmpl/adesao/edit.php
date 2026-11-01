@@ -39,6 +39,8 @@ HTMLHelper::_('bootstrap.tooltip');
 				<?php echo $this->form->renderField('ds_cnpj'); ?>
 				<?php echo $this->form->renderField('no_oficial'); ?>
 				<?php echo $this->form->renderField('ds_email_responsavel'); ?>
+				<?php echo $this->form->renderField('ds_instituicao'); ?>
+				<?php echo $this->form->renderField('ds_cargo'); ?>
 				<?php echo $this->form->renderField('dt_criacao'); ?>
 				<?php echo $this->form->renderField('created_by'); ?>
 				<?php echo $this->form->renderField('sg_estado'); ?>

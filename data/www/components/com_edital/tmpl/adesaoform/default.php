@@ -174,7 +174,7 @@ if ($travado) {
 
         <?php
         $titulosEtapas = [
-            'Identificação do Solicitante',
+            'Identificação do Respondente',
         ];
         $iconesEtapas = [
             'fa-solid fa-building',

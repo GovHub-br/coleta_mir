@@ -106,6 +106,8 @@ $statusConfig = [
 			<div class="fr-dado-row">Nome: <span><?php echo htmlspecialchars($this->item->no_oficial ?? '—'); ?></span></div>
 			<div class="fr-dado-row">Documento: <span><?php echo htmlspecialchars($documentoMascarado); ?></span></div>
 			<div class="fr-dado-row">E-mail: <span><?php echo htmlspecialchars($this->item->ds_email_responsavel ?? '—'); ?></span></div>
+			<div class="fr-dado-row">Instituição: <span><?php echo htmlspecialchars($this->item->ds_instituicao ?? '—'); ?></span></div>
+			<div class="fr-dado-row">Cargo: <span><?php echo htmlspecialchars($this->item->ds_cargo ?? '—'); ?></span></div>
 		</div>
 	</div>
 

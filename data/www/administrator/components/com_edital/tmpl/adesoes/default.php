@@ -85,16 +85,7 @@ if (!empty($saveOrder))
 							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_ADESOES_CO_EDITAL', 'a.co_edital', $listDirn, $listOrder); ?>
 						</th>
 						<th class='left'>
-							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_ADESOES_TP_ESFERA_GOVERNAMENTAL', 'a.tp_esfera_governamental', $listDirn, $listOrder); ?>
-						</th>
-						<th class='left'>
-							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_ADESOES_SG_ESTADO', 'a.sg_estado', $listDirn, $listOrder); ?>
-						</th>
-						<th class='left'>
-							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_ADESOES_DS_MUNICIPIOS', 'a.ds_municipios', $listDirn, $listOrder); ?>
-						</th>
-						<th class='left'>
-							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_ADESOES_NO_CONSORCIO', 'no_consorcio', $listDirn, $listOrder); ?>
+							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_FORM_LBL_ADESAO_DS_INSTITUICAO', 'a.ds_instituicao', $listDirn, $listOrder); ?>
 						</th>
 						<th class='left'>
 							<?php echo HTMLHelper::_('searchtools.sort',  'COM_EDITAL_ADESOES_DT_CRIACAO', 'a.dt_criacao', $listDirn, $listOrder); ?>
@@ -185,28 +176,7 @@ if (!empty($saveOrder))
 								<?php echo $item->co_edital; ?>
 							</td>
 							<td>
-								<?php echo $item->tp_esfera_governamental; ?>
-							</td>
-							<td>
-								<?php echo !empty($item->estados_labels) ? $this->escape(implode(', ', $item->estados_labels)) : '&mdash;'; ?>
-							</td>
-							<td>
-								<?php if (empty($item->municipios_labels)) : ?>
-									&mdash;
-								<?php else :
-									$municipiosVisiveis = array_slice($item->municipios_labels, 0, 3);
-									$municipiosRestantes = count($item->municipios_labels) - count($municipiosVisiveis);
-									?>
-									<span title="<?php echo $this->escape(implode(', ', $item->municipios_labels)); ?>">
-										<?php echo $this->escape(implode(', ', $municipiosVisiveis)); ?>
-										<?php if ($municipiosRestantes > 0) : ?>
-											<span class="badge bg-secondary">+<?php echo (int) $municipiosRestantes; ?></span>
-										<?php endif; ?>
-									</span>
-								<?php endif; ?>
-							</td>
-							<td>
-								<?php echo !empty($item->no_consorcio) ? $this->escape($item->no_consorcio) : '&mdash;'; ?>
+								<?php echo $item->ds_instituicao; ?>
 							</td>
 							<td>
 								<?php echo $dataAdesao !== '' ? $dataAdesao : '&mdash;'; ?>

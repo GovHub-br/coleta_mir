@@ -32,6 +32,9 @@
     <field name="ds_cnpj" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_CNPJ" description="COM_EDITAL_FORM_DESC_ADESAO_DS_CNPJ" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_CNPJ"/>
     <field name="no_oficial" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_NO_OFICIAL" description="COM_EDITAL_FORM_DESC_ADESAO_NO_OFICIAL" hint="COM_EDITAL_FORM_LBL_ADESAO_NO_OFICIAL"/>
     <field name="ds_email_responsavel" validate="email" type="email" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_EMAIL_RESPONSAVEL" description="COM_EDITAL_FORM_DESC_ADESAO_DS_EMAIL_RESPONSAVEL" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_EMAIL_RESPONSAVEL"/>
+    <field name="ds_instituicao" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_INSTITUICAO" description="COM_EDITAL_FORM_DESC_ADESAO_DS_INSTITUICAO" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_INSTITUICAO"/>
+    <field name="ds_cargo" filter="safehtml" type="text" required="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_CARGO" description="COM_EDITAL_FORM_DESC_ADESAO_DS_CARGO" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_CARGO"/>
+    
     <field name="dt_criacao" type="timecreated" label="COM_EDITAL_FORM_LBL_ADESAO_DT_CRIACAO" description="COM_EDITAL_FORM_DESC_ADESAO_DT_CRIACAO" hint="COM_EDITAL_FORM_LBL_ADESAO_DT_CRIACAO"/>
     <field name="sg_estado" type="adesaosgestado" multiple="true" label="COM_EDITAL_FORM_LBL_ADESAO_SG_ESTADO" description="COM_EDITAL_FORM_DESC_ADESAO_SG_ESTADO" hint="COM_EDITAL_FORM_LBL_ADESAO_SG_ESTADO"/>
     <field name="ds_municipios" type="adesaodsmunicipios" multiple="true" label="COM_EDITAL_FORM_LBL_ADESAO_DS_MUNICIPIOS" description="COM_EDITAL_FORM_DESC_ADESAO_DS_MUNICIPIOS" hint="COM_EDITAL_FORM_LBL_ADESAO_DS_MUNICIPIOS"/>

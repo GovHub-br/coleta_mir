@@ -51,21 +51,21 @@
                             </div>
                         </div>
                         <div class="row mt-4 mb-3">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for='ds_cpf' class="form-label">CPF do Responsável <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                                    <input type='text' id='ds_cpf' name='ds_cpf' class="form-control"
-                                           value='<?php echo htmlspecialchars($this->user->username ?? '', ENT_QUOTES, 'UTF-8'); ?>'
-                                           maxlength="14" inputmode="numeric" autocomplete="off"
-                                           <?php echo $this->user->id ? 'readonly' : ''; ?>
-                                           placeholder="000.000.000-00">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for='ds_cpf' class="form-label">CPF do Responsável <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                        <input type='text' id='ds_cpf' name='ds_cpf' class="form-control"
+                                            value='<?php echo htmlspecialchars($this->user->username ?? '', ENT_QUOTES, 'UTF-8'); ?>'
+                                            maxlength="14" inputmode="numeric" autocomplete="off"
+                                            <?php echo $this->user->id ? 'readonly' : ''; ?>
+                                            placeholder="000.000.000-00">
+                                    </div>
+                                    <small id="cpf-error" class="form-text text-danger" style="display: none;">CPF inválido</small>
                                 </div>
-                                <small id="cpf-error" class="form-text text-danger" style="display: none;">CPF inválido</small>
-                            </div>
+                            </div>                            
                         </div>
-                    </div>
                         <div class="col-md-6 campos-senha mt-3">
                             <div class="form-group">
                                 <label for='ds_senha' class="form-label">Senha <span class="text-danger">*</span></label>
@@ -94,6 +94,35 @@
                     </div>
                 <?php endif; ?>
 
+
+                <div class="row mt-4 mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for='ds_cpf' class="form-label">Instituição <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
+                                <input type='text' id='ds_instituicao' name='ds_instituicao' class="form-control"
+                                    value='<?php echo $this->escape($this->item->ds_instituicao ?? ''); ?>'
+                                    maxlength="128" inputmode="text" autocomplete="off"
+                                    placeholder="Instituição">
+                            </div>
+                            <small id="instituicao-error" class="form-text text-danger" style="display: none;">Instituição inválida</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for='ds_cpf' class="form-label">Cargo <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
+                                <input type='text' id='ds_cargo' name='ds_cargo' class="form-control"
+                                    value='<?php echo $this->escape($this->item->ds_cargo ?? ''); ?>'
+                                    maxlength="64" inputmode="text" autocomplete="off"
+                                    placeholder="Cargo">
+                            </div>
+                            <small id="cargo-error" class="form-text text-danger" style="display: none;">Cargo inválido</small>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
