@@ -569,6 +569,28 @@ var AdesaoForm = {
     // Lista de itens (pergunta do tipo "tabela"): a pessoa preenche os campos de entrada e
     // adiciona o item à lista; os itens ficam em JSON no campo oculto pergunta[id].
     initTabelas: function () {
+        var formatarCpf = function (valor) {
+            var d = valor.replace(/\D/g, '').slice(0, 11);
+            return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+        };
+
+        var cpfValido = function (valor) {
+            var d = valor.replace(/\D/g, '');
+            if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) {
+                return false;
+            }
+            for (var t = 9; t < 11; t++) {
+                var soma = 0;
+                for (var i = 0; i < t; i++) {
+                    soma += parseInt(d.charAt(i), 10) * (t + 1 - i);
+                }
+                if (parseInt(d.charAt(t), 10) !== (soma * 10) % 11 % 10) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
         var formatarCnpj = function (valor) {
             var d = String(valor || '').replace(/\D/g, '').substring(0, 14);
             return d.replace(/^(\d{2})(\d)/, '$1.$2')
@@ -621,6 +643,10 @@ var AdesaoForm = {
                 this.value = formatarCnpj(this.value);
             });
 
+            $tabela.on('input', 'input[data-tipo-coluna="cpf"]', function () {
+                this.value = formatarCpf(this.value);
+            });
+
             // Enter num campo de entrada adiciona o item em vez de enviar o formulário.
             $tabela.on('keydown', 'input[data-coluna]', function (e) {
                 if (e.key === 'Enter') {
@@ -637,6 +663,8 @@ var AdesaoForm = {
                     var valor = $.trim($tabela.find('[data-coluna="' + coluna.chave + '"]').val() || '');
                     if (coluna.tipo === 'cnpj' && valor !== '' && valor.replace(/\D/g, '').length !== 14) {
                         faltando.push(coluna.rotulo + ' (14 dígitos)');
+                    } else if (coluna.tipo === 'cpf' && valor !== '' && !cpfValido(valor)) {
+                        faltando.push(coluna.rotulo + ' (CPF válido)');
                     } else if (coluna.obrigatoria && valor === '') {
                         faltando.push(coluna.rotulo);
                     }

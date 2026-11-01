@@ -83,7 +83,7 @@ class PerguntaHelper
      */
     public const PARAM_COLUNAS = 'colunas';
 
-    public const TIPOS_COLUNA_TABELA = ['linha', 'cnpj', 'moeda', 'lista'];
+    public const TIPOS_COLUNA_TABELA = ['linha', 'cnpj', 'cpf', 'moeda', 'lista'];
 
     /** Limites de uma lista de itens, para não gravar respostas desproporcionais. */
     private const TABELA_MAX_LINHAS = 500;
@@ -94,6 +94,28 @@ class PerguntaHelper
     public static function parametrosConfiguracao(): array
     {
         return array_merge(DwHelper::PARAMETROS, [EspelhoDwHelper::PARAM_REMOVIDOS], OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
+    }
+
+    /** Só os 11 dígitos do CPF, se os dígitos verificadores conferem; vazio caso contrário. */
+    public static function cpfValido(string $cpf): string
+    {
+        $digitos = preg_replace('/\D/', '', $cpf);
+
+        if (strlen($digitos) !== 11 || preg_match('/^(\d)\1{10}$/', $digitos)) {
+            return '';
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            $soma = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $soma += (int) $digitos[$i] * ($t + 1 - $i);
+            }
+            if ((int) $digitos[$t] !== ($soma * 10) % 11 % 10) {
+                return '';
+            }
+        }
+
+        return $digitos;
     }
 
     /**
@@ -163,6 +185,12 @@ class PerguntaHelper
                         : '';
                     if ($texto === '') {
                         $erros[] = 'CNPJ inválido no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
+                    }
+                } elseif ($texto !== '' && $coluna['tipo'] === 'cpf') {
+                    $digitos = self::cpfValido($texto);
+                    $texto = $digitos !== '' ? vsprintf('%s.%s.%s-%s', [substr($digitos, 0, 3), substr($digitos, 3, 3), substr($digitos, 6, 3), substr($digitos, 9, 2)]) : '';
+                    if ($texto === '') {
+                        $erros[] = 'CPF inválido no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
                     }
                 } elseif ($texto !== '' && $coluna['tipo'] === 'moeda') {
                     $numero = str_replace(',', '.', preg_replace('/[^\d,.-]/', '', $texto));
@@ -1490,7 +1518,8 @@ class PerguntaHelper
             } else {
                 $atributos = $coluna['tipo'] === 'moeda'
                     ? 'type="number" min="0" step="0.01" inputmode="decimal"'
-                    : ($coluna['tipo'] === 'cnpj' ? 'type="text" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00"' : 'type="text"');
+                    : ($coluna['tipo'] === 'cnpj' ? 'type="text" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00"'
+                    : ($coluna['tipo'] === 'cpf' ? 'type="text" maxlength="14" inputmode="numeric" placeholder="000.000.000-00"' : 'type="text"'));
                 $html .= '<input class="form-control" id="' . $entradaId . '" data-coluna="' . $coluna['chave']
                     . '" data-tipo-coluna="' . $coluna['tipo'] . '" ' . $atributos . ' />';
             }

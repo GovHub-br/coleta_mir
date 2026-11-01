@@ -107,7 +107,7 @@ class OrigemHelper
         $respostaControle = (int) $lista->depende_de > 0 ? (string) ($respostas[(int) $lista->depende_de]->ds_resposta ?? '') : '';
 
         if (is_array($propriaQuando) && in_array($respostaControle, $propriaQuando, true)) {
-            $projetos[0] = ['rotulo' => PerguntaHelper::getParametro($lista, self::PARAM_PROJETOS), 'responsavel' => '', 'email' => '', 'itens' => []];
+            $projetos[0] = ['rotulo' => PerguntaHelper::getParametro($lista, self::PARAM_PROJETOS), 'responsavel' => '', 'email' => '', 'cpf' => '', 'itens' => []];
         }
 
         // Itens da lista só valem quando ela está visível (resposta de controle entre as que a exibem).
@@ -120,6 +120,7 @@ class OrigemHelper
                     'rotulo'      => trim(implode(' - ', array_filter([$item['instituicao'] ?? '', $item['tema'] ?? '']))) ?: 'Projeto ' . ($i + 1),
                     'responsavel' => $item['responsavel'] ?? '',
                     'email'       => $item['email'] ?? '',
+                    'cpf'         => preg_replace('/\D/', '', (string) ($item['cpf'] ?? '')),
                     'itens'       => $item,
                 ];
             }
@@ -147,6 +148,10 @@ class OrigemHelper
 
         if (!isset($projetos[$projeto])) {
             return $erro;
+        }
+
+        if (($bloqueio = self::bloqueioExecucao($adesao, $projetos[$projeto])) !== null) {
+            return ['erro' => $bloqueio] + $erro;
         }
 
         $respostasOrigem = [];
@@ -212,6 +217,74 @@ class OrigemHelper
         }
 
         return implode(' - ', $partes);
+    }
+
+    /**
+     * Só o responsável do projeto (CPF da lista de projetos = CPF do login) e o gestor que enviou a
+     * lista preenchem a execução; a execução pela própria unidade (projeto 0) e projetos sem CPF,
+     * só o gestor. Devolve a mensagem de bloqueio ou null.
+     */
+    public static function bloqueioExecucao(object $adesaoOrigem, array $projeto): ?string
+    {
+        $user = Factory::getApplication()->getIdentity();
+
+        if ($user->guest) {
+            return 'Entre com o seu CPF para preencher a execução deste projeto.';
+        }
+
+        if ((int) $user->id === (int) $adesaoOrigem->created_by) {
+            return null;
+        }
+
+        if ($projeto['cpf'] === '') {
+            return 'A execução deste projeto é preenchida pelo gestor do instrumento.';
+        }
+
+        if ($projeto['cpf'] === self::cpfDoUsuario($user)) {
+            return null;
+        }
+
+        return 'Este projeto está vinculado a outro CPF. A execução só pode ser preenchida pelo responsável do projeto ou pelo gestor do instrumento.';
+    }
+
+    /**
+     * Projetos sob a responsabilidade de um CPF, em todas as respostas enviadas de formulários de
+     * origem: lista de ['adesao' => resposta de origem, 'projeto' => posição, 'dados' => getProjetos].
+     */
+    public static function getProjetosDoCpf(string $cpf, int $editalOrigemId): array
+    {
+        if ($cpf === '' || $editalOrigemId <= 0) {
+            return [];
+        }
+
+        $db = Factory::getContainer()->get('DatabaseDriver');
+        $origens = $db->setQuery(
+            $db->getQuery(true)
+                ->select($db->quoteName(['id', 'created_by']))
+                ->from($db->quoteName('#__tb_adesao'))
+                ->where($db->quoteName('co_edital') . ' = ' . $editalOrigemId)
+                ->where($db->quoteName('state') . ' = 1')
+                ->where($db->quoteName('st_adesao') . ' != ' . $db->quote('rascunho'))
+                ->order($db->quoteName('id'))
+        )->loadObjectList();
+
+        $encontrados = [];
+
+        foreach ($origens as $adesao) {
+            foreach (self::getProjetos((int) $adesao->id) as $projeto => $dados) {
+                if ($projeto > 0 && $dados['cpf'] === $cpf) {
+                    $encontrados[] = ['adesao' => $adesao, 'projeto' => $projeto, 'dados' => $dados];
+                }
+            }
+        }
+
+        return $encontrados;
+    }
+
+    /** CPF (só dígitos) do usuário: o login do site é o CPF. */
+    public static function cpfDoUsuario($user): string
+    {
+        return preg_replace('/\D/', '', (string) ($user->username ?? ''));
     }
 
     /** Link do formulário de execução para um projeto da resposta de origem. */

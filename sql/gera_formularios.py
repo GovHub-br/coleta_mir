@@ -113,12 +113,11 @@ MOEDA = {"min": "0", "step": "0.01"}
 
 
 # Perfis (grupos de usuários) que iniciam cada formulário pelo botão "Novo instrumento", pelo nome;
-# os grupos são criados no admin (Usuários > Grupos). Grupo inexistente fica de fora.
+# os grupos são criados no admin (Usuários > Grupos). Grupo inexistente fica de fora. A execução não
+# tem perfil: o responsável de cada projeto é vinculado pelo CPF na lista de projetos do gestor.
 PERFIL_MIR = "Gerenciar Adesões"
 PERFIL_GESTOR_TED = "Coleta MIR - Gestor de TEDs"
-PERFIL_EXECUTOR_TED = "Coleta MIR - Executor de TEDs"
 PERFIL_GESTOR_CONVENIO = "Coleta MIR - Gestor de Convênios"
-PERFIL_EXECUTOR_CONVENIO = "Coleta MIR - Executor de Convênios"
 
 
 def grupos_perfis(perfis):
@@ -600,6 +599,7 @@ ted_ges.p("tabela", "Projetos / ações apoiados e instituições executoras",
            ["Repassador (2ª ponta)", "Executor direto (3ª ponta)", "Subexecutor / fundação de apoio (4ª ponta)"]),
           ("valor", "Valor gasto (R$)", "moeda"),
           ("responsavel", "Responsável pelo projeto", "linha", True),
+          ("cpf", "CPF do responsável", "cpf", True),
           ("email", "E-mail do responsável", "linha", True),
       ), "projetos_execucao": "execução pela própria Unidade Descentralizada",
          "propria_quando": json.dumps(TED_PARCEIRA[1:], ensure_ascii=False)},
@@ -616,7 +616,6 @@ ted_ex = Form(
     "O TED, o período e o projeto vêm definidos pelo gestor.</p>",
     25,
     origem=ted_ges,
-    perfis=(PERFIL_EXECUTOR_TED, PERFIL_GESTOR_TED,),
 )
 
 ted_ex.bloco("b0", "Identificação da atividade (TED)", "Identificação", "fa fa-id-card",
@@ -896,6 +895,7 @@ cv_ges.p("tabela", "Projetos / ações apoiados e instituições executoras",
           ["Convenente (2ª ponta)", "Executor direto (3ª ponta)", "Subexecutor / contratado / parceiro (4ª ponta)"]),
          ("valor", "Valor gasto (R$)", "moeda"),
          ("responsavel", "Responsável pelo projeto", "linha", True),
+         ("cpf", "CPF do responsável", "cpf", True),
          ("email", "E-mail do responsável", "linha", True),
      ), "projetos_execucao": "execução direta pelo convenente",
         "propria_quando": json.dumps(CV_TERCEIROS[1:], ensure_ascii=False)},
@@ -912,7 +912,6 @@ cv_ex = Form(
     "O convênio, o período e o projeto vêm definidos pelo convenente.</p>",
     45,
     origem=cv_ges,
-    perfis=(PERFIL_EXECUTOR_CONVENIO, PERFIL_GESTOR_CONVENIO,),
 )
 
 cv_ex.bloco("b0", "Identificação da atividade (Convênio)", "Identificação", "fa fa-id-card",
