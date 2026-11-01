@@ -83,6 +83,14 @@ class HtmlView extends BaseHtmlView
 
 		if ($this->getLayout() === 'execucao')
 		{
+			// Sem login, vai para o acesso e volta para a escolha do instrumento.
+			if ($user->guest)
+			{
+				$app->redirect(Route::_('index.php?option=com_users&view=login&return=' . base64_encode(\Joomla\CMS\Uri\Uri::getInstance()->toString()), false));
+
+				return;
+			}
+
 			$this->prepararExecucao($editais, $app->input->getInt('edital_id'), trim($app->input->getString('instrumento', '')));
 		}
 		else

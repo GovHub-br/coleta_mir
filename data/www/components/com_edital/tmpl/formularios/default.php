@@ -9,9 +9,13 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
 
 $this->document->addStyleSheet(Uri::root() . 'media/com_edital/css/formularios.css');
+
+// Menu do "Novo instrumento" quando o perfil tem mais de um formulário.
+HTMLHelper::_('bootstrap.dropdown', '.dropdown-toggle');
 
 include __DIR__ . '/../parts/_menu_formularios_ente.php';
 ?>

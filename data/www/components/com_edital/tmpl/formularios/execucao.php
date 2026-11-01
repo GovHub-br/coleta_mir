@@ -14,6 +14,13 @@ use Joomla\CMS\Uri\Uri;
 $this->document->addStyleSheet(Uri::root() . 'media/com_edital/css/formularios.css');
 
 $execucao = $this->execucao;
+
+// Escolher o instrumento já mostra os projetos. Fica num script à parte: a política de segurança
+// do site (script-src-attr 'none') bloqueia handlers inline como onchange="...".
+$this->document->addScriptDeclaration(
+	'document.addEventListener("DOMContentLoaded",function(){var s=document.getElementById("execucao-instrumento");'
+	. 'if(s){s.addEventListener("change",function(){if(s.value){s.form.submit();}});}});'
+);
 $itemid = \Joomla\CMS\Factory::getApplication()->input->getInt('Itemid');
 ?>
 <div class="formularios-container">
@@ -36,7 +43,7 @@ $itemid = \Joomla\CMS\Factory::getApplication()->input->getInt('Itemid');
 				<?php endif; ?>
 				<label for="execucao-instrumento" class="form-label"><strong>1. Escolha o instrumento</strong></label>
 				<div class="d-flex flex-wrap gap-2">
-					<select id="execucao-instrumento" name="instrumento" class="form-select" style="max-width: 40rem;" onchange="this.form.submit()">
+					<select id="execucao-instrumento" name="instrumento" class="form-select" style="max-width: 40rem;">
 						<option value="">Selecione o instrumento</option>
 						<?php foreach ($execucao->instrumentos as $codigo => $instrumento) : ?>
 							<option value="<?php echo $this->escape($codigo); ?>"<?php echo $execucao->escolhido === $instrumento ? ' selected' : ''; ?>>
@@ -44,7 +51,7 @@ $itemid = \Joomla\CMS\Factory::getApplication()->input->getInt('Itemid');
 							</option>
 						<?php endforeach; ?>
 					</select>
-					<noscript><button type="submit" class="btn btn-secondary">Ver projetos</button></noscript>
+					<button type="submit" class="btn btn-secondary">Ver projetos</button>
 				</div>
 			</div>
 		</form>
