@@ -334,20 +334,21 @@ TERRITORIOS = [
 
 TIPOS_EVIDENCIA = ["Foto", "Vídeo", "Lista de presença", "Ata", "Relatório de atividade", "Outro"]
 
-# Rótulo do PDF; valor = chave do TED no contrato coleta_mir do DW (mesmo valor das opções vindas do DW).
+# TEDs dos PDFs: a resposta guarda só o código do instrumento (nr_instrumento no DW); a descrição
+# fica na pergunta "Descrição do instrumento". A sincronização com o DW traz os demais.
 TEDS = [
-    ("30882320220003 - Ambulatório de Saúde Humanitária para indígenas e quilombolas", "ted:931295"),
-    ("30882320240015 - Projeto Griô-Agentes de Promoção da Igualdade Racial", "ted:972366"),
-    ("30882320220001 - Fomento a permanência universitária de estudantes da UFFS, pertencentes a povos e comunidades tradicionais", "ted:930522"),
-    ("30882320230028 - Programa de Pós-Graduação em Sustentabilidade junto a Povos e Territórios Tradicionais (PPG-PCTs)", "ted:946708"),
-    ("30882320240012 - Memória Negra Paranaense (Rotas Negras no Estado do Paraná)", "ted:972575"),
-    ("30882320230017 - Promover o desenvolvimento sustentável dos Povos e Comunidades Tradicionais de Matriz Africana e de Terreiro", "ted:947942"),
-    ("30882320240030 - NIF6 - Promoção da Igualdade Étnico Racial, Combate e Superação do Racismo", "ted:972712"),
-    ("30882320250003 - Desenvolver e implementar inovações agrícolas adaptadas, fortalecendo a autonomia econômica e política", "ted:977697"),
-    ("30882320240004 - Realização de Conferências Temáticas no âmbito da 4ª Conferência Nacional de Cultura/CNC", "ted:955619"),
-    ("30882320230026 - Qualificação das Ouvidorias de Igualdade Racial", "ted:951425"),
-    ("30882320240023 - Pesquisa e extensão para o desenvolvimento de estratégias para o ODS 18 de Igualdade Étnico-Racial", "ted:966020"),
-    ("30882320240008 - CNPq/MIR - Fomento à pesquisa com foco na igualdade racial", "ted:958214"),
+    ("931295", "931295"),
+    ("972366", "972366"),
+    ("930522", "930522"),
+    ("946708", "946708"),
+    ("972575", "972575"),
+    ("947942", "947942"),
+    ("972712", "972712"),
+    ("977697", "977697"),
+    ("955619", "955619"),
+    ("951425", "951425"),
+    ("966020", "966020"),
+    ("958214", "958214"),
 ]
 
 NAO_HA_INFO = "Não há informações de relevância territorial a serem coletadas no período"
@@ -459,6 +460,7 @@ ted = Form(
 ted.bloco("b1", "Bloco 1 - Identificação do TED", "Identificação", "fa fa-id-card",
           "<p>Apresentação formal e institucional do TED.</p>")
 ted.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg. " + AUTO, TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("resposta_unica", "sim")], req=True)
+ted.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 ted.p("linha", "Número SEI", "Número do processo de formalização no SEI/MIR.", dw("instrumento.nr_processo_sei"))
 ted.p("linha", "Processos SEI relacionados (se houver)",
       "Outros processos vinculados ao TED (produtos, atividades correlatas), para rastreabilidade e entendimento das entregas; separar por ponto e vírgula.")
@@ -532,6 +534,7 @@ ted_ges = Form(
 ted_ges.bloco("b0", "Identificação do TED", "Identificação", "fa fa-id-card",
              "<p>Selecione o TED ao qual esta atualização se refere.</p>")
 ted_ges.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento")], req=True)
+ted_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 ted_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
 ted_ges.p("linha", "Responsável pelo preenchimento - nome completo", "", req=True)
 ted_ges.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
@@ -598,6 +601,7 @@ ted_ex = Form(
 ted_ex.bloco("b0", "Identificação da atividade (TED)", "Identificação", "fa fa-id-card",
              "<p>TED, período e projeto definidos pelo gestor do TED.</p>")
 ted_ex.p("lista", "Número do TED", "", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do TED")], req=True)
+ted_ex.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 ted_ex.p("linha", "Período de referência da atualização", "", {"origem": "pergunta:Período de referência da atualização"}, req=True)
 ted_ex.p("linha", "Instituição executora", "", {"origem": "projeto:instituicao", "origem_propria": "Unidade Descentralizada (execução direta)"}, req=True)
 ted_ex.p("linha", "Projeto / ação", "Tema ou objeto do projeto.", {"origem": "projeto:tema"}, req=True)
@@ -656,6 +660,7 @@ cv.bloco("b1", "Bloco 1 - Identificação do convênio", "Identificação", "fa 
 cv.p("lista", "Número do convênio",
      "Número do instrumento no Transferegov.br e código Siorg (se houver). " + AUTO,
      [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("resposta_unica", "sim")], req=True)
+cv.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 cv.p("radio", "Tipo de instrumento", "Conforme o Decreto nº 11.531/2023.", ["Convênio", "Contrato de repasse", ("campo_dw", "instrumento.tipo_instrumento")], chave="tipo_instr")
 cv.p("linha", "Número SEI", "Número do processo de formalização no SEI/MIR.", dw("instrumento.nr_processo_sei"))
 cv.p("linha", "Processos SEI relacionados (se houver)",
@@ -788,6 +793,7 @@ cv_ges = Form(
 cv_ges.bloco("b0", "Identificação do convênio", "Identificação", "fa fa-id-card",
             "<p>Informe o convênio ao qual esta atualização se refere.</p>")
 cv_ges.p("lista", "Número do convênio", "Número do instrumento no Transferegov.br.", [("fonte_dw", "convenios"), ("chave_dw", "instrumento")], req=True)
+cv_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 cv_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
 cv_ges.p("linha", "Responsável pelo preenchimento - nome completo", "", req=True)
 cv_ges.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
@@ -888,6 +894,7 @@ cv_ex = Form(
 cv_ex.bloco("b0", "Identificação da atividade (Convênio)", "Identificação", "fa fa-id-card",
             "<p>Convênio, período e projeto definidos pelo convenente.</p>")
 cv_ex.p("lista", "Número do convênio", "", [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do convênio")], req=True)
+cv_ex.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 cv_ex.p("linha", "Período de referência da atualização", "", {"origem": "pergunta:Período de referência da atualização"}, req=True)
 cv_ex.p("linha", "Instituição executora", "", {"origem": "projeto:instituicao", "origem_propria": "Convenente (execução direta)"}, req=True)
 cv_ex.p("linha", "Projeto / ação", "Tema ou objeto do projeto.", {"origem": "projeto:tema"}, req=True)

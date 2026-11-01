@@ -54,7 +54,8 @@ $captchaPlugin = $config->get('captcha', '0');
 
 // Load the interactive form JavaScript only in filling mode.
 if (!$isPreview) {
-    $this->document->addScript(Uri::root() . 'media/com_edital/js/adesao.js');
+    // Versão = data do arquivo: o navegador não fica com um adesao.js antigo em cache depois de uma atualização.
+    $this->document->addScript(Uri::root() . 'media/com_edital/js/adesao.js?v=' . (int) @filemtime(JPATH_ROOT . '/media/com_edital/js/adesao.js'));
 }
 
 $activeMenu = $app->getMenu()->getActive();

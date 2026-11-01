@@ -426,6 +426,7 @@ var AdesaoForm = {
                     option: 'com_edital',
                     task: 'adesaoform.opcoesDw',
                     fonte: fonte,
+                    origem: $campo.attr('data-filtro-dw'),
                     filtro: filtro
                 };
                 ajaxData[window.adesaoConfig.token] = 1;
@@ -453,6 +454,7 @@ var AdesaoForm = {
 
         $('.pergunta-field[data-chave-dw]').each(function () {
             var registro = $(this).attr('data-chave-dw');
+            var fonte = $(this).attr('data-fonte-dw') || '';
             var perguntaId = $(this).attr('data-pergunta-id');
             var $destinos = $('.pergunta-field[data-campo-dw^="' + registro + '."]');
 
@@ -470,6 +472,7 @@ var AdesaoForm = {
                     option: 'com_edital',
                     task: 'adesaoform.dadosDw',
                     registro: registro,
+                    fonte: fonte,
                     chave: chave
                 };
                 ajaxData[window.adesaoConfig.token] = 1;

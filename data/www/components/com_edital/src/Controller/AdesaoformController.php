@@ -209,6 +209,11 @@ class AdesaoformController extends FormController
 		$registro = $app->input->getCmd('registro', '');
 		$chave = $app->input->getString('chave', '');
 
+		// A resposta guarda só o código do instrumento; a fonte da pergunta diz o tipo.
+		if ($registro === 'instrumento') {
+			$chave = DwHelper::chaveInstrumento($app->input->getCmd('fonte', ''), $chave);
+		}
+
 		$dados = EspelhoDwHelper::getRegistro($registro, $chave);
 
 		echo json_encode($dados === null ? ['success' => false] : ['success' => true, 'data' => $dados], JSON_UNESCAPED_UNICODE);
@@ -228,7 +233,8 @@ class AdesaoformController extends FormController
 
 		$app = Factory::getApplication();
 		$fonte = $app->input->getCmd('fonte', '');
-		$filtro = $app->input->getString('filtro', '');
+		// Filtro = código do instrumento escolhido na pergunta com a fonte "origem" (ex.: teds).
+		$filtro = DwHelper::chaveInstrumento($app->input->getCmd('origem', ''), $app->input->getString('filtro', ''));
 
 		if (!DwHelper::fonteComFiltro($fonte) || trim($filtro) === '') {
 			echo json_encode(['success' => false]);

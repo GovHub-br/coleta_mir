@@ -51,14 +51,12 @@ class DwHelper
      */
     private const OPCOES = [
         'teds' => "
-            SELECT chave AS valor,
-                   concat_ws(' - ', nr_instrumento, no_parceiro, left(NULLIF(trim(ds_objeto), ''), 120)) AS nome
+            SELECT nr_instrumento AS valor, nr_instrumento AS nome
             FROM coleta_mir.coleta_instrumento
             WHERE tp_instrumento = 'ted'
             ORDER BY nr_instrumento",
         'convenios' => "
-            SELECT chave AS valor,
-                   concat_ws(' - ', nr_instrumento, no_parceiro, left(NULLIF(trim(ds_objeto), ''), 120)) AS nome
+            SELECT nr_instrumento AS valor, nr_instrumento AS nome
             FROM coleta_mir.coleta_instrumento
             WHERE tp_instrumento = 'convenio'
             ORDER BY nr_instrumento",
@@ -108,12 +106,19 @@ class DwHelper
     private const FONTES_COM_FILTRO = ['metas_instrumento'];
 
     /**
+     * Tipo do instrumento de cada fonte de instrumentos. A resposta guarda só o código
+     * (nr_instrumento, ex.: "931295"); a chave do contrato é "<tipo>:<código>" (ex.: "ted:931295").
+     */
+    private const TIPOS_INSTRUMENTO = ['teds' => 'ted', 'convenios' => 'convenio'];
+
+    /**
      * Registros para pré-preenchimento. Cada consulta recebe :chave e devolve uma linha
      * cujas colunas são os campos referenciados por campo_dw ("registro.coluna").
      */
     private const REGISTROS = [
         'instrumento' => "
             SELECT ds_objeto AS objeto,
+                   concat_ws(' - ', NULLIF(trim(no_parceiro), ''), NULLIF(trim(ds_objeto), '')) AS descricao,
                    vl_firmado,
                    vl_empenhado,
                    vl_liquidado,
@@ -166,6 +171,15 @@ class DwHelper
             "SELECT DISTINCT programa::text AS chave FROM ppa_dbt.programa_filtrado_mir",
         ],
     ];
+
+    /** Chave do contrato ("ted:931295") a partir da fonte da pergunta e do código respondido. */
+    public static function chaveInstrumento(string $fonte, string $codigo): string
+    {
+        $codigo = trim($codigo);
+        $tipo = self::TIPOS_INSTRUMENTO[$fonte] ?? '';
+
+        return $tipo !== '' && $codigo !== '' && strpos($codigo, ':') === false ? $tipo . ':' . $codigo : $codigo;
+    }
 
     /** Normaliza a chave recebida, por registro. */
     public static function normalizarChave(string $registro, string $chave): string
