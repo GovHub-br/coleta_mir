@@ -14,7 +14,7 @@ OUT = sys.argv[1]
 lines = []
 
 # Entradas de ds_opcoes que configuram a pergunta (não são alternativas)
-PARAMETROS = {"permite_outro", "fonte_dw", "chave_dw", "campo_dw", "sugestoes_dw", "filtro_dw", "resposta_unica", "colunas",
+PARAMETROS = {"acesso_unidade", "permite_outro", "fonte_dw", "chave_dw", "campo_dw", "sugestoes_dw", "filtro_dw", "resposta_unica", "colunas",
               "origem", "origem_propria", "projetos_execucao", "propria_quando"}
 
 
@@ -123,17 +123,6 @@ def grupos_perfis(perfis):
         return "NULL"
     titulos = ", ".join(q(t) for t in perfis)
     return f"(SELECT GROUP_CONCAT(`id` ORDER BY `id`) FROM `{PREFIX}usergroups` WHERE `title` IN ({titulos}))"
-
-
-def gestores(f, titulo, descricao):
-    """Quem preenche o formulário do gestor/convenente, cadastrado pelo MIR: cada CPF vê o instrumento
-    em "Meus instrumentos" (mesmo vínculo dos projetos com a execução)."""
-    f.p("tabela", titulo, descricao + " Com o CPF, o instrumento aparece em \"Meus instrumentos\" para a pessoa, que preenche o formulário de atualização.",
-        {**colunas(
-            ("nome", "Nome", "linha", True),
-            ("cpf", "CPF", "cpf", True),
-            ("email", "E-mail", "linha", True),
-        ), "projetos_execucao": "gestor"}, req=True)
 
 
 def dw(campo, base=None):
@@ -465,8 +454,8 @@ def documentos(f, categorias):
 
 INTRO_PERFIS = (
     "<p><strong>Perfis de preenchimento:</strong></p><ul>"
-    "<li><strong>Identificação, responsáveis, enquadramento, modalidade de resposta e fiscalização:</strong> {mir}, que também cadastra, pelo CPF, quem preenche como {gestor_curto}</li>"
-    "<li><strong>Execução e projetos:</strong> {gestor} (atualização periódica), em formulário próprio ({sufixo_gestor}), a partir do instrumento em \"Meus instrumentos\"</li>"
+    "<li><strong>Identificação, responsáveis, enquadramento, modalidade de resposta e fiscalização:</strong> {mir}</li>"
+    "<li><strong>Execução e projetos:</strong> {gestor} (atualização periódica), em formulário próprio ({sufixo_gestor}), a partir do instrumento em \"Meus instrumentos\", com o acesso da sua {unidade} liberado pelo MIR</li>"
     "<li><strong>Atividades e beneficiários:</strong> responsável por cada projeto, identificado pelo CPF na lista de projetos do {gestor_curto}, em formulário próprio (execução), um preenchimento por atividade</li></ul>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>"
     "<p>Campos marcados como automáticos serão preenchidos a partir do Transferegov.br / SIAFI / Siorg quando a integração estiver disponível; até lá, preencha manualmente.</p>"
@@ -478,7 +467,7 @@ INTRO_PERFIS = (
 ted = Form(
     "ted", "Coleta MIR - TEDs (MIR)",
     "<p>Instrumento para coleta de dados de forma territorializada dos Termos de Execução Descentralizada (TEDs) celebrados pelo Ministério da Igualdade Racial (MIR).</p>"
-    + INTRO_PERFIS.format(mir="servidor do MIR", gestor="gestor do TED na Unidade Descentralizada", sufixo_gestor="gestor", gestor_curto="gestor do TED"),
+    + INTRO_PERFIS.format(mir="servidor do MIR", gestor="gestor do TED na Unidade Descentralizada", sufixo_gestor="gestor", gestor_curto="gestor do TED", unidade="UG"),
     10,
     perfis=(PERFIL_MIR,),
 )
@@ -509,7 +498,6 @@ ted.secao("Unidade do MIR")
 ted.p("linha", "Unidade descentralizadora responsável (Secretaria)", "Secretaria ou unidade responsável no MIR. " + AUTO, dw("instrumento.unidade_mir"))
 ted.p("linha", "Código da unidade descentralizadora (UG/SIAFI)", "Código da unidade gestora no SIAFI. " + AUTO, dw("instrumento.ug_mir"))
 fiscais(ted, "Fiscais do TED")
-gestores(ted, "Gestor(es) do TED na Unidade Descentralizada", "Quem acompanha a execução do TED no órgão que recebeu os recursos.")
 ted.secao("Instrumento jurídico relacionado (se houver)")
 ted.p("checkbox", "Tipo de instrumento complementar", "", ["ACT", "Convênio", "Chamada Pública / Edital"], outro=True)
 ted.p("linha", "Número / Referência do instrumento complementar", "Se houver instrumento paralelo vinculado a este TED.")
@@ -553,17 +541,16 @@ ted_ges = Form(
     "ted_ges", "Coleta MIR - TEDs (gestor)",
     "<p>Atualização periódica da execução dos Termos de Execução Descentralizada (TEDs) celebrados pelo MIR.</p>"
     "<p><strong>Quem preenche:</strong> gestor do TED na Unidade Descentralizada: forma de execução, contrapartida e os projetos/ações apoiados, com seus responsáveis. "
-    "Identificação, responsáveis, enquadramento e fiscalização são preenchidos pelo servidor do MIR em formulário próprio; o número e a descrição do instrumento vêm de lá.</p>"
+    "Identificação, responsáveis, enquadramento e fiscalização são preenchidos pelo servidor do MIR em formulário próprio.</p>"
     "<p>Ao enviar, cada projeto aparece em \"Meus instrumentos\" para o responsável informado (pelo CPF), que registra no formulário de execução as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     20,
-    origem=ted,
 )
 
 ted_ges.bloco("b0", "Identificação do TED", "Identificação", "fa fa-id-card",
-             "<p>O TED vem do cadastro do MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
-ted_ges.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do TED")], req=True)
-ted_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3", "origem": "pergunta:Descrição do instrumento"}))
+             "<p>O TED é escolhido em \"Meus instrumentos\", entre os da sua UG liberada pelo MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
+ted_ges.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("acesso_unidade", "sim")], req=True)
+ted_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3"}))
 ted_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
 
 ted_ges.bloco("b4", "Execução (TED)", "Execução", "fa fa-tasks",
@@ -673,7 +660,7 @@ cv = Form(
     "<p>Instrumento para coleta de dados de forma territorializada dos convênios celebrados pelo Ministério da Igualdade Racial (MIR), na qualidade de concedente.</p>"
     "<p>O Coleta MIR não substitui o registro dos atos de execução, acompanhamento e fiscalização, nem a prestação de contas, exigidos no Transferegov.br (Decreto nº 11.531/2023); "
     "seu propósito é complementar esses registros com informações territorializadas.</p>"
-    + INTRO_PERFIS.format(mir="servidor do MIR (concedente)", gestor="convenente", sufixo_gestor="convenente", gestor_curto="convenente"),
+    + INTRO_PERFIS.format(mir="servidor do MIR (concedente)", gestor="convenente", sufixo_gestor="convenente", gestor_curto="convenente", unidade="CNPJ"),
     30,
     perfis=(PERFIL_MIR,),
 )
@@ -719,7 +706,7 @@ cv.p("radio", "Natureza do convenente", "Conforme o Decreto nº 11.531/2023.", [
     ("campo_dw", "instrumento.natureza_convenente"),
 ])
 cv.p("linha", "Dirigente do convenente", "Nome completo, cargo e e-mail institucional. " + AUTO)
-gestores(cv, "Responsável(is) pela execução / coordenação do convênio", "Quem coordena a execução no convenente.")
+cv.p("linha", "Responsável pela execução / coordenação do convênio", "Nome completo, cargo, telefone e e-mail.")
 cv.p("texto", "Interveniente(s) (se houver)",
      "Órgão ou entidade que participa do instrumento para manifestar consentimento ou assumir obrigações: nome e CNPJ.")
 cv.p("linha", "Mandatária", "Instituição financeira oficial federal que opera o contrato de repasse.", dep=("tipo_instr", "Contrato de repasse"))
@@ -806,17 +793,16 @@ cv_ges = Form(
     "conv_ges", "Coleta MIR - Convênios (convenente)",
     "<p>Atualização periódica da execução dos convênios celebrados pelo MIR, na qualidade de concedente.</p>"
     "<p><strong>Quem preenche:</strong> convenente: forma de execução, contrapartida, bens e os projetos/ações apoiados, com seus responsáveis. "
-    "Identificação, responsáveis, enquadramento e fiscalização são preenchidos pelo servidor do MIR em formulário próprio; o número e a descrição do instrumento vêm de lá.</p>"
+    "Identificação, responsáveis, enquadramento e fiscalização são preenchidos pelo servidor do MIR em formulário próprio.</p>"
     "<p>Ao enviar, cada projeto aparece em \"Meus instrumentos\" para o responsável informado (pelo CPF), que registra no formulário de execução as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     40,
-    origem=cv,
 )
 
 cv_ges.bloco("b0", "Identificação do convênio", "Identificação", "fa fa-id-card",
-            "<p>O convênio vem do cadastro do MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
-cv_ges.p("lista", "Número do convênio", "Número do instrumento no Transferegov.br.", [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do convênio")], req=True)
-cv_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3", "origem": "pergunta:Descrição do instrumento"}))
+            "<p>O convênio é escolhido em \"Meus instrumentos\", entre os do seu CNPJ liberado pelo MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
+cv_ges.p("lista", "Número do convênio", "Número do instrumento no Transferegov.br.", [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("acesso_unidade", "sim")], req=True)
+cv_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3"}))
 cv_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
 
 cv_ges.bloco("b4", "Execução (Convênio)", "Execução", "fa fa-tasks",
@@ -964,10 +950,9 @@ header = f"""-- Carga dos formulários Coleta MIR - TEDs e Coleta MIR - Convêni
 -- "2026.09.30 Coleta MIR Convênios - Proposta.pdf".
 --
 -- Cria três editais do tipo 'formulario' por instrumento, conforme o perfil de preenchimento:
---   * (MIR): identificação, responsáveis (com o CPF de quem preenche como gestor), enquadramento, modalidade e
---     fiscalização - servidor do MIR;
---   * (gestor / convenente): execução e projetos - aberto pelo instrumento em "Meus instrumentos" (gestor
---     vinculado pelo CPF no formulário do MIR). Ligado ao do MIR por co_edital_adesao;
+--   * (MIR): identificação, responsáveis, enquadramento, modalidade e fiscalização - servidor do MIR;
+--   * (gestor / convenente): execução e projetos - aberto pelo instrumento em "Meus instrumentos", entre os da
+--     UG (TED) ou do CNPJ (convênio) liberados para a pessoa pelo MIR (solicitação de acesso);
 --   * (execução): atividades e beneficiários, um preenchimento por atividade, aberto pelo
 --     projeto em "Meus instrumentos" (responsável vinculado pelo CPF). Ligado ao anterior por co_edital_adesao.
 -- Cada bloco vira um agrupamento (aba) com suas perguntas. As dependências entre perguntas (depende_de) usam os

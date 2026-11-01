@@ -115,6 +115,12 @@ class Router extends RouterView
 			$adesaogestao = new RouterViewConfiguration('adesaogestao');
 			$this->registerView($adesaogestao);
 
+			// Acesso ao Coleta MIR: cadastro e pedidos de perfil; decisão pelo MIR.
+			$solicitacaoacesso = new RouterViewConfiguration('solicitacaoacesso');
+			$this->registerView($solicitacaoacesso);
+			$solicitacoesacesso = new RouterViewConfiguration('solicitacoesacesso');
+			$this->registerView($solicitacoesacesso);
+
 		parent::__construct($app, $menu);
 
 		$this->attachRule(new MenuRules($this));
