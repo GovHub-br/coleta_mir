@@ -1,0 +1,154 @@
+.coleta-inicio {
+	padding: 24px 0 48px;
+}
+
+.coleta-inicio-hero {
+	background: linear-gradient(135deg, #0c326f 0%, #1351b4 100%);
+	color: #fff;
+	border-radius: 12px;
+	padding: 40px 32px;
+	margin-bottom: 40px;
+}
+
+.coleta-inicio-hero h1 {
+	color: #fff;
+	font-size: 2.4rem;
+	font-weight: 700;
+	margin: 0 0 12px;
+}
+
+.coleta-inicio-sobretitulo {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.8rem;
+	opacity: 0.85;
+	margin-bottom: 4px;
+}
+
+.coleta-inicio-lead {
+	font-size: 1.15rem;
+	max-width: 46rem;
+	margin-bottom: 8px;
+}
+
+.coleta-inicio-nota {
+	opacity: 0.85;
+	margin: 0;
+}
+
+.coleta-inicio-secao {
+	margin-bottom: 40px;
+}
+
+.coleta-inicio-secao h2 {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 20px;
+}
+
+.coleta-inicio-card,
+.coleta-inicio-aviso {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 10px;
+	padding: 24px;
+	height: 100%;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.coleta-inicio-card h3 {
+	font-size: 1.15rem;
+	font-weight: 600;
+	margin: 12px 0 8px;
+}
+
+.coleta-inicio-icone {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: #e8f0fc;
+	color: #1351b4;
+	font-size: 1.1rem;
+}
+
+.coleta-inicio-onde {
+	color: #555;
+	font-size: 0.9rem;
+	margin: 0;
+	border-top: 1px solid #eee;
+	padding-top: 10px;
+}
+
+.coleta-inicio-aviso {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.coleta-inicio-aviso > i {
+	color: #1351b4;
+	font-size: 1.4rem;
+	margin-top: 2px;
+}
+
+.coleta-inicio-aviso ul {
+	padding-left: 1.1rem;
+	margin-top: 4px;
+}
+
+.coleta-inicio-aviso-espera > i {
+	color: #b56b00;
+}
+
+.coleta-inicio-passos {
+	list-style: none;
+	counter-reset: passo;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 16px;
+}
+
+.coleta-inicio-passos li {
+	counter-increment: passo;
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 10px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.coleta-inicio-passos li::before {
+	content: counter(passo);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: #1351b4;
+	color: #fff;
+	font-weight: 700;
+	margin-bottom: 6px;
+}
+
+.coleta-inicio-passos span {
+	color: #555;
+}
+
+@media (max-width: 576px) {
+	.coleta-inicio-hero {
+		padding: 28px 20px;
+	}
+
+	.coleta-inicio-hero h1 {
+		font-size: 1.9rem;
+	}
+}
