@@ -111,7 +111,8 @@ class HtmlView extends BaseHtmlView
 
 			$editalExecucao = OrigemHelper::getEditalExecucao((int) $edital->id);
 
-			// Projetos de outros gestores sob a responsabilidade do CPF do usuário.
+			// Preenchimentos vinculados ao CPF do usuário por outra pessoa: projetos cadastrados pelo
+			// gestor (execução) e gestores cadastrados pelo MIR (formulário do gestor).
 			if ($editalExecucao && isset($editais[(int) $editalExecucao->id]) && $editais[(int) $editalExecucao->id]->aberto)
 			{
 				foreach (OrigemHelper::getProjetosDoCpf(OrigemHelper::cpfDoUsuario($user), (int) $edital->id) as $encontrado)
@@ -129,7 +130,7 @@ class HtmlView extends BaseHtmlView
 					}
 
 					$this->grupoInstrumento($instrumento)->projetos[] = (object) [
-						'rotulo'     => $encontrado['dados']['rotulo'],
+						'rotulo'     => $encontrado['dados']['projeto'] ? $encontrado['dados']['rotulo'] : '',
 						'gestor'     => Factory::getUser((int) $encontrado['adesao']->created_by)->name,
 						'formulario' => $editalExecucao->no_edital,
 						'url'        => OrigemHelper::getLinkExecucao((int) $editalExecucao->id, (int) $encontrado['adesao']->id, $encontrado['projeto']),
@@ -185,6 +186,7 @@ class HtmlView extends BaseHtmlView
 		$respondidos = (int) ($progresso->respondidos ?? 0);
 		$enviado = $adesao->st_adesao !== 'rascunho';
 		$execucoes = [];
+		$rotuloExecucoes = $editalExecucao ? $editalExecucao->no_edital : '';
 
 		if ($editalExecucao && $enviado)
 		{
@@ -212,6 +214,7 @@ class HtmlView extends BaseHtmlView
 				: '',
 			'urlVer'      => $enviado ? Route::_('index.php?option=com_edital&view=formulariosrespostas&id=' . (int) $adesao->id) : '',
 			'execucoes'   => $execucoes,
+			'rotuloExecucoes' => $rotuloExecucoes,
 		];
 	}
 }

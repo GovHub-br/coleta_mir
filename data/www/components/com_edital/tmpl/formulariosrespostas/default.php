@@ -112,12 +112,10 @@ $statusConfig = [
 	<?php if (!empty($this->linksExecucao)) : ?>
 	<!-- Formulário de execução: um preenchimento por atividade, aberto pelo projeto -->
 	<div class="fr-docs-section fr-execucao">
-		<h3 class="fr-docs-titulo"><i class="fas fa-tasks"></i> Registro da execução</h3>
-		<p class="text-muted">Cada atividade executada no período é registrada em um preenchimento do formulário de execução.
-			<?php if (count(array_diff_key($this->linksExecucao, [0 => true])) > 0) : ?>
-				Cada responsável vê o seu projeto em "Meus instrumentos" ao entrar com o CPF informado na lista; os dados do instrumento e do projeto já vêm preenchidos.
-			<?php endif; ?>
-		</p>
+		<h3 class="fr-docs-titulo"><i class="fas fa-tasks"></i> <?php echo htmlspecialchars($this->editalExecucao->no_edital); ?></h3>
+		<?php if (count(array_diff_key($this->linksExecucao, [0 => true])) > 0) : ?>
+			<p class="text-muted">Cada pessoa cadastrada vê o instrumento em "Meus instrumentos" ao entrar com o CPF informado; os dados do instrumento já vêm preenchidos.</p>
+		<?php endif; ?>
 		<?php if (isset($this->linksExecucao[0])) : ?>
 			<a href="<?php echo htmlspecialchars($this->linksExecucao[0]['url']); ?>" class="btn btn-primary mb-3">
 				<i class="fas fa-plus"></i> Registrar atividades (<?php echo htmlspecialchars($this->linksExecucao[0]['rotulo']); ?>)
@@ -135,7 +133,7 @@ $statusConfig = [
 					</div>
 				<?php endif; ?>
 				<a class="btn btn-sm btn-outline-primary mt-2" href="<?php echo htmlspecialchars($link['url']); ?>">
-					<i class="fas fa-plus"></i> Preencher a execução
+					<i class="fas fa-plus"></i> Preencher
 				</a>
 			</div>
 		<?php endforeach; ?>

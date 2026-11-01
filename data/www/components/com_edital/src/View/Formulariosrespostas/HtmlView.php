@@ -32,6 +32,9 @@ class HtmlView extends BaseHtmlView
 
 	/** Links do formulário de execução, por projeto (posição 0 = execução pela própria unidade). */
 	public $linksExecucao = [];
+
+	/** Formulário seguinte da cadeia (gestor, a partir do MIR; execução, a partir do gestor). */
+	public $editalExecucao;
 	protected $municipios;
 
 	/**
@@ -89,6 +92,8 @@ class HtmlView extends BaseHtmlView
 		$editalExecucao = OrigemHelper::getEditalExecucao((int) $this->item->co_edital_id);
 
 		if ($editalExecucao && $this->item->st_adesao !== 'rascunho') {
+			$this->editalExecucao = $editalExecucao;
+
 			foreach (OrigemHelper::getProjetos((int) $this->item->id) as $projeto => $dados) {
 				$this->linksExecucao[$projeto] = $dados + [
 					'url' => OrigemHelper::getLinkExecucao((int) $editalExecucao->id, (int) $this->item->id, $projeto),
