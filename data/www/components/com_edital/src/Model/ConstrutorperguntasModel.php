@@ -202,7 +202,10 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 	 */
 	private function normalizar(array $secoes, array $secoesAtuais, array $perguntasAtuais): array
 	{
-		$filtro          = InputFilter::getInstance();
+		// Mantém a formatação das descrições e textos de ajuda (<h5>, <p>, listas, class) e só
+		// remove tags e atributos perigosos (script, iframe, on*...); sem argumentos, o filtro
+		// apagava todo o HTML ao salvar.
+		$filtro          = InputFilter::getInstance([], [], InputFilter::ONLY_BLOCK_DEFINED_TAGS, InputFilter::ONLY_BLOCK_DEFINED_ATTRIBUTES);
 		$secoesUsadas    = [];
 		$perguntasUsadas = [];
 		$chavesUsadas    = [];
