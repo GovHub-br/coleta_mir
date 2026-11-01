@@ -86,7 +86,10 @@ for sigla, secao in secoes.items():
     for st in stmts:
         if st.startswith("INSERT INTO `joom_tb_edital`"):
             v = campos(st[st.find("VALUES (") + 8:-1])
-            saida.append(f"UPDATE joom_tb_edital SET no_edital = {v[4]}, ds_edital = {v[5]}, co_edital_adesao = {v[10]} WHERE id = {edital};")
+            # Origem fora desta execução: a variável @<sigla>_edital não existe; mantém o vínculo atual.
+            origem = re.fullmatch(r"@(\w+)_edital", v[10])
+            vinculo = "" if origem and int(ALVOS.get(origem.group(1)) or 0) == 0 else f", co_edital_adesao = {v[10]}"
+            saida.append(f"UPDATE joom_tb_edital SET no_edital = {v[4]}, ds_edital = {v[5]}{vinculo} WHERE id = {edital};")
         elif st.startswith("INSERT INTO `joom_tb_agrupamento`"):
             grupos.append({"v": campos(st[st.find("VALUES (") + 8:-1])})
         elif st.startswith("SET @") and "_g_" in st:

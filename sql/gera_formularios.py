@@ -625,16 +625,12 @@ ted_ex = Form(
 )
 
 ted_ex.bloco("b0", "Identificação da atividade (TED)", "Identificação", "fa fa-id-card",
-             "<p>TED, período e projeto definidos pelo gestor do TED.</p>")
+             "<p>TED, período e projeto definidos pelo gestor do TED. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
 ted_ex.p("lista", "Número do TED", "", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do TED")], req=True)
-ted_ex.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
+ted_ex.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3", "origem": "pergunta:Descrição do instrumento"}))
 ted_ex.p("linha", "Período de referência da atualização", "", {"origem": "pergunta:Período de referência da atualização"}, req=True)
 ted_ex.p("linha", "Instituição executora", "", {"origem": "projeto:instituicao", "origem_propria": "Unidade Descentralizada (execução direta)"}, req=True)
 ted_ex.p("linha", "Projeto / ação", "Tema ou objeto do projeto.", {"origem": "projeto:tema"}, req=True)
-ted_ex.p("linha", "Responsável pelo preenchimento - nome completo", "", req=True)
-ted_ex.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
-ted_ex.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", req=True)
-ted_ex.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
 ted_ex.bloco("b5", "Atividade e beneficiários (TED)", "Atividade", "fa fa-map-marker",
              "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, use de novo \"Preencher a execução\" no projeto, em \"Meus instrumentos\".</p>")
@@ -916,16 +912,12 @@ cv_ex = Form(
 )
 
 cv_ex.bloco("b0", "Identificação da atividade (Convênio)", "Identificação", "fa fa-id-card",
-            "<p>Convênio, período e projeto definidos pelo convenente.</p>")
+            "<p>Convênio, período e projeto definidos pelo convenente. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
 cv_ex.p("lista", "Número do convênio", "", [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do convênio")], req=True)
-cv_ex.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
+cv_ex.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3", "origem": "pergunta:Descrição do instrumento"}))
 cv_ex.p("linha", "Período de referência da atualização", "", {"origem": "pergunta:Período de referência da atualização"}, req=True)
 cv_ex.p("linha", "Instituição executora", "", {"origem": "projeto:instituicao", "origem_propria": "Convenente (execução direta)"}, req=True)
 cv_ex.p("linha", "Projeto / ação", "Tema ou objeto do projeto.", {"origem": "projeto:tema"}, req=True)
-cv_ex.p("linha", "Responsável pelo preenchimento - nome completo", "", req=True)
-cv_ex.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
-cv_ex.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", req=True)
-cv_ex.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
 cv_ex.bloco("b5", "Atividade e beneficiários (Convênio)", "Atividade", "fa fa-map-marker",
             "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, use de novo \"Preencher a execução\" no projeto, em \"Meus instrumentos\".</p>")
