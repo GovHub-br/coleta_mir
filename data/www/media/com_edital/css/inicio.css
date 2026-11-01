@@ -219,14 +219,11 @@
 /* Fluxos em imagem: em telas estreitas rolam na horizontal para o texto continuar legível */
 .coleta-inicio-fluxo {
 	overflow-x: auto;
-	border: 1px solid #e5e5e5;
-	border-radius: 10px;
-	background: #fff;
 }
 
 .coleta-inicio-fluxo img {
 	display: block;
 	width: 100%;
-	min-width: 900px;
+	min-width: 760px;
 	height: auto;
 }

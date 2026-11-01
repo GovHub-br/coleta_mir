@@ -1,147 +1,112 @@
-import sys, html
-# Gera os fluxos da página inicial (raias por ator, paleta GovHub).
-# Uso: python3 sql/gera_fluxos_inicio.py data/www/media/com_edital/images/inicio
-OUT = sys.argv[1]
-F = "font-family=\"Inter, Raleway, 'Segoe UI', Arial, sans-serif\""
-MIR, PESSOA, GESTOR, RESP, DEC = '#5B21B6', '#7A34F3', '#9520B6', '#F97316', '#C520A4'
-LIGHT = {MIR: '#EDE7F8', PESSOA: '#F0E8FE', GESTOR: '#F3E6F8', RESP: '#FEEEE2'}
-DARK = {MIR: '#3B1578', PESSOA: '#4E1FA0', GESTOR: '#5E1473', RESP: '#9A4A0E'}
+# Gera as imagens "Quem preenche o quê" e "Como começar" da página inicial, no visual dos
+# slides do Gov Hub (gov-hub-docs/apresentacoes): cards #F2F1F6 arredondados, roxo #613EFF,
+# azul-marinho #0A005A, sobretítulo em caixa alta e Reddit Sans (embutida no SVG, porque
+# SVG usado como <img> não carrega fonte externa).
+# Uso: python3 sql/gera_fluxos_inicio.py
+import base64, html, os
 
-def e(s): return html.escape(s, quote=True)
+RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'www', 'media', 'com_edital')
+SAIDA = os.path.join(RAIZ, 'images', 'inicio')
 
-class D:
-    def __init__(s, w, h, titulo, desc):
-        s.w, s.h, s.o = w, h, []
-        s.o.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" {F}>')
-        s.o.append(f'<title>{e(titulo)}</title><desc>{e(desc)}</desc>')
-        s.o.append('<defs><marker id="seta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9z" fill="context-stroke"/></marker></defs>')
-        s.o.append(f'<rect width="{w}" height="{h}" fill="#FFFFFF"/>')
-    def raw(s, x): s.o.append(x)
-    def text(s, x, y, t, size=12, cor='#202020', peso=400, anchor='middle'):
-        s.o.append(f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{peso}" fill="{cor}" text-anchor="{anchor}" dominant-baseline="central">{e(t)}</text>')
-    def raia(s, y, h, nome, cor, linhas=None):
-        s.o.append(f'<rect x="20" y="{y}" width="{s.w-40}" height="{h}" rx="10" fill="{LIGHT[cor]}" opacity="0.55"/>')
-        s.o.append(f'<rect x="20" y="{y}" width="160" height="{h}" rx="10" fill="{cor}"/>')
-        ls = linhas or [nome]
-        y0 = y + h/2 - (len(ls)-1)*9
-        for i, l in enumerate(ls):
-            s.text(100, y0 + i*18, l, 14, '#FFFFFF', 700)
-    def etapa(s, x, y, w, h, linhas, cor):
-        s.o.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{cor}"/>')
-        y0 = y + h/2 - (len(linhas)-1)*9
-        for i, l in enumerate(linhas):
-            s.text(x+w/2, y0+i*18, l, 14 if i == 0 else 12, '#FFFFFF', 700 if i == 0 else 500)
-    def circulo(s, cx, cy, cor, rot, lado='baixo'):
-        s.o.append(f'<circle cx="{cx}" cy="{cy}" r="14" fill="{cor}"/>')
-        if lado == 'baixo': s.text(cx, cy+26, rot, 12, '#202020', 600)
-        else: s.text(cx-22, cy, rot, 12, '#202020', 600, 'end')
-    def etiqueta(s, x, y, w, t, cor):
-        s.o.append(f'<rect x="{x}" y="{y}" width="{w}" height="22" rx="11" fill="#FFFFFF" stroke="{cor}" stroke-width="1"/>')
-        s.text(x+w/2, y+11, t, 12, DARK[cor], 600)
-    def obs(s, x, y, w, linhas, borda='#9CA3AF', icone='i'):
-        h = 14 + 16*len(linhas)
-        s.o.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="#F8F9FA" stroke="{borda}" stroke-width="1" stroke-dasharray="{"0" if borda != "#9CA3AF" else "4 3"}"/>')
-        s.o.append(f'<circle cx="{x+14}" cy="{y+15}" r="8" fill="{borda}"/>')
-        s.text(x+14, y+15, icone, 11, '#FFFFFF', 700)
-        for i, l in enumerate(linhas):
-            s.text(x+28, y+15+i*16, l, 12, '#202020', 400, 'start')
-    def decisao(s, cx, cy, hw, hh, linhas):
-        s.o.append(f'<polygon points="{cx},{cy-hh} {cx+hw},{cy} {cx},{cy+hh} {cx-hw},{cy}" fill="{DEC}"/>')
-        y0 = cy - (len(linhas)-1)*8
-        for i, l in enumerate(linhas): s.text(cx, y0+i*16, l, 12, '#FFFFFF', 700)
-    def seta(s, d, cor='#4B5563'):
-        s.o.append(f'<path d="{d}" fill="none" stroke="{cor}" stroke-width="1.5" marker-end="url(#seta)"/>')
-    def linha(s, d, cor='#4B5563'):
-        s.o.append(f'<path d="{d}" fill="none" stroke="{cor}" stroke-width="1.5"/>')
-    def legenda(s, itens, y=24):
-        x = 20
-        s.text(x, y+12, 'Legenda', 12, '#202020', 700, 'start'); x += 70
-        for tipo, cor, rot in itens:
-            if tipo == 'circ':
-                s.o.append(f'<circle cx="{x+9}" cy="{y+12}" r="8" fill="{cor}"/>'); x += 24
-            elif tipo == 'etapa':
-                s.o.append(f'<rect x="{x}" y="{y+3}" width="26" height="18" rx="4" fill="{cor}"/>'); x += 34
-            elif tipo == 'dec':
-                s.o.append(f'<polygon points="{x+13},{y+1} {x+26},{y+12} {x+13},{y+23} {x},{y+12}" fill="{DEC}"/>'); x += 34
-            elif tipo == 'etq':
-                s.o.append(f'<rect x="{x}" y="{y+3}" width="34" height="18" rx="9" fill="#FFF" stroke="#6B7280"/>'); x += 42
-            elif tipo == 'obs':
-                s.o.append(f'<rect x="{x}" y="{y+3}" width="30" height="18" rx="4" fill="#F8F9FA" stroke="{cor}" stroke-dasharray="{"4 3" if cor == "#9CA3AF" else "0"}"/>'); x += 38
-            s.text(x, y+12, rot, 12, '#374151', 400, 'start'); x += len(rot)*6.6 + 22
-    def salvar(s, nome):
-        s.o.append('</svg>')
-        open(f'{OUT}/{nome}', 'w', encoding='utf-8').write('\n'.join(s.o))
+ROXO, MARINHO, ROXO700, SUAVE, TEXTO, MUTED = '#613EFF', '#0A005A', '#3F28A6', '#F2F1F6', '#2D3748', '#666666'
 
-# ---------- 1. Quem preenche o quê ----------
-d = D(1200, 640, 'Quem preenche o quê no Coleta MIR',
-      'Servidor do MIR cadastra o instrumento. Gestor de TED ou convenente abre o instrumento pela UG ou CNPJ, informa execução e contrapartida e lista os projetos com o CPF do responsável, ou registra as atividades quando a própria unidade executa. O responsável pelo projeto entra com o CPF, abre o projeto e registra cada atividade e os beneficiários.')
-d.legenda([('circ', '#6B7280', 'Início e fim'), ('etapa', MIR, 'Etapa (cor do ator)'), ('dec', DEC, 'Decisão'),
-           ('etq', None, 'Tela ou formulário'), ('obs', '#9CA3AF', 'Observação'), ('obs', DEC, 'Dado pessoal (LGPD)')])
-# Raia MIR
-d.raia(80, 170, '', MIR, ['Servidor', 'do MIR'])
-d.circulo(222, 150, MIR, 'Início'); d.seta('M236 150 H286')
-d.etapa(290, 125, 210, 50, ['Abrir "Novo instrumento"'], MIR); d.seta('M500 150 H546')
-d.etapa(550, 122, 260, 56, ['Preencher identificação,', 'responsáveis e fiscalização'], MIR)
-d.etiqueta(600, 186, 160, 'Formulário do MIR', MIR); d.seta('M810 150 H852')
-d.circulo(870, 150, MIR, 'Fim')
-d.obs(290, 186, 240, ['Número e descrição do instrumento', 'vêm da base do MIR'])
-# Raia gestor
-d.raia(260, 190, '', GESTOR, ['Gestor de TED', 'ou convenente'])
-d.circulo(222, 315, GESTOR, 'Início'); d.seta('M236 315 H286')
-d.etapa(290, 290, 180, 50, ['Abrir o instrumento'], GESTOR)
-d.etiqueta(285, 348, 190, 'UG (TED) · CNPJ (convênio)', GESTOR); d.seta('M470 315 H506')
-d.etapa(510, 287, 200, 56, ['Informar execução', 'e contrapartida'], GESTOR)
-d.etiqueta(525, 351, 170, 'Formulário do gestor', GESTOR); d.seta('M710 315 H726')
-d.decisao(790, 315, 60, 40, ['Executa por', 'parceiro?'])
-d.text(890, 300, 'Sim ou ambos', 12, '#374151', 600); d.seta('M850 315 H926')
-d.etapa(930, 287, 190, 56, ['Listar os projetos', 'com CPF do responsável'], GESTOR); d.seta('M1120 315 H1138')
-d.circulo(1156, 315, GESTOR, 'Fim')
-d.seta('M790 355 V378'); d.text(798, 366, 'Não ou ambos', 12, '#374151', 600, 'start')
-d.etapa(690, 382, 200, 56, ['Registrar as atividades', 'da própria unidade'], GESTOR)
-# ligação gestor -> responsável
-d.seta('M1025 343 V470 H630 V502')
-d.text(830, 460, 'o projeto aparece para o responsável pelo CPF', 12, '#374151', 600)
-# Raia responsável
-d.raia(460, 160, '', RESP, ['Responsável', 'pelo projeto'])
-d.circulo(222, 530, RESP, 'Início'); d.seta('M236 530 H286')
-d.etapa(290, 505, 180, 50, ['Entrar com o CPF'], RESP); d.seta('M470 530 H536')
-d.etapa(540, 505, 180, 50, ['Abrir o projeto'], RESP)
-d.etiqueta(550, 563, 160, 'Meus instrumentos', RESP); d.seta('M720 530 H766')
-d.etapa(770, 502, 230, 56, ['Registrar a atividade', 'e os beneficiários'], RESP)
-d.etiqueta(800, 566, 170, 'Formulário de execução', RESP); d.seta('M1000 530 H1038')
-d.circulo(1056, 530, RESP, 'Fim')
-d.obs(1010, 566, 170, ['Um preenchimento', 'por atividade'])
-d.obs(290, 566, 240, ['O CPF é dado pessoal: serve só', 'para liberar o projeto'], DEC, '!')
-d.salvar('quem-preenche.svg')
 
-# ---------- 2. Como começar ----------
-d = D(1200, 560, 'Como começar no Coleta MIR',
-      'A pessoa cria a conta com CPF, nome, e-mail e senha. Gestor de TED informa a UG, convenente informa o CNPJ e servidor do MIR pede o perfil MIR; o MIR confere o pedido e libera ou recusa com motivo. Responsável por projeto não pede perfil e vai direto para Meus instrumentos.')
-d.legenda([('circ', '#6B7280', 'Início e fim'), ('etapa', PESSOA, 'Etapa (cor do ator)'), ('dec', DEC, 'Decisão'),
-           ('etq', None, 'Tela ou formulário'), ('obs', '#9CA3AF', 'Observação')])
-d.raia(80, 240, '', PESSOA, ['Quem vai', 'preencher'])
-d.circulo(222, 210, PESSOA, 'Início'); d.seta('M236 210 H286')
-d.etapa(290, 182, 200, 56, ['Criar a conta', 'CPF, nome, e-mail, senha'], PESSOA)
-d.etiqueta(305, 246, 170, 'Solicitar acesso', PESSOA); d.seta('M490 210 H526')
-d.decisao(600, 210, 70, 42, ['Qual o seu', 'papel?'])
-for y, t in ((168, 'Gestor de TED: informa a UG'), (210, 'Convenente: informa o CNPJ'), (252, 'Servidor do MIR: pede perfil')):
-    d.seta(f'M670 210 H695 V{y} H716' if y != 210 else 'M670 210 H716')
-    d.raw(f'<rect x="720" y="{y-18}" width="240" height="36" rx="8" fill="{PESSOA}"/>')
-    d.text(840, y, t, 13, '#FFFFFF', 700)
-    d.linha(f'M960 {y} H985')
-d.seta('M985 168 V330 H810 V356')
-d.text(620, 116, 'Responsável por projeto: não pede perfil', 12, '#374151', 600, 'start')
-d.seta('M600 168 V128 H1095 V178')
-d.etapa(1010, 182, 170, 56, ['Preencher', 'em Meus instrumentos'], PESSOA)
-d.seta('M1160 238 V262'); d.circulo(1160, 280, PESSOA, 'Fim', 'esq')
-d.obs(290, 278, 400, ['Quem já tem conta pede outros perfis em "Meus acessos"'])
-# Raia MIR
-d.raia(330, 210, '', MIR, ['Servidor', 'do MIR'])
-d.etapa(720, 360, 180, 50, ['Conferir o pedido'], MIR)
-d.etiqueta(725, 418, 170, 'Solicitações de acesso', MIR); d.seta('M900 385 H996')
-d.decisao(1060, 385, 60, 38, ['Libera?'])
-d.seta('M1060 347 V242'); d.text(1068, 300, 'Sim', 12, '#374151', 600, 'start')
-d.seta('M1060 423 V448'); d.text(1068, 436, 'Não', 12, '#374151', 600, 'start')
-d.etapa(975, 452, 170, 50, ['Recusar com motivo'], MIR)
-d.obs(290, 452, 380, ['Quem pediu acompanha a liberação ou o motivo da', 'recusa em "Meus acessos"'])
-d.salvar('como-comecar.svg')
+def fontes():
+    regras = []
+    for peso in (500, 700, 800):
+        dados = base64.b64encode(open(os.path.join(RAIZ, 'fonts', 'reddit-%d.woff2' % peso), 'rb').read()).decode()
+        regras.append("@font-face{font-family:'Reddit Sans';font-weight:%d;src:url(data:font/woff2;base64,%s) format('woff2');}" % (peso, dados))
+    return ''.join(regras)
+
+
+def e(t):
+    return html.escape(t, quote=True)
+
+
+class Svg:
+    def __init__(self, w, h, titulo, descricao):
+        self.w, self.h = w, h
+        self.p = [
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d" role="img">' % (w, h, w, h),
+            '<title>%s</title><desc>%s</desc>' % (e(titulo), e(descricao)),
+            "<style>%s text{font-family:'Reddit Sans','Open Sans',Arial,sans-serif;}</style>" % fontes(),
+        ]
+
+    def texto(self, x, y, t, tam, cor, peso=500, anchor='start', espaco=0):
+        ls = ' letter-spacing="%s"' % espaco if espaco else ''
+        self.p.append('<text x="%s" y="%s" font-size="%s" font-weight="%s" fill="%s" text-anchor="%s"%s>%s</text>'
+                      % (x, y, tam, peso, cor, anchor, ls, e(t)))
+
+    def linhas(self, x, y, ls, tam, cor, peso=500, altura=1.25, anchor='start'):
+        for i, t in enumerate(ls):
+            self.texto(x, round(y + i * tam * altura, 1), t, tam, cor, peso, anchor)
+        return y + len(ls) * tam * altura
+
+    def ret(self, x, y, w, h, r, fill, extra=''):
+        self.p.append('<rect x="%s" y="%s" width="%s" height="%s" rx="%s" fill="%s" %s/>' % (x, y, w, h, r, fill, extra))
+
+    def chip(self, x, y, t, fundo, cor, tam=17):
+        w = len(t) * tam * 0.56 + 36
+        self.ret(x, y, round(w), 40, 20, fundo)
+        self.texto(round(x + w / 2), y + 26, t, tam, cor, 700, 'middle')
+        return w
+
+    def seta(self, x1, x2, y, cor=ROXO):
+        self.p.append('<path d="M%s %s H%s" stroke="%s" stroke-width="6" stroke-linecap="round" fill="none"/>' % (x1, y, x2 - 14, cor))
+        self.p.append('<path d="M%s %s L%s %s L%s %s Z" fill="%s"/>' % (x2 - 20, y - 14, x2, y, x2 - 20, y + 14, cor))
+
+    def salvar(self, nome):
+        self.p.append('</svg>')
+        open(os.path.join(SAIDA, nome), 'w', encoding='utf-8').write('\n'.join(self.p))
+
+
+# Quem preenche o quê: três cards; o do gestor em destaque e uma seta dele para o responsável.
+CARDS = [
+    ('Quem cadastra', ['Servidor', 'do MIR'], ['Cadastra o TED ou o', 'convênio e os dados', 'de acompanhamento.'], ['Novo instrumento'], False),
+    ('Quem acompanha', ['Gestor de TED', 'ou convenente'], ['Conta como o instrumento', 'é executado e indica', 'os projetos apoiados.'], ['UG ou CNPJ liberado'], True),
+    ('Quem executa', ['Responsável', 'pelo projeto'], ['Registra as atividades', 'e as pessoas', 'beneficiadas.'], ['Entra pelo CPF'], False),
+]
+s = Svg(1500, 470, 'Quem preenche o quê',
+        'Servidor do MIR cadastra o TED ou o convênio. Gestor de TED ou convenente, com a UG ou o CNPJ liberado, conta como o instrumento é executado e indica os projetos. Responsável pelo projeto entra pelo CPF e registra as atividades e as pessoas beneficiadas.')
+x = 0
+for i, (k, titulo, desc, chips, destaque) in enumerate(CARDS):
+    w = 440
+    fundo, cor_t, cor_d, cor_k = (ROXO, '#FFFFFF', '#FFFFFF', '#E9DFFF') if destaque else (SUAVE, MARINHO, TEXTO, ROXO700)
+    s.ret(x, 10, w, 450, 36, fundo)
+    s.texto(x + 44, 74, k.upper(), 17, cor_k, 700, espaco=3)
+    y = s.linhas(x + 44, 136, titulo, 46, cor_t, 800, 1.05)
+    s.linhas(x + 44, y + 34, desc, 24, cor_d, 500, 1.35)
+    cx = x + 44
+    for c in chips:
+        cx += s.chip(cx, 376, c, '#FFFFFF' if destaque else ROXO, ROXO if destaque else '#FFFFFF') + 10
+    if i == 1:
+        s.seta(x + w + 22, x + w + 98, 235)
+        s.texto(x + w + 60, 290, 'pelo', 16, ROXO700, 700, 'middle')
+        s.texto(x + w + 60, 310, 'CPF', 16, ROXO700, 700, 'middle')
+    x += w + (40 if i == 0 else 120)
+s.salvar('quem-preenche.svg')
+
+# Como começar: passos em pílula, como o gh-flow dos slides, e a exceção do responsável.
+PASSOS = [
+    ('Passo 1', 'Crie sua conta', 'CPF, e-mail e senha', SUAVE, MARINHO, ROXO700),
+    ('Passo 2', 'Peça seu perfil', 'UG, CNPJ ou MIR', SUAVE, MARINHO, ROXO700),
+    ('Passo 3', 'O MIR libera', 'veja em Meus acessos', ROXO, '#FFFFFF', '#E9DFFF'),
+    ('Passo 4', 'Preencha', 'em Meus instrumentos', MARINHO, '#FFFFFF', '#C9C2FF'),
+]
+s = Svg(1500, 330, 'Como começar',
+        'Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos. Responsável por projeto pula os passos 2 e 3, porque o projeto aparece pelo CPF.')
+w, gap = 315, 80
+for i, (k, t, d, fundo, cor_t, cor_k) in enumerate(PASSOS):
+    x = i * (w + gap)
+    s.ret(x, 10, w, 150, 75, fundo)
+    s.texto(x + 48, 58, k.upper(), 16, cor_k, 700, espaco=3)
+    s.texto(x + 48, 100, t, 34, cor_t, 800)
+    s.texto(x + 48, 134, d, 20, cor_t if fundo != SUAVE else TEXTO, 500)
+    if i < len(PASSOS) - 1:
+        s.seta(x + w + 14, x + w + gap - 14, 85)
+# exceção: pílula tracejada sob os passos 2 e 3, como o gh-flow__step--back
+x0, x1 = w + gap, 3 * (w + gap) - gap
+s.ret(x0, 210, x1 - x0, 96, 48, '#FFFFFF', 'stroke="%s" stroke-width="3" stroke-dasharray="10 8"' % ROXO700)
+s.texto((x0 + x1) / 2, 250, 'Responsável por projeto pula os passos 2 e 3', 24, MARINHO, 800, 'middle')
+s.texto((x0 + x1) / 2, 282, 'o projeto aparece em Meus instrumentos pelo CPF', 20, TEXTO, 500, 'middle')
+s.salvar('como-comecar.svg')

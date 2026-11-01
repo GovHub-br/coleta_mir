@@ -137,16 +137,16 @@ $primeiroNome = $this->user->guest ? '' : strtok(trim($this->user->name), ' ');
 	<section class="coleta-inicio-secao" aria-labelledby="coleta-quem">
 		<h2 id="coleta-quem">Quem preenche o quê</h2>
 		<div class="coleta-inicio-fluxo">
-			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/quem-preenche.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/quem-preenche.svg'); ?>" width="1200" height="640" loading="lazy"
-				alt="O servidor do MIR cadastra o instrumento em Novo instrumento. O gestor de TED ou convenente abre o instrumento pela UG ou CNPJ, informa execução e contrapartida e lista os projetos com o CPF do responsável; quando a própria unidade executa, ele mesmo registra as atividades. O responsável pelo projeto entra com o CPF, abre o projeto em Meus instrumentos e registra cada atividade e os beneficiários.">
+			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/quem-preenche.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/quem-preenche.svg'); ?>" width="1500" height="470" loading="lazy"
+				alt="Servidor do MIR: cadastra o TED ou o convênio, em Novo instrumento. Gestor de TED ou convenente, com a UG ou o CNPJ liberado: conta como o instrumento é executado e indica os projetos apoiados. Responsável pelo projeto: entra pelo CPF e registra as atividades e as pessoas beneficiadas.">
 		</div>
 	</section>
 
 	<section class="coleta-inicio-secao" aria-labelledby="coleta-passos">
 		<h2 id="coleta-passos">Como começar</h2>
 		<div class="coleta-inicio-fluxo">
-			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/como-comecar.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/como-comecar.svg'); ?>" width="1200" height="560" loading="lazy"
-				alt="Crie a conta em Solicitar acesso, com CPF, nome, e-mail e senha. Gestor de TED informa a UG, convenente informa o CNPJ e servidor do MIR pede o perfil MIR. O MIR confere o pedido em Solicitações de acesso e libera ou recusa com motivo; o resultado aparece em Meus acessos. Responsável por projeto não pede perfil e preenche direto em Meus instrumentos.">
+			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/como-comecar.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/como-comecar.svg'); ?>" width="1500" height="330" loading="lazy"
+				alt="Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil, informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos. Responsável por projeto pula os passos 2 e 3, porque o projeto aparece pelo CPF.">
 		</div>
 	</section>
 
