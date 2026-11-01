@@ -46,14 +46,12 @@ $menuClass = 'col-auto flex-auto';
  */
 $searchModule       = Helper::getSearchModule('-header');
 $oidcLoginHtml      = '';
-$oidcLoginPublished = false;
 
 foreach (ModuleHelper::getModules('login-modal-oidc') as $module) {
 	if (($module->module ?? '') !== 'mod_oidc_login' || empty($module->id)) {
 		continue;
 	}
 
-	$oidcLoginPublished = true;
 	$oidcLoginHtml = trim(ModuleHelper::renderModule($module, ['style' => 'none']));
 	break;
 }
@@ -79,7 +77,7 @@ $togglerHtml     = '
 			<div class="row">
 				<div id="sp-top1" class="col-lg-6">
             <div class="sp-column text-center text-lg-start">
-            <span class="fw-semibold">Portal do SINAPIR - Governo Federal</span>
+            <span class="fw-semibold">Coleta MIR - Governo Federal</span>
 						<?php if ($data->params->get('social_position') === 'top1'): ?>
 							<?php echo $social->renderFeature(); ?>
 						<?php endif ?>
@@ -172,10 +170,10 @@ $togglerHtml     = '
           </div>
           <h5 id="loginModalLabel">Acesso à Plataforma</h5>
           <p>
-            <?php if ($oidcLoginPublished): ?>
-              Pessoas físicas e entes acessam com GOV.BR (vinculados na adesão).
+            <?php if ($oidcLoginHtml !== ''): ?>
+              Entre com gov.br ou com o CPF e a senha da sua conta no Coleta MIR. O gov.br funciona para quem já tem conta.
             <?php else: ?>
-              Pessoas físicas e entes acessam com CPF e senha cadastrados no momento da adesão.
+              Entre com o CPF e a senha da sua conta no Coleta MIR.
             <?php endif; ?>
           </p>
         </div>
