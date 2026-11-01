@@ -110,12 +110,12 @@ $statusConfig = [
 	</div>
 
 	<?php if (!empty($this->linksExecucao)) : ?>
-	<!-- Formulário de execução: um link por projeto -->
+	<!-- Formulário de execução: um preenchimento por atividade, aberto pelo projeto -->
 	<div class="fr-docs-section fr-execucao">
 		<h3 class="fr-docs-titulo"><i class="fas fa-tasks"></i> Registro da execução</h3>
 		<p class="text-muted">Cada atividade executada no período é registrada em um preenchimento do formulário de execução.
 			<?php if (count(array_diff_key($this->linksExecucao, [0 => true])) > 0) : ?>
-				Envie a cada executor o link do seu projeto: os dados do instrumento e do projeto já vêm preenchidos.
+				Cada responsável vê o seu projeto em "Meus instrumentos" ao entrar com o CPF informado na lista; os dados do instrumento e do projeto já vêm preenchidos.
 			<?php endif; ?>
 		</p>
 		<?php if (isset($this->linksExecucao[0])) : ?>
@@ -128,29 +128,18 @@ $statusConfig = [
 				<div class="fr-resposta-header">
 					<span class="fr-resposta-titulo"><?php echo $projeto . '. ' . htmlspecialchars($link['rotulo']); ?></span>
 				</div>
-				<?php if ($link['responsavel'] !== '' || $link['email'] !== '') : ?>
+				<?php $responsavel = array_filter([$link['responsavel'], $link['cpf'] !== '' ? 'CPF ' . vsprintf('%s.%s.%s-%s', str_split(str_pad($link['cpf'], 11, '0', STR_PAD_LEFT), 3)) : '', $link['email']]); ?>
+				<?php if ($responsavel) : ?>
 					<div class="fr-resposta-meta"><i class="far fa-user"></i>
-						<?php echo htmlspecialchars(trim($link['responsavel'] . ($link['email'] !== '' ? ' - ' . $link['email'] : ''), ' -')); ?>
+						<?php echo htmlspecialchars(implode(' - ', $responsavel)); ?>
 					</div>
 				<?php endif; ?>
-				<div class="input-group input-group-sm mt-2">
-					<input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($link['url']); ?>" aria-label="Link de execução do projeto <?php echo $projeto; ?>">
-					<button type="button" class="btn btn-outline-secondary fr-copiar-link"><i class="far fa-copy"></i> Copiar</button>
-					<a class="btn btn-outline-primary" href="<?php echo htmlspecialchars($link['url']); ?>" target="_blank" rel="noopener">Abrir</a>
-				</div>
+				<a class="btn btn-sm btn-outline-primary mt-2" href="<?php echo htmlspecialchars($link['url']); ?>">
+					<i class="fas fa-plus"></i> Preencher a execução
+				</a>
 			</div>
 		<?php endforeach; ?>
 	</div>
-	<script>
-		document.querySelectorAll('.fr-copiar-link').forEach(function (botao) {
-			botao.addEventListener('click', function () {
-				var campo = botao.parentElement.querySelector('input');
-				campo.select();
-				(navigator.clipboard ? navigator.clipboard.writeText(campo.value) : Promise.reject()).catch(function () { document.execCommand('copy'); });
-				botao.innerHTML = '<i class="fas fa-check"></i> Copiado';
-			});
-		});
-	</script>
 	<?php endif; ?>
 
 	<!-- Responses by Section -->

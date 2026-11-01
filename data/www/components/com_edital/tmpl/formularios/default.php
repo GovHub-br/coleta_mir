@@ -43,7 +43,11 @@ include __DIR__ . '/../parts/_menu_formularios_ente.php';
 		<?php endif; ?>
 	</div>
 
-	<?php if (empty($this->instrumentos) && empty($this->outrasRespostas)) : ?>
+	<?php if (\Joomla\CMS\Factory::getApplication()->getIdentity()->guest) : ?>
+		<div class="alert alert-info">
+			<a href="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_users&view=login&return=' . base64_encode(\Joomla\CMS\Uri\Uri::getInstance()->toString())); ?>">Entre com o seu CPF</a> para ver os seus instrumentos.
+		</div>
+	<?php elseif (empty($this->instrumentos) && empty($this->outrasRespostas)) : ?>
 		<div class="alert alert-info">
 			<?php if ($this->novos) : ?>
 				Você ainda não preencheu nenhum instrumento. Clique em <strong>Novo instrumento</strong> para começar.

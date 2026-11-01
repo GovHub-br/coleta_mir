@@ -19,9 +19,9 @@ use Joomla\CMS\Uri\Uri;
  * Formulários encadeados: um formulário de origem (ex.: gestor do TED, que lista os projetos)
  * e um formulário de execução (tb_edital.co_edital_adesao = origem), respondido por projeto.
  *
- * Cada projeto da lista de origem tem um link próprio para o formulário de execução
+ * Cada projeto da lista de origem abre o formulário de execução pelo endereço de getLinkExecucao
  * (origem_key = chave pública da resposta de origem, projeto = posição na lista; 0 = execução
- * pela própria unidade). As perguntas da execução com o parâmetro "origem" vêm preenchidas e
+ * pela própria unidade), oferecido em "Meus instrumentos" ao responsável (CPF) e ao gestor. As perguntas da execução com o parâmetro "origem" vêm preenchidas e
  * travadas a partir da resposta de origem:
  *   - "pergunta:<título>": resposta da pergunta de mesmo título no formulário de origem;
  *   - "projeto:<coluna>": coluna do projeto escolhido (ou o parâmetro "origem_propria" quando
@@ -136,7 +136,7 @@ class OrigemHelper
      */
     public static function resolver($editalExecucao, string $origemKey, int $projeto): array
     {
-        $erro = ['erro' => 'Link de execução inválido. Peça um novo link ao gestor do instrumento.', 'adesao' => null, 'valores' => []];
+        $erro = ['erro' => 'Projeto não encontrado. Abra a execução pelo projeto, em "Meus instrumentos".', 'adesao' => null, 'valores' => []];
         $adesaoId = (int) AdesaoHelper::getAdesaoIdByPubKey($origemKey);
         $adesao = $adesaoId > 0 ? AdesaoHelper::getAdesaoById($adesaoId) : null;
 
