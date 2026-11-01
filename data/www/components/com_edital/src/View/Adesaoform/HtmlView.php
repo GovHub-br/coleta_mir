@@ -62,7 +62,7 @@ class HtmlView extends BaseHtmlView
 	 */
 	public $valoresOrigem = [];
 
-	/** Link de execução (resposta nova): chave da resposta de origem e posição do projeto. */
+	/** Execução nova: chave da resposta de origem e posição do projeto (vindos do projeto em "Meus instrumentos"). */
 	public $origemKey = '';
 
 	public $projeto = -1;
@@ -329,7 +329,7 @@ class HtmlView extends BaseHtmlView
 
 		if ($origem === null || $origem['erro'] !== null) {
 			$this->avisoMinhaAdesao = $origem['erro']
-				?? 'Este formulário é preenchido a partir do link de execução enviado pelo gestor do instrumento, um por projeto.';
+				?? 'A execução é preenchida a partir do projeto, em "Meus instrumentos": pelo responsável cadastrado (CPF) na lista de projetos do gestor ou pelo próprio gestor.';
 
 			return;
 		}

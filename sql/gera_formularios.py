@@ -458,7 +458,7 @@ INTRO_PERFIS = (
     "<p><strong>Perfis de preenchimento:</strong></p><ul>"
     "<li><strong>Blocos 1 a 3, 5.0 e 6:</strong> {mir}</li>"
     "<li><strong>Bloco 4 e projetos (5.1):</strong> {gestor} (atualização periódica), em formulário próprio ({sufixo_gestor})</li>"
-    "<li><strong>Atividades e beneficiários (5.2 em diante):</strong> executor de cada projeto, pelo link enviado pelo {gestor_curto}, em formulário próprio (execução), um preenchimento por atividade</li></ul>"
+    "<li><strong>Atividades e beneficiários (5.2 em diante):</strong> responsável por cada projeto, identificado pelo CPF na lista de projetos do {gestor_curto}, em formulário próprio (execução), um preenchimento por atividade</li></ul>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>"
     "<p>Campos marcados como automáticos serão preenchidos a partir do Transferegov.br / SIAFI / Siorg quando a integração estiver disponível; até lá, preencha manualmente.</p>"
 )
@@ -544,7 +544,7 @@ ted_ges = Form(
     "<p>Atualização periódica da execução dos Termos de Execução Descentralizada (TEDs) celebrados pelo MIR.</p>"
     "<p><strong>Quem preenche:</strong> gestor do TED na Unidade Descentralizada: forma de execução, contrapartida e os projetos/ações apoiados, com seus responsáveis. "
     "Os Blocos 1 a 3 e 6 são preenchidos pelo servidor do MIR em formulário próprio.</p>"
-    "<p>Ao enviar, cada projeto recebe um link para o formulário de execução, em que o executor registra as atividades e os beneficiários.</p>"
+    "<p>Ao enviar, cada projeto aparece em \"Meus instrumentos\" para o responsável informado (pelo CPF), que registra no formulário de execução as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     20,
     perfis=(PERFIL_GESTOR_TED,),
@@ -590,7 +590,7 @@ ted_ges.p("radio", "Esta atividade é executada por uma organização parceira �
       "Por exemplo, sua organização é responsável pela abertura de editais para selecionar organizações para executarem atividades específicas - cursos, oficinas, elaboração de materiais, etc.",
       TED_PARCEIRA, req=True, chave="parceira")
 ted_ges.p("tabela", "Projetos / ações apoiados e instituições executoras",
-      "Adicione um item por projeto/ação apoiada, com o responsável que receberá o link de execução do projeto.",
+      "Adicione um item por projeto/ação apoiada, com o responsável e o CPF dele: é com esse CPF que ele acessa a execução do projeto em \"Meus instrumentos\".",
       {**colunas(
           ("instituicao", "Instituição executora", "linha", True),
           ("cnpj", "CNPJ (quando se aplicar)", "cnpj"),
@@ -604,15 +604,15 @@ ted_ges.p("tabela", "Projetos / ações apoiados e instituições executoras",
       ), "projetos_execucao": "execução pela própria Unidade Descentralizada",
          "propria_quando": json.dumps(TED_PARCEIRA[1:], ensure_ascii=False)},
       dep=("parceira", [TED_PARCEIRA[0], TED_PARCEIRA[2]]))
-ted_ges.aviso("Links de execução",
-              "<p>Ao enviar este formulário, cada projeto da lista recebe um link para o formulário de execução, a ser enviado ao responsável pelo projeto: "
+ted_ges.aviso("Execução dos projetos",
+              "<p>Ao enviar este formulário, cada projeto da lista aparece em \"Meus instrumentos\" para o responsável, que entra com o CPF informado e preenche o formulário de execução: "
               "nele são registradas as atividades executadas no período e os beneficiários alcançados, uma atividade por preenchimento. "
-              "Quando a própria Unidade Descentralizada executa atividades, o registro é feito pelo botão \"Registrar atividades\".</p>")
+              "Quando a própria Unidade Descentralizada executa atividades, o próprio gestor faz o registro, também em \"Meus instrumentos\".</p>")
 
 ted_ex = Form(
     "ted_ex", "Coleta MIR - TEDs (execução)",
     "<p>Registro das atividades executadas e dos beneficiários alcançados nos Termos de Execução Descentralizada (TEDs) celebrados pelo MIR: um preenchimento por atividade.</p>"
-    "<p><strong>Quem preenche:</strong> o responsável por cada projeto, pelo link enviado pelo gestor do TED, ou o próprio gestor, quando a Unidade Descentralizada executa diretamente. "
+    "<p><strong>Quem preenche:</strong> o responsável por cada projeto, vinculado pelo CPF na lista de projetos do gestor do TED, ou o próprio gestor, quando a Unidade Descentralizada executa diretamente. O preenchimento começa pelo projeto, em \"Meus instrumentos\". "
     "O TED, o período e o projeto vêm definidos pelo gestor.</p>",
     25,
     origem=ted_ges,
@@ -631,7 +631,7 @@ ted_ex.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", r
 ted_ex.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
 ted_ex.bloco("b5", "Bloco 5 - Atividade e beneficiários (TED)", "Atividade", "fa fa-map-marker",
-             "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, preencha o formulário de novo pelo mesmo link.</p>")
+             "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, use de novo \"Preencher a execução\" no projeto, em \"Meus instrumentos\".</p>")
 ted_ex.aviso("Mensagem ao usuário",
              "<p><strong>Neste momento você deve inserir uma atividade por vez que tenha sido executada no período a ser coletado.</strong></p>",
              "warning")
@@ -806,7 +806,7 @@ cv_ges = Form(
     "<p>Atualização periódica da execução dos convênios celebrados pelo MIR, na qualidade de concedente.</p>"
     "<p><strong>Quem preenche:</strong> convenente: forma de execução, contrapartida, bens e os projetos/ações apoiados, com seus responsáveis. "
     "Os Blocos 1 a 3 e 6 são preenchidos pelo servidor do MIR em formulário próprio.</p>"
-    "<p>Ao enviar, cada projeto recebe um link para o formulário de execução, em que o executor registra as atividades e os beneficiários.</p>"
+    "<p>Ao enviar, cada projeto aparece em \"Meus instrumentos\" para o responsável informado (pelo CPF), que registra no formulário de execução as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     40,
     perfis=(PERFIL_GESTOR_CONVENIO,),
@@ -886,7 +886,7 @@ cv_ges.p("radio", "Esta atividade é executada por organização distinta do con
      "Por exemplo: o convenente contrata empresa, seleciona organizações por chamada pública ou repassa recursos a outra instituição para executar cursos, oficinas, obras, elaboração de materiais, etc.",
      CV_TERCEIROS, req=True, chave="terceiros")
 cv_ges.p("tabela", "Projetos / ações apoiados e instituições executoras",
-     "Adicione um item por projeto/ação apoiada, com o responsável que receberá o link de execução do projeto. Nota: o MIR (concedente) ocupa a 1ª ponta da cadeia de execução.",
+     "Adicione um item por projeto/ação apoiada, com o responsável e o CPF dele: é com esse CPF que ele acessa a execução do projeto em \"Meus instrumentos\". Nota: o MIR (concedente) ocupa a 1ª ponta da cadeia de execução.",
      {**colunas(
          ("instituicao", "Instituição executora", "linha", True),
          ("cnpj", "CNPJ (quando se aplicar)", "cnpj"),
@@ -900,15 +900,15 @@ cv_ges.p("tabela", "Projetos / ações apoiados e instituições executoras",
      ), "projetos_execucao": "execução direta pelo convenente",
         "propria_quando": json.dumps(CV_TERCEIROS[1:], ensure_ascii=False)},
      dep=("terceiros", [CV_TERCEIROS[0], CV_TERCEIROS[2]]))
-cv_ges.aviso("Links de execução",
-             "<p>Ao enviar este formulário, cada projeto da lista recebe um link para o formulário de execução, a ser enviado ao responsável pelo projeto: "
+cv_ges.aviso("Execução dos projetos",
+             "<p>Ao enviar este formulário, cada projeto da lista aparece em \"Meus instrumentos\" para o responsável, que entra com o CPF informado e preenche o formulário de execução: "
              "nele são registradas as atividades executadas no período e os beneficiários alcançados, uma atividade por preenchimento. "
-             "Quando o próprio convenente executa atividades, o registro é feito pelo botão \"Registrar atividades\".</p>")
+             "Quando o próprio convenente executa atividades, ele mesmo faz o registro, também em \"Meus instrumentos\".</p>")
 
 cv_ex = Form(
     "conv_ex", "Coleta MIR - Convênios (execução)",
     "<p>Registro das atividades executadas e dos beneficiários alcançados nos convênios celebrados pelo MIR: um preenchimento por atividade.</p>"
-    "<p><strong>Quem preenche:</strong> o responsável por cada projeto, pelo link enviado pelo convenente, ou o próprio convenente, quando executa diretamente. "
+    "<p><strong>Quem preenche:</strong> o responsável por cada projeto, vinculado pelo CPF na lista de projetos do convenente, ou o próprio convenente, quando executa diretamente. O preenchimento começa pelo projeto, em \"Meus instrumentos\". "
     "O convênio, o período e o projeto vêm definidos pelo convenente.</p>",
     45,
     origem=cv_ges,
@@ -927,7 +927,7 @@ cv_ex.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", re
 cv_ex.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
 cv_ex.bloco("b5", "Bloco 5 - Atividade e beneficiários (Convênio)", "Atividade", "fa fa-map-marker",
-            "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, preencha o formulário de novo pelo mesmo link.</p>")
+            "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, use de novo \"Preencher a execução\" no projeto, em \"Meus instrumentos\".</p>")
 cv_ex.aviso("Mensagem ao usuário",
             "<p><strong>Neste momento você deve inserir uma atividade por vez que tenha sido executada no período a ser coletado.</strong></p>",
             "warning")
@@ -973,8 +973,8 @@ header = f"""-- Carga dos formulários Coleta MIR - TEDs e Coleta MIR - Convêni
 -- Cria três editais do tipo 'formulario' por instrumento, conforme o perfil de preenchimento:
 --   * (MIR): Blocos 1, 2, 3, 5.0 e 6 - servidor do MIR;
 --   * (gestor / convenente): Bloco 4 e projetos (5.1) - gestor do TED ou convenente;
---   * (execução): atividades e beneficiários (5.2 em diante), um preenchimento por atividade, pelo link
---     de cada projeto. Ligado ao anterior por co_edital_adesao.
+--   * (execução): atividades e beneficiários (5.2 em diante), um preenchimento por atividade, aberto pelo
+--     projeto em "Meus instrumentos" (responsável vinculado pelo CPF). Ligado ao anterior por co_edital_adesao.
 -- Cada bloco vira um agrupamento (aba) com suas perguntas. As dependências entre perguntas (depende_de) usam os
 -- ids gerados nesta mesma execução. Prefixo de tabelas: {PREFIX}
 --
