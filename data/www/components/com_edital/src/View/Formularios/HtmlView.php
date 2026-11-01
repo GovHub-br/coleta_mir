@@ -206,7 +206,7 @@ class HtmlView extends BaseHtmlView
 
 			$this->grupoInstrumento($instrumento)->projetos[] = (object) [
 				'rotulo'     => '',
-				'detalhe'    => 'Pela ' . strtoupper((string) ($registro['tp_identificador'] ?? '')) . ' ' . $unidade . ' - ' . ($unidades[$item['perfil']][$unidade] ?? ''),
+				'detalhe'    => (($registro['tp_identificador'] ?? '') === 'cnpj' ? 'Pelo ' : 'Pela ') . strtoupper((string) ($registro['tp_identificador'] ?? '')) . ' ' . $unidade . ' - ' . ($unidades[$item['perfil']][$unidade] ?? ''),
 				'formulario' => $edital->no_edital,
 				'url'        => Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . (int) $edital->id . '&instrumento=' . rawurlencode($item['codigo']) . $itemid),
 			];
