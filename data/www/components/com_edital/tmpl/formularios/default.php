@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
 
-$this->document->addStyleSheet(Uri::root() . 'media/com_edital/css/formularios.css');
+$this->document->addStyleSheet(Uri::root() . 'media/com_edital/css/formularios.css?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/css/formularios.css'));
 
 // Menu do "Novo instrumento" quando o perfil tem mais de um formulário.
 HTMLHelper::_('bootstrap.dropdown', '.dropdown-toggle');
@@ -69,7 +69,7 @@ include __DIR__ . '/../parts/_menu_formularios_ente.php';
 						<?php echo $this->escape($instrumento->rotuloTipo . ' ' . $instrumento->codigo); ?>
 					</h3>
 					<?php if ($instrumento->descricao !== '') : ?>
-						<p class="formulario-description"><?php echo $this->escape($instrumento->descricao); ?></p>
+						<p class="formulario-description instrumento-descricao" title="<?php echo $this->escape($instrumento->descricao); ?>"><?php echo $this->escape($instrumento->descricao); ?></p>
 					<?php endif; ?>
 					<?php if ($instrumento->projetos) : ?>
 						<p class="mb-1"><strong>Para você preencher</strong></p>
