@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `#__tb_edital` (
 `tp_edital` VARCHAR(24) NULL DEFAULT 'adesao',
 `co_edital_adesao` INT NULL DEFAULT NULL ,
 `tp_esfera_solicitante` VARCHAR(24) NULL DEFAULT NULL ,
+`co_grupos` VARCHAR(255) NULL DEFAULT NULL ,
 PRIMARY KEY (`id`)
 ,KEY `idx_state` (`state`)
 ,KEY `idx_checked_out` (`checked_out`)

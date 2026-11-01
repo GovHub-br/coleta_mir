@@ -190,6 +190,30 @@ class OrigemHelper
         return $valores;
     }
 
+    /**
+     * Projeto de uma resposta de execução, para identificá-la na listagem: respostas das
+     * perguntas travadas a partir do projeto (origem "projeto:..."), ex.: "Universidade X - Formação".
+     */
+    public static function getRotuloProjeto(int $adesaoId, int $editalId): string
+    {
+        $partes = [];
+
+        foreach (PerguntaHelper::getPerguntasByEdital($editalId, 'adesao') ?: [] as $pergunta) {
+            if (strpos(PerguntaHelper::getParametro($pergunta, self::PARAM_ORIGEM), 'projeto:') !== 0) {
+                continue;
+            }
+
+            $resposta = PerguntaHelper::getRespostaByAdesaoPergunta($adesaoId, (int) $pergunta->id);
+            $valor = is_object($resposta) ? trim((string) $resposta->ds_resposta) : '';
+
+            if ($valor !== '') {
+                $partes[] = $valor;
+            }
+        }
+
+        return implode(' - ', $partes);
+    }
+
     /** Link do formulário de execução para um projeto da resposta de origem. */
     public static function getLinkExecucao(int $editalExecucaoId, int $adesaoOrigemId, int $projeto): string
     {

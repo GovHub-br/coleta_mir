@@ -132,6 +132,13 @@ class EditalTable extends Table implements VersionableTableInterface, TaggableTa
 			$array['tp_esfera_solicitante'] = null;
 		}
 
+		// Perfis que podem iniciar o formulário: ids de grupos separados por vírgula.
+		if (isset($array['co_grupos']))
+		{
+			$grupos = array_filter(array_map('intval', is_array($array['co_grupos']) ? $array['co_grupos'] : explode(',', (string) $array['co_grupos'])));
+			$array['co_grupos'] = $grupos ? implode(',', array_unique($grupos)) : null;
+		}
+
 		foreach (['co_edital_municipio_consorcio', 'co_edital_adesao'] as $fk)
 		{
 			if (!isset($array[$fk]) || $array[$fk] === '' || (int) $array[$fk] === 0)

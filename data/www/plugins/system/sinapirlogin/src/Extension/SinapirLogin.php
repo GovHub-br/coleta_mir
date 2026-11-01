@@ -55,6 +55,31 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
         return 'index.php?Itemid=' . (int) $item->id;
     }
 
+    /**
+     * O usuário está em algum grupo que é perfil de formulário do Coleta MIR (tb_edital.co_grupos),
+     * ex.: "Coleta MIR - Gestor de TEDs".
+     */
+    private function temPerfilColeta(array $groups): bool
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        try {
+            $perfis = $db->setQuery(
+                $db->getQuery(true)
+                    ->select($db->quoteName('co_grupos'))
+                    ->from($db->quoteName('#__tb_edital'))
+                    ->where($db->quoteName('co_grupos') . ' IS NOT NULL')
+                    ->where($db->quoteName('state') . ' = 1')
+            )->loadColumn();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        $perfis = array_map('intval', explode(',', implode(',', $perfis)));
+
+        return (bool) array_intersect($perfis, $groups);
+    }
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -110,10 +135,10 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
 
         if ($isMir) {
             $alias = self::ROUTE_PAINEL;
-        } elseif ($isEnte) {
+        } elseif ($isEnte || $this->temPerfilColeta($groups)) {
             $alias = self::ROUTE_ADESAO;
         } else {
-            // Usuário sem perfil MIR ou Ente — não redireciona (comportamento padrão)
+            // Usuário sem perfil MIR, Ente ou de preenchimento do Coleta MIR — não redireciona (comportamento padrão)
             return;
         }
 
