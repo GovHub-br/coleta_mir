@@ -233,6 +233,11 @@ $togglerHtml     = '
               <a href="#" id="openResetModal">Esqueceu sua senha?</a>
             </div>
 
+            <!-- Coleta MIR: cadastro com pedido de perfil -->
+            <div class="login-forgot">
+              Não tem conta? <a href="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_edital&view=solicitacaoacesso'); ?>">Solicite acesso</a>
+            </div>
+
             <!-- Termos -->
             <p class="login-terms">
               Ao acessar, você concorda com os Termos de Uso e Política de Privacidade

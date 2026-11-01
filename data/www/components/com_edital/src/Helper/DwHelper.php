@@ -128,6 +128,9 @@ class DwHelper
                    dt_assinatura,
                    nr_processo_sei,
                    no_parceiro || COALESCE(' (' || upper(tp_identificador) || ' ' || co_identificador || ')', '') AS parceiro,
+                   no_parceiro,
+                   tp_identificador,
+                   co_identificador,
                    CASE WHEN qt_aditivos > 0 THEN 'Sim' WHEN qt_aditivos = 0 THEN 'Não' END AS existem_aditivos,
                    ds_situacao,
                    CASE

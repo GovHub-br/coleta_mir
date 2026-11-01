@@ -12,6 +12,7 @@ namespace Comedital\Component\Edital\Site\View\Adesaoform;
 // No direct access
 defined('_JEXEC') or die;
 
+use Comedital\Component\Edital\Site\Helper\AcessoHelper;
 use Comedital\Component\Edital\Site\Helper\AdesaoHelper;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use \Joomla\CMS\Factory;
@@ -61,6 +62,9 @@ class HtmlView extends BaseHtmlView
 	 * @var array
 	 */
 	public $valoresOrigem = [];
+
+	/** Formulário do gestor, resposta nova: código do instrumento escolhido em "Meus instrumentos". */
+	public $instrumento = '';
 
 	/** Quem define os valores travados: o formulário de origem é do MIR ou do gestor. */
 	public $definidoPor = 'definido pelo gestor';
@@ -268,6 +272,10 @@ class HtmlView extends BaseHtmlView
 			$this->prepararOrigem($perguntas);
 		}
 
+		if (!$this->previewMode && AcessoHelper::getPerguntaAcessoUnidade($perguntas)) {
+			$this->prepararInstrumento($perguntas);
+		}
+
 		$perguntasAjuda = PerguntaHelper::getPerguntasByEdital($editalId, 'ajuda_adesao');
 		$this->perguntasAjuda = $perguntasAjuda;
 	}
@@ -342,6 +350,28 @@ class HtmlView extends BaseHtmlView
 
 		$this->item->co_adesao_origem = (int) $origem['adesao']->id;
 		$this->valoresOrigem = $origem['valores'];
+	}
+
+	/**
+	 * Formulário do gestor: instrumento (e descrição) travados, vindos da escolha em "Meus instrumentos"
+	 * numa UG/CNPJ liberada, ou do que já foi gravado.
+	 */
+	protected function prepararInstrumento(array $perguntas)
+	{
+		$salvas = !empty($this->item->id)
+			? (new \Comedital\Component\Edital\Site\Model\RespostaModel())->getRespostasMapByAdesao((int) $this->item->id)
+			: [];
+		$instrumento = AcessoHelper::valoresDoInstrumento($perguntas, $salvas, $this->input->getString('instrumento', ''), Factory::getApplication()->getIdentity());
+
+		if ($instrumento['erro'] !== null) {
+			$this->avisoMinhaAdesao = $instrumento['erro'];
+
+			return;
+		}
+
+		$this->instrumento = $instrumento['codigo'];
+		$this->valoresOrigem = $instrumento['valores'] + $this->valoresOrigem;
+		$this->definidoPor = 'definido pelo instrumento';
 	}
 
 	public function isPreviewMode(): bool

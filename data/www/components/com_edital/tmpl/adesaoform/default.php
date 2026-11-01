@@ -171,6 +171,9 @@ if ($travado) {
         <input type="hidden" id="id_usuario_logado" name="id_usuario_logado" value="<?php echo isset($this->user->id) ? $this->user->id : ''; ?>"/>
         <input type="hidden" id="co_adesao" name="co_adesao" value="<?php echo isset($this->item->id) ? $this->item->id : ''; ?>"/>
         <input type="hidden" id="municipi_salvo" name="municipi_salvo" value="<?php echo isset($this->item->ds_municipios) ? $this->item->ds_municipios : ''; ?>"/>
+        <?php if ($this->instrumento !== '') : ?>
+        <input type="hidden" name="instrumento" value="<?php echo $this->escape($this->instrumento); ?>"/>
+        <?php endif; ?>
         <?php if ($this->origemKey !== '') : ?>
         <input type="hidden" name="origem_key" value="<?php echo $this->escape($this->origemKey); ?>"/>
         <input type="hidden" name="projeto" value="<?php echo (int) $this->projeto; ?>"/>

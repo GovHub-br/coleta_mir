@@ -24,6 +24,7 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Comedital\Component\Edital\Site\Helper\EditalHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Comedital\Component\Edital\Site\Helper\AdesaoHelper;
+use Comedital\Component\Edital\Site\Helper\AcessoHelper;
 use Comedital\Component\Edital\Site\Helper\DwHelper;
 use Comedital\Component\Edital\Site\Helper\EspelhoDwHelper;
 use Comedital\Component\Edital\Site\Helper\OrigemHelper;
@@ -613,6 +614,21 @@ class AdesaoformController extends FormController
 			}
 
 			foreach ($valoresOrigem as $perguntaId => $valor) {
+				$inputPerguntas[$perguntaId] = $valor;
+			}
+		}
+
+		// Formulário do gestor: instrumento e descrição vêm da UG/CNPJ liberada (resposta nova) ou do
+		// que já foi gravado; o que vier no POST para essas perguntas é ignorado.
+		if (AcessoHelper::getPerguntaAcessoUnidade($resPerguntas)) {
+			$instrumento = AcessoHelper::valoresDoInstrumento($resPerguntas, $dados['id'] > 0 ? $respostasExistentes : [],
+				$this->input->getString('instrumento', ''), Factory::getApplication()->getIdentity());
+
+			if ($instrumento['erro'] !== null) {
+				$errors[] = $instrumento['erro'];
+			}
+
+			foreach ($instrumento['valores'] as $perguntaId => $valor) {
 				$inputPerguntas[$perguntaId] = $valor;
 			}
 		}

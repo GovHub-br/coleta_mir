@@ -15,10 +15,13 @@ defined('_JEXEC') or die;
 use \Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use \Joomla\CMS\Factory;
 use \Joomla\CMS\Router\Route;
+use \Comedital\Component\Edital\Site\Helper\AcessoHelper;
+use \Comedital\Component\Edital\Site\Helper\DwHelper;
 use \Comedital\Component\Edital\Site\Helper\EditalHelper;
 use \Comedital\Component\Edital\Site\Helper\InstrumentoHelper;
 use \Comedital\Component\Edital\Site\Helper\OrigemHelper;
 use \Comedital\Component\Edital\Site\Helper\PerfilHelper;
+use \Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use \Comedital\Component\Edital\Site\Model\MinhaadesaoModel;
 
 /**
@@ -131,7 +134,7 @@ class HtmlView extends BaseHtmlView
 
 					$this->grupoInstrumento($instrumento)->projetos[] = (object) [
 						'rotulo'     => $encontrado['dados']['projeto'] ? $encontrado['dados']['rotulo'] : '',
-						'gestor'     => Factory::getUser((int) $encontrado['adesao']->created_by)->name,
+						'detalhe'    => 'Cadastrado por ' . Factory::getUser((int) $encontrado['adesao']->created_by)->name,
 						'formulario' => $editalExecucao->no_edital,
 						'url'        => OrigemHelper::getLinkExecucao((int) $editalExecucao->id, (int) $encontrado['adesao']->id, $encontrado['projeto']),
 					];
@@ -154,12 +157,59 @@ class HtmlView extends BaseHtmlView
 			}
 		}
 
+		if (!$user->guest)
+		{
+			$this->adicionarInstrumentosDaUnidade($editais, $user, $itemid);
+		}
+
 		// Instrumentos por tipo e código; dentro de cada um, a resposta mais recente primeiro.
 		uasort($this->instrumentos, static fn ($a, $b) => [$a->rotuloTipo, $a->codigo] <=> [$b->rotuloTipo, $b->codigo]);
 
 		foreach (array_merge($this->instrumentos, $this->outrasRespostas) as $grupo)
 		{
 			usort($grupo->respostas, static fn ($a, $b) => $b->id <=> $a->id);
+		}
+	}
+
+	/**
+	 * Gestor liberado (UG/CNPJ): todos os instrumentos da unidade, com o formulário do gestor
+	 * (o que tem a pergunta de instrumento com acesso_unidade para a fonte do instrumento).
+	 */
+	protected function adicionarInstrumentosDaUnidade(array $editais, $user, string $itemid)
+	{
+		$formularios = [];
+
+		foreach ($editais as $edital)
+		{
+			$pergunta = InstrumentoHelper::getPergunta((int) $edital->id);
+
+			if ($edital->aberto && $pergunta && PerguntaHelper::getParametro($pergunta, AcessoHelper::PARAM_ACESSO_UNIDADE) === 'sim')
+			{
+				$formularios[PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_FONTE)] = $edital;
+			}
+		}
+
+		$unidades = AcessoHelper::getUnidadesLiberadas((int) $user->id);
+
+		foreach (AcessoHelper::getInstrumentosDoGestor((int) $user->id) as $item)
+		{
+			$edital = $formularios[$item['fonte']] ?? null;
+
+			if (!$edital)
+			{
+				continue;
+			}
+
+			$instrumento = InstrumentoHelper::montar($item['fonte'], $item['codigo']);
+			$registro = \Comedital\Component\Edital\Site\Helper\EspelhoDwHelper::getRegistro('instrumento', $instrumento['chave']) ?? [];
+			$unidade = (string) ($registro['co_identificador'] ?? '');
+
+			$this->grupoInstrumento($instrumento)->projetos[] = (object) [
+				'rotulo'     => '',
+				'detalhe'    => 'Pela ' . strtoupper((string) ($registro['tp_identificador'] ?? '')) . ' ' . $unidade . ' - ' . ($unidades[$item['perfil']][$unidade] ?? ''),
+				'formulario' => $edital->no_edital,
+				'url'        => Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . (int) $edital->id . '&instrumento=' . rawurlencode($item['codigo']) . $itemid),
+			];
 		}
 	}
 

@@ -93,7 +93,7 @@ class PerguntaHelper
     /** Nomes de ds_opcoes que configuram a pergunta (não são alternativas nem editáveis no construtor). */
     public static function parametrosConfiguracao(): array
     {
-        return array_merge(DwHelper::PARAMETROS, [EspelhoDwHelper::PARAM_REMOVIDOS], OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
+        return array_merge(DwHelper::PARAMETROS, [EspelhoDwHelper::PARAM_REMOVIDOS, AcessoHelper::PARAM_ACESSO_UNIDADE], OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
     }
 
     /** Só os 11 dígitos do CPF, se os dígitos verificadores conferem; vazio caso contrário. */
