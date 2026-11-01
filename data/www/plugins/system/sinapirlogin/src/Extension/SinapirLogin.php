@@ -29,9 +29,8 @@ use Joomla\Event\SubscriberInterface;
  */
 final class SinapirLogin extends CMSPlugin implements SubscriberInterface
 {
-    // IDs dos grupos de usuários — devem corresponder ao banco de dados
+    // ID do grupo MIR — deve corresponder ao banco de dados
     private const GROUP_MIR = 10;
-    private const GROUP_ENTE = 11;
 
     // Alias dos itens de menu — estáveis entre ambientes (não usar Itemid fixo)
     private const ROUTE_PAINEL = 'gestao-de-formularios';
@@ -53,31 +52,6 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
         }
 
         return 'index.php?Itemid=' . (int) $item->id;
-    }
-
-    /**
-     * O usuário está em algum grupo que é perfil de formulário do Coleta MIR (tb_edital.co_grupos),
-     * ex.: "Coleta MIR - Gestor de TEDs".
-     */
-    private function temPerfilColeta(array $groups): bool
-    {
-        $db = Factory::getContainer()->get(DatabaseInterface::class);
-
-        try {
-            $perfis = $db->setQuery(
-                $db->getQuery(true)
-                    ->select($db->quoteName('co_grupos'))
-                    ->from($db->quoteName('#__tb_edital'))
-                    ->where($db->quoteName('co_grupos') . ' IS NOT NULL')
-                    ->where($db->quoteName('state') . ' = 1')
-            )->loadColumn();
-        } catch (\Throwable $e) {
-            return false;
-        }
-
-        $perfis = array_map('intval', explode(',', implode(',', $perfis)));
-
-        return (bool) array_intersect($perfis, $groups);
     }
 
     public static function getSubscribedEvents(): array
@@ -131,15 +105,13 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
         $groups = $user->getAuthorisedGroups();
 
         $isMir = \in_array(self::GROUP_MIR, $groups, true);
-        $isEnte = \in_array(self::GROUP_ENTE, $groups, true);
 
         if ($isMir) {
             $alias = self::ROUTE_PAINEL;
-        } elseif ($isEnte || $this->temPerfilColeta($groups)) {
-            $alias = self::ROUTE_ADESAO;
         } else {
-            // Usuário sem perfil MIR, Ente ou de preenchimento do Coleta MIR — não redireciona (comportamento padrão)
-            return;
+            // Demais usuários (Ente, perfis do Coleta MIR, responsáveis de projeto vinculados pelo CPF):
+            // a listagem dos instrumentos.
+            $alias = self::ROUTE_ADESAO;
         }
 
         $redirect = $this->resolveMenuRouteByAlias($alias);

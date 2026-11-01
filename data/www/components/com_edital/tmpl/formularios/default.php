@@ -48,7 +48,7 @@ include __DIR__ . '/../parts/_menu_formularios_ente.php';
 			<?php if ($this->novos) : ?>
 				Você ainda não preencheu nenhum instrumento. Clique em <strong>Novo instrumento</strong> para começar.
 			<?php else : ?>
-				Você ainda não preencheu nenhum instrumento e seu perfil não tem formulários para iniciar. Se precisar preencher, peça ao MIR a liberação do seu perfil.
+				Nenhum instrumento por aqui ainda. Quando o gestor de um TED ou convênio cadastrar o seu CPF como responsável de um projeto, ele aparece nesta página para você preencher a execução.
 			<?php endif; ?>
 		</div>
 	<?php endif; ?>
@@ -63,7 +63,25 @@ include __DIR__ . '/../parts/_menu_formularios_ente.php';
 					<?php if ($instrumento->descricao !== '') : ?>
 						<p class="formulario-description"><?php echo $this->escape($instrumento->descricao); ?></p>
 					<?php endif; ?>
-					<?php $respostas = $instrumento->respostas; include __DIR__ . '/default_respostas.php'; ?>
+					<?php if ($instrumento->projetos) : ?>
+						<p class="mb-1"><strong>Projetos sob sua responsabilidade</strong></p>
+						<ul class="list-group mb-3">
+							<?php foreach ($instrumento->projetos as $projeto) : ?>
+								<li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+									<div>
+										<strong><?php echo $this->escape($projeto->rotulo); ?></strong>
+										<br><small class="text-muted">Cadastrado por <?php echo $this->escape($projeto->gestor); ?> · <?php echo $this->escape($projeto->formulario); ?></small>
+									</div>
+									<a href="<?php echo $this->escape($projeto->url); ?>" class="btn btn-sm btn-primary">
+										<i class="fas fa-plus" aria-hidden="true"></i> Preencher a execução
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
+					<?php if ($instrumento->respostas) : ?>
+						<?php $respostas = $instrumento->respostas; include __DIR__ . '/default_respostas.php'; ?>
+					<?php endif; ?>
 				</div>
 			</div>
 		<?php endforeach; ?>

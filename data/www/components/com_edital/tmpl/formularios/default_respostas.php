@@ -55,7 +55,7 @@ use Joomla\CMS\Language\Text;
 					<ul class="small mb-0 mt-1">
 						<?php foreach ($resposta->execucoes as $execucao) : ?>
 							<li>
-								<?php echo $this->escape($execucao->rotulo); ?>:
+								<?php echo $this->escape($execucao->rotulo); ?><?php echo $execucao->responsavel !== '' ? ' (responsável: ' . $this->escape($execucao->responsavel) . ')' : ''; ?>:
 								<a href="<?php echo $this->escape($execucao->url); ?>">preencher a execução</a>
 							</li>
 						<?php endforeach; ?>
