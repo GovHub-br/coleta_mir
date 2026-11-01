@@ -15,11 +15,10 @@ use \Joomla\CMS\Log\Log;
 /**
  * Leitura do data warehouse do data-application-mir (Postgres).
  *
- * Lê apenas o schema coleta_mir, o contrato publicado pelo DW para o Coleta MIR
- * (papel de leitura coleta_leitor). Só executa as consultas do catálogo abaixo:
- * perguntas e requisições escolhem uma fonte pelo nome, nunca enviam SQL. Se o DW não
- * estiver configurado ou não responder, as funções devolvem vazio e o formulário segue
- * com as opções fixas da pergunta.
+ * Lê o schema coleta_mir, o contrato publicado pelo DW para o Coleta MIR (papel de leitura
+ * coleta_leitor), e os complementos temporários abaixo. Só a sincronização do espelho
+ * (EspelhoDwHelper) consulta o DW: os formulários leem as tabelas espelho do banco do
+ * Coleta MIR. Só executa as consultas do catálogo abaixo, nunca SQL vindo de fora.
  *
  * Conexão: variáveis DB_DW_HOST_MIR, DB_DW_PORT_MIR, DB_DW_DBNAME_MIR, DB_DW_USER_MIR e
  * DB_DW_PASSWORD_MIR (mesmos nomes usados pelo dbt do data-application-mir).
@@ -47,8 +46,8 @@ class DwHelper
 
     /**
      * Fontes de opções. Cada consulta devolve valor, nome e, opcionalmente, filtro: o valor
-     * da pergunta-pai (depende_de) para o qual a opção vale. As fontes de
-     * FONTES_COM_FILTRO recebem :filtro e só são consultadas com ele.
+     * da pergunta-pai para o qual a opção vale. Nas fontes de FONTES_COM_FILTRO o filtro é a
+     * chave do instrumento escolhido no preenchimento.
      */
     private const OPCOES = [
         'teds' => "
@@ -95,16 +94,15 @@ class DwHelper
             WHERE nivel = 'objetivo_estrategico'
             ORDER BY codigo",
         'metas_instrumento' => "
-            SELECT valor, valor AS nome FROM (
-                SELECT DISTINCT ON (nr_meta, nr_etapa)
+            SELECT valor, valor AS nome, filtro FROM (
+                SELECT DISTINCT ON (chave_instrumento, nr_meta, nr_etapa)
                        'Meta ' || nr_meta || COALESCE('.' || nr_etapa, '') || ' - ' || COALESCE(NULLIF(trim(no_meta), ''), ds_meta) AS valor,
-                       nr_meta, nr_etapa
+                       chave_instrumento AS filtro, nr_meta, nr_etapa
                 FROM coleta_mir.coleta_instrumento_meta
-                WHERE chave_instrumento = :filtro
-                ORDER BY nr_meta, nr_etapa NULLS FIRST
+                ORDER BY chave_instrumento, nr_meta, nr_etapa NULLS FIRST
             ) x
             WHERE valor IS NOT NULL
-            ORDER BY nr_meta, nr_etapa NULLS FIRST",
+            ORDER BY filtro, nr_meta, nr_etapa NULLS FIRST",
     ];
 
     private const FONTES_COM_FILTRO = ['metas_instrumento'];
@@ -155,8 +153,22 @@ class DwHelper
                    ), '') AS objetivo_geral",
     ];
 
+    /**
+     * Chaves de cada registro, para copiar todos ao espelho. Cada consulta roda à parte e,
+     * se falhar (ex.: sem acesso ao ppa_dbt), é ignorada.
+     */
+    private const CHAVES = [
+        'instrumento' => [
+            "SELECT chave FROM coleta_mir.coleta_instrumento ORDER BY chave",
+        ],
+        'ppa_programa' => [
+            "SELECT DISTINCT codigo AS chave FROM coleta_mir.coleta_lista_ppa WHERE nivel = 'programa'",
+            "SELECT DISTINCT programa::text AS chave FROM ppa_dbt.programa_filtrado_mir",
+        ],
+    ];
+
     /** Normaliza a chave recebida, por registro. */
-    private static function normalizarChave(string $registro, string $chave): string
+    public static function normalizarChave(string $registro, string $chave): string
     {
         $chave = trim($chave);
 
@@ -248,8 +260,6 @@ class DwHelper
 
     private static $conexao = null;
 
-    private static $opcoesCache = [];
-
     public static function configurado(): bool
     {
         return (getenv('DB_DW_HOST_MIR') ?: '') !== '';
@@ -293,28 +303,69 @@ class DwHelper
         return in_array($fonte, self::FONTES_COM_FILTRO, true);
     }
 
-    /**
-     * Opções de uma fonte: lista de ['nome' => ..., 'valor' => ..., 'filtro' => ...].
-     * Vazio quando a fonte não existe, falta o filtro exigido ou o DW não responde.
-     */
-    public static function getOpcoes(string $fonte, string $filtro = ''): array
+    /** O DW respondeu à conexão. */
+    public static function disponivel(): bool
     {
-        $cacheKey = $fonte . '|' . $filtro;
+        return self::conexao() !== null;
+    }
 
-        if (array_key_exists($cacheKey, self::$opcoesCache)) {
-            return self::$opcoesCache[$cacheKey];
+    /** Nomes das fontes de opções do catálogo. */
+    public static function fontes(): array
+    {
+        return array_keys(self::OPCOES);
+    }
+
+    /** Nomes dos registros do catálogo. */
+    public static function registros(): array
+    {
+        return array_keys(self::REGISTROS);
+    }
+
+    /** Todas as chaves de um registro (sem repetição), lidas do DW. */
+    public static function getChaves(string $registro): array
+    {
+        $chaves = [];
+
+        foreach (self::CHAVES[$registro] ?? [] as $i => $sql) {
+            if (!($db = self::conexao())) {
+                break;
+            }
+
+            try {
+                foreach ($db->query($sql) as $linha) {
+                    $chave = self::normalizarChave($registro, (string) ($linha['chave'] ?? ''));
+
+                    if ($chave !== '') {
+                        $chaves[$chave] = true;
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::add('Chaves ' . $i . ' de "' . $registro . '" indisponíveis no DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
+            }
         }
 
+        return array_keys($chaves);
+    }
+
+    /**
+     * Opções de uma fonte: lista de ['nome' => ..., 'valor' => ..., 'filtro' => ...].
+     * Null quando a fonte não existe ou o DW não responde (para não apagar o espelho).
+     */
+    public static function getOpcoes(string $fonte): ?array
+    {
         $sql = self::OPCOES[$fonte] ?? null;
-        $comFiltro = self::fonteComFiltro($fonte);
         $opcoes = [];
 
         if ($sql === null) {
             Log::add('Fonte de opções do DW desconhecida: ' . $fonte, Log::WARNING, 'com_edital');
-        } elseif ((!$comFiltro || trim($filtro) !== '') && ($db = self::conexao())) {
+
+            return null;
+        }
+
+        if ($db = self::conexao()) {
             try {
                 $stmt = $db->prepare($sql);
-                $stmt->execute($comFiltro ? [':filtro' => trim($filtro)] : []);
+                $stmt->execute();
 
                 foreach ($stmt as $linha) {
                     $valor = trim((string) ($linha['valor'] ?? ''));
@@ -329,11 +380,14 @@ class DwHelper
                 }
             } catch (\Throwable $e) {
                 Log::add('Falha ao ler a fonte "' . $fonte . '" do DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
-                $opcoes = [];
+
+                return null;
             }
+
+            return $opcoes;
         }
 
-        return self::$opcoesCache[$cacheKey] = $opcoes;
+        return null;
     }
 
     /**

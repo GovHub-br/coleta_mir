@@ -46,6 +46,7 @@ services:
       DB_DW_DBNAME_MIR: ${DB_DW_DBNAME_MIR:-analytics}
       DB_DW_USER_MIR: ${DB_DW_USER_MIR:-}
       DB_DW_PASSWORD_MIR: ${DB_DW_PASSWORD_MIR:-}
+      DB_DW_SINCRONIZAR_HORAS: ${DB_DW_SINCRONIZAR_HORAS:-24}
     # Permite DB_DW_HOST_MIR=host.docker.internal quando o DW roda na mesma máquina.
     extra_hosts:
       - "host.docker.internal:host-gateway"
