@@ -45,7 +45,7 @@ def opcoes_json(opcoes, outro=False):
 
 
 class Form:
-    def __init__(self, sigla, nome, descricao, ordem_base, origem=None):
+    def __init__(self, sigla, nome, descricao, ordem_base, origem=None, perfis=()):
         self.sigla = sigla
         self.ordem_grupo = ordem_base
         self.ordem_pergunta = 0
@@ -54,8 +54,9 @@ class Form:
         lines.append(f"\n-- {'=' * 70}\n-- {nome}\n-- {'=' * 70}")
         lines.append(
             f"INSERT INTO `{PREFIX}tb_edital` (`state`, `ordering`, `created_by`, `modified_by`, `no_edital`, `ds_edital`,"
-            f" `dt_abertura`, `dt_encerramento`, `dt_publicacao`, `tp_edital`, `co_edital_adesao`)\nVALUES (1, 0, 0, 0, {q(nome)}, {q(descricao)},"
-            f" '2026-11-01 00:00:00', '2027-12-31 23:59:59', '2026-11-01 00:00:00', 'formulario', {f'@{origem.sigla}_edital' if origem else 'NULL'});"
+            f" `dt_abertura`, `dt_encerramento`, `dt_publicacao`, `tp_edital`, `co_edital_adesao`, `co_grupos`)\nVALUES (1, 0, 0, 0, {q(nome)}, {q(descricao)},"
+            f" '2026-11-01 00:00:00', '2027-12-31 23:59:59', '2026-11-01 00:00:00', 'formulario', {f'@{origem.sigla}_edital' if origem else 'NULL'},"
+            f" {grupos_perfis(perfis)});"
         )
         lines.append(f"SET @{sigla}_edital = LAST_INSERT_ID();")
 
@@ -109,6 +110,22 @@ class Form:
 SIM_NAO = ["Sim", "Não"]
 DATA = "Formato dd/mm/aaaa."
 MOEDA = {"min": "0", "step": "0.01"}
+
+
+# Perfis (grupos de usuários) que iniciam cada formulário pelo botão "Novo instrumento", pelo nome;
+# os grupos são criados no admin (Usuários > Grupos). Grupo inexistente fica de fora.
+PERFIL_MIR = "Gerenciar Adesões"
+PERFIL_GESTOR_TED = "Coleta MIR - Gestor de TEDs"
+PERFIL_EXECUTOR_TED = "Coleta MIR - Executor de TEDs"
+PERFIL_GESTOR_CONVENIO = "Coleta MIR - Gestor de Convênios"
+PERFIL_EXECUTOR_CONVENIO = "Coleta MIR - Executor de Convênios"
+
+
+def grupos_perfis(perfis):
+    if not perfis:
+        return "NULL"
+    titulos = ", ".join(q(t) for t in perfis)
+    return f"(SELECT GROUP_CONCAT(`id` ORDER BY `id`) FROM `{PREFIX}usergroups` WHERE `title` IN ({titulos}))"
 
 
 def dw(campo, base=None):
@@ -455,6 +472,7 @@ ted = Form(
     "<p>Instrumento para coleta de dados de forma territorializada dos Termos de Execução Descentralizada (TEDs) celebrados pelo Ministério da Igualdade Racial (MIR).</p>"
     + INTRO_PERFIS.format(mir="servidor do MIR", gestor="gestor do TED na Unidade Descentralizada", sufixo_gestor="gestor", gestor_curto="gestor do TED"),
     10,
+    perfis=(PERFIL_MIR,),
 )
 
 ted.bloco("b1", "Bloco 1 - Identificação do TED", "Identificação", "fa fa-id-card",
@@ -530,6 +548,7 @@ ted_ges = Form(
     "<p>Ao enviar, cada projeto recebe um link para o formulário de execução, em que o executor registra as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     20,
+    perfis=(PERFIL_GESTOR_TED,),
 )
 
 ted_ges.bloco("b0", "Identificação do TED", "Identificação", "fa fa-id-card",
@@ -597,6 +616,7 @@ ted_ex = Form(
     "O TED, o período e o projeto vêm definidos pelo gestor.</p>",
     25,
     origem=ted_ges,
+    perfis=(PERFIL_EXECUTOR_TED, PERFIL_GESTOR_TED,),
 )
 
 ted_ex.bloco("b0", "Identificação da atividade (TED)", "Identificação", "fa fa-id-card",
@@ -654,6 +674,7 @@ cv = Form(
     "seu propósito é complementar esses registros com informações territorializadas.</p>"
     + INTRO_PERFIS.format(mir="servidor do MIR (concedente)", gestor="convenente", sufixo_gestor="convenente", gestor_curto="convenente"),
     30,
+    perfis=(PERFIL_MIR,),
 )
 
 cv.bloco("b1", "Bloco 1 - Identificação do convênio", "Identificação", "fa fa-id-card",
@@ -789,6 +810,7 @@ cv_ges = Form(
     "<p>Ao enviar, cada projeto recebe um link para o formulário de execução, em que o executor registra as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     40,
+    perfis=(PERFIL_GESTOR_CONVENIO,),
 )
 
 cv_ges.bloco("b0", "Identificação do convênio", "Identificação", "fa fa-id-card",
@@ -890,6 +912,7 @@ cv_ex = Form(
     "O convênio, o período e o projeto vêm definidos pelo convenente.</p>",
     45,
     origem=cv_ges,
+    perfis=(PERFIL_EXECUTOR_CONVENIO, PERFIL_GESTOR_CONVENIO,),
 )
 
 cv_ex.bloco("b0", "Identificação da atividade (Convênio)", "Identificação", "fa fa-id-card",

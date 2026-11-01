@@ -172,6 +172,12 @@ class DwHelper
         ],
     ];
 
+    /** Tipo do instrumento ("ted", "convenio") de uma fonte de instrumentos, ou vazio. */
+    public static function tipoInstrumento(string $fonte): string
+    {
+        return self::TIPOS_INSTRUMENTO[$fonte] ?? '';
+    }
+
     /** Chave do contrato ("ted:931295") a partir da fonte da pergunta e do código respondido. */
     public static function chaveInstrumento(string $fonte, string $codigo): string
     {

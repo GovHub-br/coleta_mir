@@ -29,6 +29,7 @@
       <option value="municipal">COM_EDITAL_EDITAIS_TP_ESFERA_SOLICITANTE_OPTION_MUNICIPAL</option>
       <option value="consorcio">COM_EDITAL_EDITAIS_TP_ESFERA_SOLICITANTE_OPTION_CONSORCIO</option>
     </field>
+    <field name="co_grupos" type="usergrouplist" multiple="true" required="false" default="" layout="joomla.form.field.list-fancy-select" label="COM_EDITAL_FORM_LBL_EDITAL_CO_GRUPOS" description="COM_EDITAL_FORM_DESC_EDITAL_CO_GRUPOS"/>
     <field name="co_edital_adesao"
       type="sql"
       label="COM_EDITAL_FORM_LBL_EDITAL_CO_EDITAL_ADESAO"
