@@ -110,7 +110,7 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 				'tipo'         => $tipo,
 				'obrigatoria'  => $pergunta->tp_requerida === 'sim',
 				'alternativas' => array_column($opcoes, 'nome'),
-				// Valor gravado de cada alternativa (ex.: "ted:931295"), preservado ao editar o nome.
+				// Valor gravado de cada alternativa (ex.: o código "931295" de um TED), preservado ao editar o nome.
 				'valores'      => array_column($opcoes, 'valor'),
 				'permiteOutro' => PerguntaHelper::permiteOutro($pergunta),
 				'fonteDw'      => $opcoes ? PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_FONTE) : '',
@@ -539,7 +539,7 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 		{
 			$opcoes = [];
 
-			// Alternativas que já existiam mantêm valor e filtro (ex.: "ted:931295" vindo do DW),
+			// Alternativas que já existiam mantêm valor e filtro (ex.: o filtro do programa do PPA vindo do DW),
 			// mesmo com o nome editado; as novas usam o nome como valor.
 			$anteriores = [];
 
