@@ -68,16 +68,19 @@ include __DIR__ . '/../parts/_menu_formularios_ente.php';
 						<p class="formulario-description"><?php echo $this->escape($instrumento->descricao); ?></p>
 					<?php endif; ?>
 					<?php if ($instrumento->projetos) : ?>
-						<p class="mb-1"><strong>Projetos sob sua responsabilidade</strong></p>
+						<p class="mb-1"><strong>Para você preencher</strong></p>
 						<ul class="list-group mb-3">
 							<?php foreach ($instrumento->projetos as $projeto) : ?>
 								<li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
 									<div>
-										<strong><?php echo $this->escape($projeto->rotulo); ?></strong>
-										<br><small class="text-muted">Cadastrado por <?php echo $this->escape($projeto->gestor); ?> · <?php echo $this->escape($projeto->formulario); ?></small>
+										<strong><?php echo $this->escape($projeto->formulario); ?></strong>
+										<?php if ($projeto->rotulo !== '') : ?>
+											<br><small>Projeto: <?php echo $this->escape($projeto->rotulo); ?></small>
+										<?php endif; ?>
+										<br><small class="text-muted">Cadastrado por <?php echo $this->escape($projeto->gestor); ?></small>
 									</div>
 									<a href="<?php echo $this->escape($projeto->url); ?>" class="btn btn-sm btn-primary">
-										<i class="fas fa-plus" aria-hidden="true"></i> Preencher a execução
+										<i class="fas fa-plus" aria-hidden="true"></i> Preencher
 									</a>
 								</li>
 							<?php endforeach; ?>

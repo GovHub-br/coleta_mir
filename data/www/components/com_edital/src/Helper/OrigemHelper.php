@@ -107,7 +107,7 @@ class OrigemHelper
         $respostaControle = (int) $lista->depende_de > 0 ? (string) ($respostas[(int) $lista->depende_de]->ds_resposta ?? '') : '';
 
         if (is_array($propriaQuando) && in_array($respostaControle, $propriaQuando, true)) {
-            $projetos[0] = ['rotulo' => PerguntaHelper::getParametro($lista, self::PARAM_PROJETOS), 'responsavel' => '', 'email' => '', 'cpf' => '', 'itens' => []];
+            $projetos[0] = ['rotulo' => PerguntaHelper::getParametro($lista, self::PARAM_PROJETOS), 'projeto' => true, 'responsavel' => '', 'email' => '', 'cpf' => '', 'itens' => []];
         }
 
         // Itens da lista só valem quando ela está visível (resposta de controle entre as que a exibem).
@@ -117,8 +117,11 @@ class OrigemHelper
         if ($listaVisivel) {
             foreach (PerguntaHelper::normalizarTabela($lista, $respostas[(int) $lista->id]->ds_resposta ?? '') as $i => $item) {
                 $projetos[$i + 1] = [
-                    'rotulo'      => trim(implode(' - ', array_filter([$item['instituicao'] ?? '', $item['tema'] ?? '']))) ?: 'Projeto ' . ($i + 1),
-                    'responsavel' => $item['responsavel'] ?? '',
+                    // Projetos: instituição e tema; lista de gestores (formulário do MIR): o nome.
+                    'rotulo'      => trim(implode(' - ', array_filter([$item['instituicao'] ?? '', $item['tema'] ?? ''])))
+                        ?: ($item['nome'] ?? '') ?: 'Item ' . ($i + 1),
+                    'projeto'     => isset($item['instituicao']),
+                    'responsavel' => $item['responsavel'] ?? $item['nome'] ?? '',
                     'email'       => $item['email'] ?? '',
                     'cpf'         => preg_replace('/\D/', '', (string) ($item['cpf'] ?? '')),
                     'itens'       => $item,
@@ -237,14 +240,14 @@ class OrigemHelper
         }
 
         if ($projeto['cpf'] === '') {
-            return 'A execução deste projeto é preenchida pelo gestor do instrumento.';
+            return 'Este preenchimento é feito por quem cadastrou o instrumento.';
         }
 
         if ($projeto['cpf'] === self::cpfDoUsuario($user)) {
             return null;
         }
 
-        return 'Este projeto está vinculado a outro CPF. A execução só pode ser preenchida pelo responsável do projeto ou pelo gestor do instrumento.';
+        return 'Este preenchimento está vinculado a outro CPF: só a pessoa cadastrada ou quem a cadastrou pode preenchê-lo.';
     }
 
     /**

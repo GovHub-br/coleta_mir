@@ -96,7 +96,7 @@ class Form:
             lines.append(f"SET @{self.sigla}_p_{chave} = LAST_INSERT_ID();")
 
     def secao(self, titulo, texto=""):
-        """Subtítulo de seção (ex.: "3.1 Vinculação ao PPA") como pergunta informativa."""
+        """Subtítulo de seção (ex.: "Vinculação ao PPA") como pergunta informativa."""
         html = f"<h5 class=\"mt-3\">{titulo}</h5>" + (f"<p>{texto}</p>" if texto else "")
         self.p("informativo", titulo, html)
 
@@ -116,8 +116,6 @@ MOEDA = {"min": "0", "step": "0.01"}
 # os grupos são criados no admin (Usuários > Grupos). Grupo inexistente fica de fora. A execução não
 # tem perfil: o responsável de cada projeto é vinculado pelo CPF na lista de projetos do gestor.
 PERFIL_MIR = "Gerenciar Adesões"
-PERFIL_GESTOR_TED = "Coleta MIR - Gestor de TEDs"
-PERFIL_GESTOR_CONVENIO = "Coleta MIR - Gestor de Convênios"
 
 
 def grupos_perfis(perfis):
@@ -125,6 +123,17 @@ def grupos_perfis(perfis):
         return "NULL"
     titulos = ", ".join(q(t) for t in perfis)
     return f"(SELECT GROUP_CONCAT(`id` ORDER BY `id`) FROM `{PREFIX}usergroups` WHERE `title` IN ({titulos}))"
+
+
+def gestores(f, titulo, descricao):
+    """Quem preenche o formulário do gestor/convenente, cadastrado pelo MIR: cada CPF vê o instrumento
+    em "Meus instrumentos" (mesmo vínculo dos projetos com a execução)."""
+    f.p("tabela", titulo, descricao + " Com o CPF, o instrumento aparece em \"Meus instrumentos\" para a pessoa, que preenche o formulário de atualização.",
+        {**colunas(
+            ("nome", "Nome", "linha", True),
+            ("cpf", "CPF", "cpf", True),
+            ("email", "E-mail", "linha", True),
+        ), "projetos_execucao": "gestor"}, req=True)
 
 
 def dw(campo, base=None):
@@ -371,12 +380,12 @@ NAO_HA_INFO = "Não há informações de relevância territorial a serem coletad
 
 
 def bloco_3(f, instrumento, natureza, natureza_outro=True):
-    """Bloco 3 é praticamente igual nos dois instrumentos."""
+    """Enquadramento programático: praticamente igual nos dois instrumentos."""
     f.bloco(
-        "b3", f"Bloco 3 - Enquadramento programático ({'TED' if f.sigla == 'ted' else 'Convênio'})", "Enquadramento", "fa fa-sitemap",
+        "b3", f"Enquadramento programático ({'TED' if f.sigla == 'ted' else 'Convênio'})", "Enquadramento", "fa fa-sitemap",
         "<p>Preenchido pelo servidor do MIR, com base em análise do plano de trabalho. Requer subjetividade e conhecimento da administração pública.</p>",
     )
-    f.secao("3.1 Vinculação ao PPA")
+    f.secao("Vinculação ao PPA")
     f.p("lista", "Programa do PPA", f"Pergunta obrigatória. Para {instrumento} sem vinculação ao PPA, selecione \"Não se aplica\".", PPA + [("campo_dw", "instrumento.programa_ppa"), ("chave_dw", "ppa_programa")], req=True, chave="ppa")
     f.p("texto", "Objetivo Geral / Objetivos Estratégicos / Público alvo",
         "Preenchido a partir do Programa do PPA selecionado; pode ser complementado.",
@@ -389,24 +398,24 @@ def bloco_3(f, instrumento, natureza, natureza_outro=True):
         "Ex.: Agenda Transversal de Igualdade Racial. Consulte: gov.br/planejamento → Orçamento → Agendas Transversais e Multissetoriais.",
         AGENDAS + [f"Não se aplica / {instrumento} sem vinculação a agenda transversal"])
 
-    f.secao("3.2 ODS vinculadas")
+    f.secao("ODS vinculadas")
     f.p("lista", "ODS principal", "", ODS, chave="ods")
     f.p("lista", "ODS 18 - Igualdade Étnico-Racial (meta específica)",
         "Orientação: consulte as metas nacionais do ODS 18 na Portaria Conjunta MPI/MIR/SG-PR nº 198, de 24/09/2025.",
         ODS_18, dep=("ods", ODS[-1]))
 
-    f.secao("3.3 Alinhamento ao Planejamento Estratégico Institucional", "Conforme Planejamento Estratégico Institucional - Portaria n.º 3 de janeiro de 2025.")
+    f.secao("Alinhamento ao Planejamento Estratégico Institucional", "Conforme Planejamento Estratégico Institucional - Portaria n.º 3 de janeiro de 2025.")
     f.p("checkbox", "Áreas do MIR", "Por extenso, conforme Decreto nº 11.346/2023.", AREAS_MIR + [("fonte_dw", "pei_areas")])
     f.p("checkbox", "Objetivos Estratégicos", "", OBJETIVOS_ESTRATEGICOS + [("fonte_dw", "pei_objetivos")])
     f.p("texto", "Indicador / Meta", "Indique os indicadores e metas vinculados ao(s) objetivo(s) estratégico(s) selecionado(s).")
 
-    f.secao(f"3.4 Natureza do {instrumento}")
+    f.secao(f"Natureza do {instrumento}")
     f.p("checkbox", "Natureza do objeto", "Marcação múltipla permitida.", natureza, outro=natureza_outro)
 
 
 def bloco_5_beneficiarios(f, instrumento):
-    """Itens 5.3 e 5.4 são idênticos nos dois instrumentos."""
-    f.secao("5.3 Beneficiários diretos")
+    """Beneficiários e territórios: idênticos nos dois instrumentos."""
+    f.secao("Beneficiários diretos")
     f.p("numero", "Quantitativo de beneficiários diretos", "", {"min": "0", "step": "1"})
     f.p("radio", "O quantitativo de beneficiários diretos é", "", ["Real", "Estimado"], chave="tipo_qtd")
     f.p("linha", "Fonte da estimativa de beneficiários diretos", "", dep=("tipo_qtd", "Estimado"))
@@ -431,7 +440,7 @@ def bloco_5_beneficiarios(f, instrumento):
         "Informe onde a atividade aconteceu de fato (base IBGE). O código IBGE do município é registrado automaticamente.",
         dep=("abrangencia", "Municipal"))
 
-    f.secao("5.4 Territórios prioritários", "Marque os aplicáveis.")
+    f.secao("Territórios prioritários", "Marque os aplicáveis.")
     f.p("checkbox", "Territórios prioritários", "", TERRITORIOS, outro=True)
     f.p("linha", "Nome do território (se aplicável)", "Ex.: Quilombo Kalunga, Território Cigano de Sousa/PB.")
 
@@ -456,9 +465,9 @@ def documentos(f, categorias):
 
 INTRO_PERFIS = (
     "<p><strong>Perfis de preenchimento:</strong></p><ul>"
-    "<li><strong>Blocos 1 a 3, 5.0 e 6:</strong> {mir}</li>"
-    "<li><strong>Bloco 4 e projetos (5.1):</strong> {gestor} (atualização periódica), em formulário próprio ({sufixo_gestor})</li>"
-    "<li><strong>Atividades e beneficiários (5.2 em diante):</strong> responsável por cada projeto, identificado pelo CPF na lista de projetos do {gestor_curto}, em formulário próprio (execução), um preenchimento por atividade</li></ul>"
+    "<li><strong>Identificação, responsáveis, enquadramento, modalidade de resposta e fiscalização:</strong> {mir}, que também cadastra, pelo CPF, quem preenche como {gestor_curto}</li>"
+    "<li><strong>Execução e projetos:</strong> {gestor} (atualização periódica), em formulário próprio ({sufixo_gestor}), a partir do instrumento em \"Meus instrumentos\"</li>"
+    "<li><strong>Atividades e beneficiários:</strong> responsável por cada projeto, identificado pelo CPF na lista de projetos do {gestor_curto}, em formulário próprio (execução), um preenchimento por atividade</li></ul>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>"
     "<p>Campos marcados como automáticos serão preenchidos a partir do Transferegov.br / SIAFI / Siorg quando a integração estiver disponível; até lá, preencha manualmente.</p>"
 )
@@ -474,7 +483,7 @@ ted = Form(
     perfis=(PERFIL_MIR,),
 )
 
-ted.bloco("b1", "Bloco 1 - Identificação do TED", "Identificação", "fa fa-id-card",
+ted.bloco("b1", "Identificação do TED", "Identificação", "fa fa-id-card",
           "<p>Apresentação formal e institucional do TED.</p>")
 ted.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg. " + AUTO, TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("resposta_unica", "sim")], req=True)
 ted.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
@@ -495,40 +504,41 @@ ted.p("radio", "Existem termos aditivos?",
 ted.p("linha", "Número e data do último aditivo", "", dep=("aditivo", "Sim"))
 ted.p("linha", "Data de celebração (assinatura)", DATA, dw("instrumento.dt_assinatura"))
 
-ted.bloco("b2", "Bloco 2 - Responsáveis (TED)", "Responsáveis", "fa fa-users")
-ted.secao("2.1 Unidade do MIR")
+ted.bloco("b2", "Responsáveis (TED)", "Responsáveis", "fa fa-users")
+ted.secao("Unidade do MIR")
 ted.p("linha", "Unidade descentralizadora responsável (Secretaria)", "Secretaria ou unidade responsável no MIR. " + AUTO, dw("instrumento.unidade_mir"))
 ted.p("linha", "Código da unidade descentralizadora (UG/SIAFI)", "Código da unidade gestora no SIAFI. " + AUTO, dw("instrumento.ug_mir"))
 fiscais(ted, "Fiscais do TED")
-ted.secao("2.3 Instrumento jurídico relacionado (se houver)")
+gestores(ted, "Gestor(es) do TED na Unidade Descentralizada", "Quem acompanha a execução do TED no órgão que recebeu os recursos.")
+ted.secao("Instrumento jurídico relacionado (se houver)")
 ted.p("checkbox", "Tipo de instrumento complementar", "", ["ACT", "Convênio", "Chamada Pública / Edital"], outro=True)
 ted.p("linha", "Número / Referência do instrumento complementar", "Se houver instrumento paralelo vinculado a este TED.")
 
 bloco_3(ted, "TED", ["Pesquisa", "Extensão", "Ensino", "Desenvolvimento Institucional / Tecnológico", "Capacitação"])
-ted.secao("3.5 Fonte de recursos")
+ted.secao("Fonte de recursos")
 ted.p("texto", "Programa orçamentário / Fonte de recursos",
       "Preenchido automaticamente a partir das Notas de Crédito e de Empenho do SIAFI vinculadas ao TED (fonte de recursos e natureza de despesa); incluir código da ação e UO.", dw("instrumento.programa_orcamentario"))
-ted.secao("3.6 Justificativa da celebração")
+ted.secao("Justificativa da celebração")
 ted.p("texto", "Justificativa", "Importada automaticamente do campo \"justificativa\" do Plano de Ação no Transferegov; o servidor pode complementar.", dw("instrumento.justificativa"))
 ted.p("texto", "Instrumentos anteriores relacionados", "TEDs, convênios ou editais anteriores com o mesmo parceiro ou objeto similar.")
 
 
-ted.bloco("b50", "Bloco 5.0 - Modalidade de resposta (TED)", "Modalidade", "fa fa-random",
-         "<p>Definição, pelo servidor do MIR, de como o Bloco 5 será respondido pelo executor.</p>")
-ted.secao("5.0 Modalidade de resposta desta seção",
-          "Definição do gestor do MIR. Se territorializada, os itens 5.1 a 5.4 deverão ser preenchidos por executor/atividade; se exclusiva, a própria Unidade Descentralizada preenche os dados de forma consolidada, sem abertura por executor.")
+ted.bloco("b50", "Modalidade de resposta (TED)", "Modalidade", "fa fa-random",
+         "<p>Definição, pelo servidor do MIR, de como as atividades e os beneficiários serão informados.</p>")
+ted.secao("Modalidade de resposta desta seção",
+          "Definição do gestor do MIR. Se territorializada, os projetos, as atividades e os beneficiários deverão ser informados por executor/atividade; se exclusiva, a própria Unidade Descentralizada preenche os dados de forma consolidada, sem abertura por executor.")
 ted.p("radio", "Modalidade de resposta", "", [
     "Resposta exclusiva pela Unidade Descentralizada (dados consolidados)",
     "Resposta territorializada pelos executores na ponta (um registro por executor/atividade)",
 ], req=True)
 
-ted.bloco("b6", "Bloco 6 - Fiscalização e prestação de contas (TED)", "Fiscalização", "fa fa-search",
+ted.bloco("b6", "Fiscalização e prestação de contas (TED)", "Fiscalização", "fa fa-search",
           "<p>Registro de alertas pelo Fiscal do TED ao longo da execução. Por dizer respeito ao controle interno, recomenda-se que opere como um módulo do MIR, separado dos campos preenchidos pelo executor.</p>")
-ted.secao("6.1 Pontos de fiscalização", "A ser atualizado pelo servidor do MIR.")
+ted.secao("Pontos de fiscalização", "A ser atualizado pelo servidor do MIR.")
 ted.p("checkbox", "Pontos de fiscalização", "",
       ["Atraso na entrega de produtos", "Dificuldade de acesso a documentos", "Inconsistência financeira"], outro=True)
 ted.p("texto", "Descrição e encaminhamentos dos pontos críticos", "Registre os alertas e as medidas tomadas ou recomendadas.")
-ted.secao("6.2 Relatório de cumprimento do objeto (RCO)")
+ted.secao("Relatório de cumprimento do objeto (RCO)")
 ted.p("arquivo", "Documento do RCO", "Anexar o arquivo do Relatório de Cumprimento do Objeto.")
 ted.p("radio", "Tipo do RCO",
       "Indicar se o RCO encaminhado é parcial ou final. Parcerias de médio e longo prazo, por recomendação da AGU, devem ter relatórios parciais.",
@@ -543,40 +553,36 @@ ted_ges = Form(
     "ted_ges", "Coleta MIR - TEDs (gestor)",
     "<p>Atualização periódica da execução dos Termos de Execução Descentralizada (TEDs) celebrados pelo MIR.</p>"
     "<p><strong>Quem preenche:</strong> gestor do TED na Unidade Descentralizada: forma de execução, contrapartida e os projetos/ações apoiados, com seus responsáveis. "
-    "Os Blocos 1 a 3 e 6 são preenchidos pelo servidor do MIR em formulário próprio.</p>"
+    "Identificação, responsáveis, enquadramento e fiscalização são preenchidos pelo servidor do MIR em formulário próprio; o número e a descrição do instrumento vêm de lá.</p>"
     "<p>Ao enviar, cada projeto aparece em \"Meus instrumentos\" para o responsável informado (pelo CPF), que registra no formulário de execução as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     20,
-    perfis=(PERFIL_GESTOR_TED,),
+    origem=ted,
 )
 
 ted_ges.bloco("b0", "Identificação do TED", "Identificação", "fa fa-id-card",
-             "<p>Selecione o TED ao qual esta atualização se refere.</p>")
-ted_ges.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento")], req=True)
-ted_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
+             "<p>O TED vem do cadastro do MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
+ted_ges.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do TED")], req=True)
+ted_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3", "origem": "pergunta:Descrição do instrumento"}))
 ted_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
-ted_ges.p("linha", "Responsável pelo preenchimento - nome completo", "", req=True)
-ted_ges.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
-ted_ges.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", req=True)
-ted_ges.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
-ted_ges.bloco("b4", "Bloco 4 - Execução (TED)", "Execução", "fa fa-tasks",
+ted_ges.bloco("b4", "Execução (TED)", "Execução", "fa fa-tasks",
           "<p>Atualização periódica pela Unidade Descentralizada (gestor do TED no órgão que recebeu os recursos).</p>")
-ted_ges.secao("4.1 Cronograma de execução")
+ted_ges.secao("Cronograma de execução")
 ted_ges.p("radio", "O TED está sendo executado dentro do prazo previsto?", "", SIM_NAO, chave="prazo")
 ted_ges.p("texto", "Justificativa de desvio", "Descreva atrasos, obstáculos e medidas adotadas.", dep=("prazo", "Não"))
-ted_ges.secao("4.2 Forma de execução dos recursos",
+ted_ges.secao("Forma de execução dos recursos",
           "Os mecanismos NÃO são excludentes: marque todos os que se aplicam. Fundação de apoio e NEAB têm funções distintas: registre cada uma no quadro de partícipes.")
 ted_ges.p("checkbox", "Mecanismos utilizados", "Marque TODOS os que se aplicam.",
       ["Chamada pública / edital", "Concessão de bolsas e auxílios", "Repasse a subexecutores (NEABs, outras instituições)"], outro=True)
 ted_ges.p("tabela", "Identificação do(s) subexecutor(es) / intermediário(s)",
          "Informe o nome e, se aplicável, o CNPJ e clique em \"Adicionar à lista\". Adicione quantos forem necessários.",
          colunas(("nome", "Nome", "linha", True), ("cnpj", "CNPJ", "cnpj")))
-ted_ges.secao("4.3 Contrapartida prevista (se houver)")
+ted_ges.secao("Contrapartida prevista (se houver)")
 ted_ges.p("radio", "Há contrapartida financeira?", "", SIM_NAO, chave="contrapartida")
 ted_ges.p("texto", "Descrição da contrapartida", "Ex.: mão de obra, infraestrutura, espaço físico, insumos.", dep=("contrapartida", "Sim"))
 
-ted_ges.bloco("b5", "Bloco 5 - Projetos e executores (TED)", "Projetos", "fa fa-sitemap",
+ted_ges.bloco("b5", "Projetos e executores (TED)", "Projetos", "fa fa-sitemap",
           "<p>Atualização periódica pela Unidade Descentralizada (gestor do TED no órgão que recebeu os recursos).</p>")
 ted_ges.aviso("Orientação - TEDs multi-objeto",
           "<p>Em TEDs multi-objeto, os beneficiários são informados por projeto/ação, e não somados no nível do TED, preservando a rastreabilidade de qual instituição beneficiou quais grupos, em que território e sobre qual tema.</p>")
@@ -585,7 +591,7 @@ TED_PARCEIRA = [
     "Não, as atividades finalísticas do TED são executadas exclusivamente pela unidade descentralizada",
     "Ambos, as atividades finalísticas são executadas tanto por parceiros à organização quanto pela unidade finalística",
 ]
-ted_ges.secao("5.1 Execução por organização parceira")
+ted_ges.secao("Execução por organização parceira")
 ted_ges.p("radio", "Esta atividade é executada por uma organização parceira à sua?",
       "Por exemplo, sua organização é responsável pela abertura de editais para selecionar organizações para executarem atividades específicas - cursos, oficinas, elaboração de materiais, etc.",
       TED_PARCEIRA, req=True, chave="parceira")
@@ -630,12 +636,12 @@ ted_ex.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
 ted_ex.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", req=True)
 ted_ex.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
-ted_ex.bloco("b5", "Bloco 5 - Atividade e beneficiários (TED)", "Atividade", "fa fa-map-marker",
+ted_ex.bloco("b5", "Atividade e beneficiários (TED)", "Atividade", "fa fa-map-marker",
              "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, use de novo \"Preencher a execução\" no projeto, em \"Meus instrumentos\".</p>")
 ted_ex.aviso("Mensagem ao usuário",
              "<p><strong>Neste momento você deve inserir uma atividade por vez que tenha sido executada no período a ser coletado.</strong></p>",
              "warning")
-ted_ex.secao("5.2 Produtos previstos no plano de trabalho (pré-execução)",
+ted_ex.secao("Produtos previstos no plano de trabalho (pré-execução)",
           "Um produto do Plano de Trabalho pode se desdobrar em várias atividades: acompanhamos o produto (o que foi pactuado) e a atividade (o que aconteceu de fato).")
 ted_ex.p("linha", "Produto previsto no Plano de Trabalho",
           "Escolha uma das metas/etapas do plano de trabalho do TED selecionado ou digite.",
@@ -645,7 +651,7 @@ ted_ex.p("numero", "% de execução", "", {"min": "0", "max": "100", "step": "1"
 ted_ex.p("texto", "Atividades realizadas", "")
 ted_ex.p("radio", "Atividade a ser coletada", "", ATIVIDADES, outro=True)
 bloco_5_beneficiarios(ted_ex, "TED")
-evidencias(ted_ex, "5.5 Evidências de execução territorial (upload por atividade)")
+evidencias(ted_ex, "Evidências de execução territorial (upload por atividade)")
 ted_ex.secao("Dificuldades encontradas na execução", "Campo aberto - atualização periódica.")
 ted_ex.p("texto", "Dificuldades burocráticas, acesso a documentos, mobilização de pessoas", "Registre dificuldades à medida que ocorrem, não apenas ao final.")
 ted_ex.secao("Observações complementares e upload de documentos")
@@ -676,7 +682,7 @@ cv = Form(
     perfis=(PERFIL_MIR,),
 )
 
-cv.bloco("b1", "Bloco 1 - Identificação do convênio", "Identificação", "fa fa-id-card",
+cv.bloco("b1", "Identificação do convênio", "Identificação", "fa fa-id-card",
          "<p>Apresentação formal e institucional do convênio.</p>")
 cv.p("lista", "Número do convênio",
      "Número do instrumento no Transferegov.br e código Siorg (se houver). " + AUTO,
@@ -689,7 +695,7 @@ cv.p("linha", "Processos SEI relacionados (se houver)",
 cv.p("texto", "Objeto do convênio", "Descrição resumida do objeto pactuado conforme o plano de trabalho. " + AUTO, dw("instrumento.objeto"))
 cv.p("checkbox", "Palavras-chave / Tags", "Até 5 termos temáticos para indexação.", TAGS, outro=True)
 cv.p("numero", "Valor de repasse da União (R$)", "Recursos do concedente, conforme o termo de convênio. " + AUTO, moeda_dw("instrumento.valor_repasse"))
-cv.p("numero", "Valor da contrapartida do convenente (R$)", "Financeira ou em bens e serviços economicamente mensuráveis (ver item 4.3). " + AUTO, moeda_dw("instrumento.valor_contrapartida"))
+cv.p("numero", "Valor da contrapartida do convenente (R$)", "Financeira ou em bens e serviços economicamente mensuráveis (informada pelo convenente). " + AUTO, moeda_dw("instrumento.valor_contrapartida"))
 cv.p("numero", "Valor global do convênio (R$)", "Soma do repasse da União e da contrapartida. " + AUTO, moeda_dw("instrumento.vl_firmado"))
 cv.p("numero", "Valor liberado / desembolsado até a data de coleta (R$)", "Puxado do Transferegov.br / SIAFI. " + AUTO, moeda_dw("instrumento.vl_pago"))
 cv.p("linha", "Vigência - data de início", "Conforme o termo de convênio e seus aditivos. " + DATA, dw("instrumento.dt_inicio_vigencia"))
@@ -701,12 +707,12 @@ cv.p("linha", "Número e data do último aditivo", "", dep=("aditivo", "Sim"))
 cv.p("linha", "Data de celebração (assinatura)", DATA, dw("instrumento.dt_assinatura"))
 cv.p("linha", "Data de publicação do extrato", "Publicação do extrato do convênio no Diário Oficial da União. " + DATA, dw("instrumento.dt_publicacao"))
 
-cv.bloco("b2", "Bloco 2 - Responsáveis (Convênio)", "Responsáveis", "fa fa-users")
-cv.secao("2.1 Concedente (MIR)")
+cv.bloco("b2", "Responsáveis (Convênio)", "Responsáveis", "fa fa-users")
+cv.secao("Concedente (MIR)")
 cv.p("linha", "Unidade concedente responsável (Secretaria)", "Secretaria ou unidade responsável no MIR. " + AUTO)
 cv.p("linha", "Código da unidade concedente (UG/SIAFI)", "Código da unidade gestora no SIAFI. " + AUTO, dw("instrumento.ug_mir"))
 fiscais(cv, "Fiscais do convênio")
-cv.secao("2.2 Convenente e intervenientes")
+cv.secao("Convenente e intervenientes")
 cv.p("linha", "Convenente", "Denominação e CNPJ, conforme o cadastro no Transferegov.br. " + AUTO, dw("instrumento.parceiro"))
 cv.p("radio", "Natureza do convenente", "Conforme o Decreto nº 11.531/2023.", [
     "Administração pública estadual",
@@ -717,12 +723,11 @@ cv.p("radio", "Natureza do convenente", "Conforme o Decreto nº 11.531/2023.", [
     ("campo_dw", "instrumento.natureza_convenente"),
 ])
 cv.p("linha", "Dirigente do convenente", "Nome completo, cargo e e-mail institucional. " + AUTO)
-cv.p("linha", "Responsável pela execução / coordenação do convênio",
-     "Nome completo, cargo, telefone e e-mail. É a pessoa que preencherá os Blocos 4 e 5.")
+gestores(cv, "Responsável(is) pela execução / coordenação do convênio", "Quem coordena a execução no convenente.")
 cv.p("texto", "Interveniente(s) (se houver)",
      "Órgão ou entidade que participa do instrumento para manifestar consentimento ou assumir obrigações: nome e CNPJ.")
 cv.p("linha", "Mandatária", "Instituição financeira oficial federal que opera o contrato de repasse.", dep=("tipo_instr", "Contrato de repasse"))
-cv.secao("2.3 Instrumento jurídico relacionado (se houver)")
+cv.secao("Instrumento jurídico relacionado (se houver)")
 cv.p("checkbox", "Tipo de instrumento complementar", "", [
     "Acordo de cooperação técnica",
     "Acordo de adesão",
@@ -745,28 +750,28 @@ bloco_3(cv, "convênio", [
     "Eventos",
 ])
 EMENDAS = ["Emenda parlamentar individual", "Emenda parlamentar de bancada", "Emenda parlamentar de comissão"]
-cv.secao("3.5 Origem e fonte dos recursos")
+cv.secao("Origem e fonte dos recursos")
 cv.p("checkbox", "Origem da programação orçamentária", "", EMENDAS + ["Programação própria do MIR", ("campo_dw", "instrumento.origem_programacao")], outro=True, chave="origem")
 cv.p("linha", "Número da emenda e autoria", AUTO, dep=("origem", EMENDAS))
 cv.p("texto", "Programa orçamentário / Fonte de recursos",
      "Preenchido automaticamente a partir das Notas de Crédito e de Empenho do SIAFI vinculadas ao convênio (fonte de recursos e natureza de despesa); incluir código da ação e UO.")
-cv.secao("3.6 Justificativa da celebração")
+cv.secao("Justificativa da celebração")
 cv.p("texto", "Justificativa", "Importada automaticamente do campo \"justificativa\" do plano de trabalho no Transferegov.br; o servidor pode complementar.")
 cv.p("texto", "Instrumentos anteriores relacionados", "TEDs, convênios ou editais anteriores com o mesmo convenente ou objeto similar.")
 
 
-cv.bloco("b50", "Bloco 5.0 - Modalidade de resposta (Convênio)", "Modalidade", "fa fa-random",
-         "<p>Definição, pelo servidor do MIR, de como o Bloco 5 será respondido pelo executor.</p>")
-cv.secao("5.0 Modalidade de resposta desta seção",
-         "Definição do fiscal do convênio (servidor do MIR). Se territorializada, os itens 5.1 a 5.5 deverão ser preenchidos por executor/atividade; se consolidada, o próprio convenente preenche os dados de forma consolidada, sem abertura por executor.")
+cv.bloco("b50", "Modalidade de resposta (Convênio)", "Modalidade", "fa fa-random",
+         "<p>Definição, pelo servidor do MIR, de como as atividades e os beneficiários serão informados.</p>")
+cv.secao("Modalidade de resposta desta seção",
+         "Definição do fiscal do convênio (servidor do MIR). Se territorializada, os projetos, as atividades e os beneficiários deverão ser informados por executor/atividade; se consolidada, o próprio convenente preenche os dados de forma consolidada, sem abertura por executor.")
 cv.p("radio", "Modalidade de resposta", "", [
     "Resposta consolidada pelo convenente (dados consolidados)",
     "Resposta territorializada por executor / atividade (um registro por executor/atividade)",
 ], req=True)
 
-cv.bloco("b6", "Bloco 6 - Fiscalização e prestação de contas (Convênio)", "Fiscalização", "fa fa-search",
+cv.bloco("b6", "Fiscalização e prestação de contas (Convênio)", "Fiscalização", "fa fa-search",
          "<p>Registro de alertas pelo fiscal do convênio ao longo da execução. Por dizer respeito ao controle interno, recomenda-se que opere como um módulo do MIR, separado dos campos preenchidos pelo convenente.</p>")
-cv.secao("6.1 Acompanhamento e fiscalização", "A ser atualizado pelo servidor do MIR.")
+cv.secao("Acompanhamento e fiscalização", "A ser atualizado pelo servidor do MIR.")
 cv.p("checkbox", "Pontos de fiscalização", "Marque todos os que se aplicam.", [
     "Atraso na execução de metas e etapas",
     "Dificuldade de acesso a documentos",
@@ -776,7 +781,7 @@ cv.p("checkbox", "Pontos de fiscalização", "Marque todos os que se aplicam.", 
 cv.p("radio", "Visita de acompanhamento realizada no período?", "", SIM_NAO, chave="visita")
 cv.p("linha", "Data da visita de acompanhamento", DATA, dep=("visita", "Sim"))
 cv.p("texto", "Descrição e encaminhamentos dos pontos críticos", "Registre os alertas e as medidas tomadas ou recomendadas.")
-cv.secao("6.2 Prestação de contas")
+cv.secao("Prestação de contas")
 cv.p("arquivo", "Documento da prestação de contas", "Anexar o arquivo ou informar o número do registro no Transferegov.br no campo seguinte.")
 cv.p("linha", "Número do registro da prestação de contas no Transferegov.br", "")
 cv.p("radio", "Tipo de prestação de contas",
@@ -805,26 +810,22 @@ cv_ges = Form(
     "conv_ges", "Coleta MIR - Convênios (convenente)",
     "<p>Atualização periódica da execução dos convênios celebrados pelo MIR, na qualidade de concedente.</p>"
     "<p><strong>Quem preenche:</strong> convenente: forma de execução, contrapartida, bens e os projetos/ações apoiados, com seus responsáveis. "
-    "Os Blocos 1 a 3 e 6 são preenchidos pelo servidor do MIR em formulário próprio.</p>"
+    "Identificação, responsáveis, enquadramento e fiscalização são preenchidos pelo servidor do MIR em formulário próprio; o número e a descrição do instrumento vêm de lá.</p>"
     "<p>Ao enviar, cada projeto aparece em \"Meus instrumentos\" para o responsável informado (pelo CPF), que registra no formulário de execução as atividades e os beneficiários.</p>"
     "<p>A sugestão de periodicidade de atualização é trimestral.</p>",
     40,
-    perfis=(PERFIL_GESTOR_CONVENIO,),
+    origem=cv,
 )
 
 cv_ges.bloco("b0", "Identificação do convênio", "Identificação", "fa fa-id-card",
-            "<p>Informe o convênio ao qual esta atualização se refere.</p>")
-cv_ges.p("lista", "Número do convênio", "Número do instrumento no Transferegov.br.", [("fonte_dw", "convenios"), ("chave_dw", "instrumento")], req=True)
-cv_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
+            "<p>O convênio vem do cadastro do MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
+cv_ges.p("lista", "Número do convênio", "Número do instrumento no Transferegov.br.", [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("origem", "pergunta:Número do convênio")], req=True)
+cv_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3", "origem": "pergunta:Descrição do instrumento"}))
 cv_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
-cv_ges.p("linha", "Responsável pelo preenchimento - nome completo", "", req=True)
-cv_ges.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
-cv_ges.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", req=True)
-cv_ges.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
-cv_ges.bloco("b4", "Bloco 4 - Execução (Convênio)", "Execução", "fa fa-tasks",
+cv_ges.bloco("b4", "Execução (Convênio)", "Execução", "fa fa-tasks",
          "<p>Atualização periódica pelo convenente (responsável pela execução do convênio).</p>")
-cv_ges.secao("4.1 Cronograma de execução")
+cv_ges.secao("Cronograma de execução")
 cv_ges.p("radio", "O convênio está sendo executado dentro do cronograma físico e financeiro previsto no plano de trabalho?", "", SIM_NAO, chave="prazo")
 cv_ges.p("texto", "Justificativa de desvio",
      "Descreva atrasos, obstáculos e medidas adotadas; indique se há proposta de termo aditivo (prorrogação de vigência ou alteração do plano de trabalho).",
@@ -837,8 +838,8 @@ cv_ges.p("radio", "Situação da execução", "", [
     "Extinta / rescindida",
     ("campo_dw", "instrumento.situacao_execucao"),
 ])
-cv_ges.secao("4.2 Forma de execução do objeto",
-         "Os mecanismos NÃO são excludentes: marque todos os que se aplicam. Registre cada interveniente, executor ou contratado no quadro de partícipes (item 5.1).")
+cv_ges.secao("Forma de execução do objeto",
+         "Os mecanismos NÃO são excludentes: marque todos os que se aplicam. Registre cada interveniente, executor ou contratado na lista de projetos e executores.")
 cv_ges.p("checkbox", "Mecanismos utilizados", "Marque TODOS os que se aplicam.", [
     "Execução direta pelo convenente",
     "Contratação de terceiros pelo convenente (Lei nº 14.133/2021)",
@@ -859,7 +860,7 @@ cv_ges.p("tabela", "Contratações realizadas pelo convenente para a execução 
              ["Pregão", "Concorrência", "Dispensa", "Inexigibilidade", "Outra"]),
             ("valor", "Valor (R$)", "moeda"),
         ))
-cv_ges.secao("4.3 Contrapartida pactuada (se houver)")
+cv_ges.secao("Contrapartida pactuada (se houver)")
 cv_ges.p("radio", "Há contrapartida pactuada?", "", SIM_NAO + [("campo_dw", "instrumento.contrapartida_pactuada")], chave="contrapartida")
 cv_ges.p("radio", "Modalidade da contrapartida", "", [
     "Financeira (depositada na conta bancária específica do convênio)",
@@ -868,15 +869,15 @@ cv_ges.p("radio", "Modalidade da contrapartida", "", [
 cv_ges.p("numero", "Valor da contrapartida aportado até o período (R$)",
      "Contrapartida financeira: valor depositado. Bens e serviços: valor estimado.", MOEDA, dep=("contrapartida", "Sim"))
 cv_ges.p("texto", "Descrição da contrapartida", "Ex.: mão de obra, infraestrutura, espaço físico, insumos.", dep=("contrapartida", "Sim"))
-cv_ges.secao("4.4 Bens adquiridos com recursos do convênio")
+cv_ges.secao("Bens adquiridos com recursos do convênio")
 cv_ges.p("radio", "Foram adquiridos bens permanentes com recursos do convênio no período (bens remanescentes)?", "", SIM_NAO, chave="bens")
 cv_ges.p("texto", "Descrição e destinação dos bens", "Identifique os bens e a destinação prevista ao término da vigência.", dep=("bens", "Sim"))
 
-cv_ges.bloco("b5", "Bloco 5 - Projetos e executores (Convênio)", "Projetos", "fa fa-sitemap",
+cv_ges.bloco("b5", "Projetos e executores (Convênio)", "Projetos", "fa fa-sitemap",
          "<p>Atualização periódica pelo convenente (responsável pela execução do convênio).</p>")
 cv_ges.aviso("Orientação - convênios com mais de uma meta",
          "<p>Em convênios com mais de uma meta, ação ou executor, os beneficiários são informados por meta/ação, e não somados no nível do convênio, preservando a rastreabilidade de qual instituição beneficiou quais grupos, em que território e sobre qual tema.</p>")
-cv_ges.secao("5.1 Execução por organização distinta do convenente")
+cv_ges.secao("Execução por organização distinta do convenente")
 CV_TERCEIROS = [
     "Sim, as atividades finalísticas do convênio são executadas exclusivamente por terceiros (interveniente, contratado ou parceiro)",
     "Não, as atividades finalísticas do convênio são executadas exclusivamente pelo convenente",
@@ -926,12 +927,12 @@ cv_ex.p("linha", "Responsável pelo preenchimento - cargo", "", req=True)
 cv_ex.p("telefone", "Responsável pelo preenchimento - telefone", "Com DDD.", req=True)
 cv_ex.p("email", "Responsável pelo preenchimento - e-mail", "", req=True)
 
-cv_ex.bloco("b5", "Bloco 5 - Atividade e beneficiários (Convênio)", "Atividade", "fa fa-map-marker",
+cv_ex.bloco("b5", "Atividade e beneficiários (Convênio)", "Atividade", "fa fa-map-marker",
             "<p>Uma atividade por preenchimento: para registrar outra atividade do mesmo projeto, use de novo \"Preencher a execução\" no projeto, em \"Meus instrumentos\".</p>")
 cv_ex.aviso("Mensagem ao usuário",
             "<p><strong>Neste momento você deve inserir uma atividade por vez que tenha sido executada no período a ser coletado.</strong></p>",
             "warning")
-cv_ex.secao("5.2 Metas e etapas previstas no plano de trabalho (pré-execução)",
+cv_ex.secao("Metas e etapas previstas no plano de trabalho (pré-execução)",
          "Uma meta do plano de trabalho pode se desdobrar em várias atividades: acompanhamos a meta e a etapa (o que foi pactuado) e a atividade (o que aconteceu de fato).")
 cv_ex.p("linha", "Meta / etapa prevista no plano de trabalho",
           "Escolha uma das metas do plano de trabalho do convênio selecionado ou digite.",
@@ -946,12 +947,12 @@ cv_ex.p("radio", "Relevância territorial no período", "", [
     "Há informações de relevância territorial a serem coletadas no período",
     NAO_HA_INFO,
 ], chave="relevancia")
-evidencias(cv_ex, "5.5 Evidências de execução territorial (upload por atividade)",
+evidencias(cv_ex, "Evidências de execução territorial (upload por atividade)",
            dep=("relevancia", "Há informações de relevância territorial a serem coletadas no período"))
-cv_ex.secao("5.6 Dificuldades encontradas na execução", "Campo aberto - atualização periódica.")
+cv_ex.secao("Dificuldades encontradas na execução", "Campo aberto - atualização periódica.")
 cv_ex.p("texto", "Dificuldades burocráticas, acesso a documentos, mobilização de pessoas",
      "Registre dificuldades à medida que ocorrem, não apenas ao final, inclusive as relativas ao uso do Transferegov.br e ao relacionamento com o concedente.")
-cv_ex.secao("5.7 Observações complementares e upload de documentos")
+cv_ex.secao("Observações complementares e upload de documentos")
 cv_ex.p("texto", "Observações complementares", "Informações adicionais relevantes não contempladas nos campos acima.")
 documentos(cv_ex, [
     "Plano de trabalho",
@@ -971,9 +972,11 @@ header = f"""-- Carga dos formulários Coleta MIR - TEDs e Coleta MIR - Convêni
 -- "2026.09.30 Coleta MIR Convênios - Proposta.pdf".
 --
 -- Cria três editais do tipo 'formulario' por instrumento, conforme o perfil de preenchimento:
---   * (MIR): Blocos 1, 2, 3, 5.0 e 6 - servidor do MIR;
---   * (gestor / convenente): Bloco 4 e projetos (5.1) - gestor do TED ou convenente;
---   * (execução): atividades e beneficiários (5.2 em diante), um preenchimento por atividade, aberto pelo
+--   * (MIR): identificação, responsáveis (com o CPF de quem preenche como gestor), enquadramento, modalidade e
+--     fiscalização - servidor do MIR;
+--   * (gestor / convenente): execução e projetos - aberto pelo instrumento em "Meus instrumentos" (gestor
+--     vinculado pelo CPF no formulário do MIR). Ligado ao do MIR por co_edital_adesao;
+--   * (execução): atividades e beneficiários, um preenchimento por atividade, aberto pelo
 --     projeto em "Meus instrumentos" (responsável vinculado pelo CPF). Ligado ao anterior por co_edital_adesao.
 -- Cada bloco vira um agrupamento (aba) com suas perguntas. As dependências entre perguntas (depende_de) usam os
 -- ids gerados nesta mesma execução. Prefixo de tabelas: {PREFIX}

@@ -346,7 +346,8 @@ var AdesaoForm = {
         $travadas.find('select').attr({ tabindex: '-1', 'aria-readonly': 'true' })
             .on('mousedown keydown', function (e) { e.preventDefault(); });
         $travadas.each(function () {
-            $(this).find('label').first().append(' <span class="badge text-bg-light fw-normal">definido pelo gestor</span>');
+            $('<span class="badge text-bg-light fw-normal"></span>').text($(this).attr('data-definido-por') || 'definido pelo gestor')
+                .appendTo($(this).find('label').first()).before(' ');
         });
     },
 

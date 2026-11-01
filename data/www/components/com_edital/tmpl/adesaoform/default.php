@@ -298,7 +298,7 @@ if ($travado) {
                 // Formulário de execução: valor vindo do formulário de origem, travado.
                 if (array_key_exists((int) $pergunta->id, $this->valoresOrigem)) {
                     $html = PerguntaHelper::renderPerguntaField($pergunta, $this->valoresOrigem[(int) $pergunta->id], $currentIndex);
-                    echo preg_replace('/^<div class="pergunta-field /', '<div class="pergunta-field pergunta-travada ', $html, 1);
+                    echo preg_replace('/^<div class="pergunta-field /', '<div data-definido-por="' . htmlspecialchars($this->definidoPor, ENT_QUOTES, 'UTF-8') . '" class="pergunta-field pergunta-travada ', $html, 1);
                 } else {
                     echo PerguntaHelper::renderPerguntaField($pergunta, $resposta, $currentIndex);
                 }

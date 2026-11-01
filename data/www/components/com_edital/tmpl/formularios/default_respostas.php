@@ -51,12 +51,12 @@ use Joomla\CMS\Language\Text;
 			</div>
 			<?php if ($resposta->execucoes) : ?>
 				<details class="mt-2">
-					<summary class="small">Execução por projeto (<?php echo count($resposta->execucoes); ?>)</summary>
+					<summary class="small"><?php echo $this->escape($resposta->rotuloExecucoes); ?> (<?php echo count($resposta->execucoes); ?>)</summary>
 					<ul class="small mb-0 mt-1">
 						<?php foreach ($resposta->execucoes as $execucao) : ?>
 							<li>
 								<?php echo $this->escape($execucao->rotulo); ?><?php echo $execucao->responsavel !== '' ? ' (responsável: ' . $this->escape($execucao->responsavel) . ')' : ''; ?>:
-								<a href="<?php echo $this->escape($execucao->url); ?>">preencher a execução</a>
+								<a href="<?php echo $this->escape($execucao->url); ?>">preencher</a>
 							</li>
 						<?php endforeach; ?>
 					</ul>

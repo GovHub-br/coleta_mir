@@ -62,6 +62,9 @@ class HtmlView extends BaseHtmlView
 	 */
 	public $valoresOrigem = [];
 
+	/** Quem define os valores travados: o formulário de origem é do MIR ou do gestor. */
+	public $definidoPor = 'definido pelo gestor';
+
 	/** Execução nova: chave da resposta de origem e posição do projeto (vindos do projeto em "Meus instrumentos"). */
 	public $origemKey = '';
 
@@ -316,6 +319,9 @@ class HtmlView extends BaseHtmlView
 	 */
 	protected function prepararOrigem(array $perguntas)
 	{
+		$editalOrigem = EditalHelper::getEdital((int) $this->edital->co_edital_adesao);
+		$this->definidoPor = $editalOrigem && OrigemHelper::ehExecucao($editalOrigem) ? 'definido pelo gestor' : 'definido pelo MIR';
+
 		if (!empty($this->item->id)) {
 			$respostas = (new \Comedital\Component\Edital\Site\Model\RespostaModel())->getRespostasMapByAdesao((int) $this->item->id);
 			$this->valoresOrigem = OrigemHelper::getValoresSalvos($perguntas, $respostas);
