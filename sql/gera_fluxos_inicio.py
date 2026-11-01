@@ -1,22 +1,32 @@
-# Gera as imagens "Quem preenche o quê" e "Como começar" da página inicial, no visual dos
-# slides do Gov Hub (gov-hub-docs/apresentacoes): cards #F2F1F6 arredondados, roxo #613EFF,
-# azul-marinho #0A005A, sobretítulo em caixa alta e Reddit Sans (embutida no SVG, porque
-# SVG usado como <img> não carrega fonte externa).
+# Gera as imagens "Quem preenche o quê" e "Como começar" da página inicial. O layout segue os
+# slides do Gov Hub (gov-hub-docs/apresentacoes: cards arredondados, sobretítulo em caixa alta,
+# passos em pílula); cores e fonte são as do Coleta MIR (azul gov.br e Rawline).
+# A Rawline vai embutida no SVG, porque SVG usado como <img> não carrega fonte externa, e
+# recortada só com os caracteres usados (precisa de fonttools: pip install fonttools).
 # Uso: python3 sql/gera_fluxos_inicio.py
-import base64, html, os
+import base64, html, io, os
+
+from fontTools import subset
+from fontTools.ttLib import TTFont
 
 RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'www', 'media', 'com_edital')
 SAIDA = os.path.join(RAIZ, 'images', 'inicio')
 
-ROXO, MARINHO, ROXO700, SUAVE, TEXTO, MUTED = '#613EFF', '#0A005A', '#3F28A6', '#F2F1F6', '#2D3748', '#666666'
+# mesmas cores de media/com_edital/css/inicio.css
+AZUL, ESCURO, AZUL_TEXTO, SUAVE, TEXTO, CLARO = '#1351B4', '#0C326F', '#1351B4', '#E8F0FC', '#333333', '#C5D4F0'
 
 
-def fontes():
-    regras = []
-    for peso in (500, 700, 800):
-        dados = base64.b64encode(open(os.path.join(RAIZ, 'fonts', 'reddit-%d.woff2' % peso), 'rb').read()).decode()
-        regras.append("@font-face{font-family:'Reddit Sans';font-weight:%d;src:url(data:font/woff2;base64,%s) format('woff2');}" % (peso, dados))
-    return ''.join(regras)
+def fonte_recortada(peso, caracteres):
+    fonte = TTFont(os.path.join(RAIZ, 'fonts', 'rawline-%d.woff' % peso))
+    opcoes = subset.Options()
+    opcoes.flavor = 'woff'
+    recorte = subset.Subsetter(opcoes)
+    recorte.populate(text=caracteres)
+    recorte.subset(fonte)
+    saida = io.BytesIO()
+    fonte.flavor = 'woff'
+    fonte.save(saida)
+    return base64.b64encode(saida.getvalue()).decode()
 
 
 def e(t):
@@ -29,10 +39,11 @@ class Svg:
         self.p = [
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d" role="img">' % (w, h, w, h),
             '<title>%s</title><desc>%s</desc>' % (e(titulo), e(descricao)),
-            "<style>%s text{font-family:'Reddit Sans','Open Sans',Arial,sans-serif;}</style>" % fontes(),
         ]
+        self.textos = []
 
     def texto(self, x, y, t, tam, cor, peso=500, anchor='start', espaco=0):
+        self.textos.append((peso, t))
         ls = ' letter-spacing="%s"' % espaco if espaco else ''
         self.p.append('<text x="%s" y="%s" font-size="%s" font-weight="%s" fill="%s" text-anchor="%s"%s>%s</text>'
                       % (x, y, tam, peso, cor, anchor, ls, e(t)))
@@ -51,11 +62,18 @@ class Svg:
         self.texto(round(x + w / 2), y + 26, t, tam, cor, 700, 'middle')
         return w
 
-    def seta(self, x1, x2, y, cor=ROXO):
+    def seta(self, x1, x2, y, cor=AZUL):
         self.p.append('<path d="M%s %s H%s" stroke="%s" stroke-width="6" stroke-linecap="round" fill="none"/>' % (x1, y, x2 - 14, cor))
         self.p.append('<path d="M%s %s L%s %s L%s %s Z" fill="%s"/>' % (x2 - 20, y - 14, x2, y, x2 - 20, y + 14, cor))
 
     def salvar(self, nome):
+        regras = []
+        for peso in (500, 700, 800):
+            usados = ''.join(t for p, t in self.textos if p == peso)
+            if usados:
+                regras.append("@font-face{font-family:'Rawline';font-weight:%d;src:url(data:font/woff;base64,%s) format('woff');}"
+                              % (peso, fonte_recortada(peso, usados)))
+        self.p.insert(2, "<style>%s text{font-family:'Rawline',Arial,sans-serif;}</style>" % ''.join(regras))
         self.p.append('</svg>')
         open(os.path.join(SAIDA, nome), 'w', encoding='utf-8').write('\n'.join(self.p))
 
@@ -71,30 +89,30 @@ s = Svg(1500, 470, 'Quem preenche o quê',
 x = 0
 for i, (k, titulo, desc, chips, destaque) in enumerate(CARDS):
     w = 440
-    fundo, cor_t, cor_d, cor_k = (ROXO, '#FFFFFF', '#FFFFFF', '#E9DFFF') if destaque else (SUAVE, MARINHO, TEXTO, ROXO700)
+    fundo, cor_t, cor_d, cor_k = (AZUL, '#FFFFFF', '#FFFFFF', CLARO) if destaque else (SUAVE, ESCURO, TEXTO, AZUL_TEXTO)
     s.ret(x, 10, w, 450, 36, fundo)
     s.texto(x + 44, 74, k.upper(), 17, cor_k, 700, espaco=3)
     y = s.linhas(x + 44, 136, titulo, 46, cor_t, 800, 1.05)
     s.linhas(x + 44, y + 34, desc, 24, cor_d, 500, 1.35)
     cx = x + 44
     for c in chips:
-        cx += s.chip(cx, 376, c, '#FFFFFF' if destaque else ROXO, ROXO if destaque else '#FFFFFF') + 10
+        cx += s.chip(cx, 376, c, '#FFFFFF' if destaque else AZUL, AZUL if destaque else '#FFFFFF') + 10
     if i == 1:
         s.seta(x + w + 22, x + w + 98, 235)
-        s.texto(x + w + 60, 290, 'pelo', 16, ROXO700, 700, 'middle')
-        s.texto(x + w + 60, 310, 'CPF', 16, ROXO700, 700, 'middle')
+        s.texto(x + w + 60, 290, 'pelo', 16, AZUL_TEXTO, 700, 'middle')
+        s.texto(x + w + 60, 310, 'CPF', 16, AZUL_TEXTO, 700, 'middle')
     x += w + (40 if i == 0 else 120)
 s.salvar('quem-preenche.svg')
 
-# Como começar: passos em pílula, como o gh-flow dos slides, e a exceção do responsável.
+# Como começar: passos em pílula, como o gh-flow dos slides.
 PASSOS = [
-    ('Passo 1', 'Crie sua conta', 'CPF, e-mail e senha', SUAVE, MARINHO, ROXO700),
-    ('Passo 2', 'Peça seu perfil', 'UG, CNPJ ou MIR', SUAVE, MARINHO, ROXO700),
-    ('Passo 3', 'O MIR libera', 'veja em Meus acessos', ROXO, '#FFFFFF', '#E9DFFF'),
-    ('Passo 4', 'Preencha', 'em Meus instrumentos', MARINHO, '#FFFFFF', '#C9C2FF'),
+    ('Passo 1', 'Crie sua conta', 'CPF, e-mail e senha', SUAVE, ESCURO, AZUL_TEXTO),
+    ('Passo 2', 'Peça seu perfil', 'UG, CNPJ ou MIR', SUAVE, ESCURO, AZUL_TEXTO),
+    ('Passo 3', 'O MIR libera', 'veja em Meus acessos', AZUL, '#FFFFFF', CLARO),
+    ('Passo 4', 'Preencha', 'em Meus instrumentos', ESCURO, '#FFFFFF', CLARO),
 ]
-s = Svg(1500, 330, 'Como começar',
-        'Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos. Responsável por projeto pula os passos 2 e 3, porque o projeto aparece pelo CPF.')
+s = Svg(1500, 170, 'Como começar',
+        'Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos.')
 w, gap = 315, 80
 for i, (k, t, d, fundo, cor_t, cor_k) in enumerate(PASSOS):
     x = i * (w + gap)
@@ -104,9 +122,4 @@ for i, (k, t, d, fundo, cor_t, cor_k) in enumerate(PASSOS):
     s.texto(x + 48, 134, d, 20, cor_t if fundo != SUAVE else TEXTO, 500)
     if i < len(PASSOS) - 1:
         s.seta(x + w + 14, x + w + gap - 14, 85)
-# exceção: pílula tracejada sob os passos 2 e 3, como o gh-flow__step--back
-x0, x1 = w + gap, 3 * (w + gap) - gap
-s.ret(x0, 210, x1 - x0, 96, 48, '#FFFFFF', 'stroke="%s" stroke-width="3" stroke-dasharray="10 8"' % ROXO700)
-s.texto((x0 + x1) / 2, 250, 'Responsável por projeto pula os passos 2 e 3', 24, MARINHO, 800, 'middle')
-s.texto((x0 + x1) / 2, 282, 'o projeto aparece em Meus instrumentos pelo CPF', 20, TEXTO, 500, 'middle')
 s.salvar('como-comecar.svg')
