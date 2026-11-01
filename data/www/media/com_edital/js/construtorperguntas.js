@@ -372,6 +372,39 @@
 		return el;
 	}
 
+	// Pergunta com fonte_dw: o preenchimento usa a lista do data warehouse, que aqui só é exibida.
+	// As alternativas fixas ficam ocultas e são gravadas como estão (reserva para quando o DW não responde).
+	function renderListaDw(bloco, lista) {
+		const blocoDw = bloco.querySelector('[data-bloco-dw]');
+		const resumo = blocoDw.querySelector('[data-dw-resumo]');
+		const itens = blocoDw.querySelector('[data-dw-lista]');
+
+		blocoDw.hidden = !lista;
+		bloco.querySelector('[data-alternativas]').hidden = !!lista;
+		bloco.querySelector('[data-acao="alternativa-adicionar"]').hidden = !!lista;
+
+		if (!lista) {
+			return;
+		}
+
+		if (lista.porInstrumento) {
+			resumo.textContent = 'Alternativas carregadas do data warehouse (fonte "' + lista.fonte + '") de acordo com o instrumento escolhido no preenchimento.';
+		} else if (!lista.opcoes.length) {
+			resumo.textContent = 'Alternativas carregadas do data warehouse (fonte "' + lista.fonte + '"), mas o data warehouse não respondeu agora. No preenchimento, valem as alternativas fixas da pergunta enquanto ele estiver fora do ar.';
+		} else {
+			resumo.textContent = lista.opcoes.length + ' alternativas carregadas do data warehouse (fonte "' + lista.fonte + '")'
+				+ (lista.filtrada ? ', filtradas no preenchimento de acordo com respostas anteriores' : '')
+				+ '. Elas são atualizadas no data warehouse e não podem ser editadas aqui.';
+		}
+
+		itens.hidden = !lista.opcoes.length;
+		itens.replaceChildren(...lista.opcoes.map(function (nome) {
+			const li = document.createElement('li');
+			li.textContent = nome;
+			return li;
+		}));
+	}
+
 	function renderPergunta(pergunta, i, total, iSecao) {
 		const el = novoTemplate('tpl-pergunta');
 		const select = el.querySelector('[data-campo="tipo"]');
@@ -395,6 +428,7 @@
 		const bloco = el.querySelector('[data-bloco-alternativas]');
 		bloco.hidden = !ehSelecao(pergunta.tipo);
 		bloco.querySelector('[data-alternativas]').replaceChildren(...pergunta.alternativas.map(renderAlternativa));
+		renderListaDw(bloco, pergunta.listaDw);
 
 		const blocoOutro = bloco.querySelector('[data-bloco-outro]');
 		blocoOutro.hidden = !aceitaOutro(pergunta.tipo);
