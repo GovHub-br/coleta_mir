@@ -137,7 +137,7 @@ $primeiroNome = $this->user->guest ? '' : strtok(trim($this->user->name), ' ');
 	<section class="coleta-inicio-secao" aria-labelledby="coleta-quem">
 		<h2 id="coleta-quem">Quem preenche o quê</h2>
 		<div class="coleta-inicio-fluxo">
-			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/quem-preenche.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/quem-preenche.svg'); ?>" width="1500" height="470" loading="lazy"
+			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/quem-preenche.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/quem-preenche.svg'); ?>" width="1500" height="460" loading="lazy"
 				alt="Servidor do MIR: cadastra o TED ou o convênio, em Novo instrumento. Gestor de TED ou convenente, com a UG ou o CNPJ liberado: conta como o instrumento é executado e indica os projetos apoiados. Responsável pelo projeto: entra pelo CPF e registra as atividades e as pessoas beneficiadas.">
 		</div>
 	</section>
@@ -145,7 +145,7 @@ $primeiroNome = $this->user->guest ? '' : strtok(trim($this->user->name), ' ');
 	<section class="coleta-inicio-secao" aria-labelledby="coleta-passos">
 		<h2 id="coleta-passos">Como começar</h2>
 		<div class="coleta-inicio-fluxo">
-			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/como-comecar.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/como-comecar.svg'); ?>" width="1500" height="170" loading="lazy"
+			<img src="<?php echo Uri::root() . 'media/com_edital/images/inicio/como-comecar.svg?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/images/inicio/como-comecar.svg'); ?>" width="1500" height="150" loading="lazy"
 				alt="Passo 1: crie sua conta com CPF, e-mail e senha. Passo 2: peça seu perfil, informando a UG, o CNPJ ou o perfil MIR. Passo 3: o MIR libera, e você acompanha em Meus acessos. Passo 4: preencha em Meus instrumentos.">
 		</div>
 	</section>
