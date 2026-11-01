@@ -100,6 +100,13 @@ include __DIR__ . '/../parts/_menu_formularios_gestao.php';
 		</label>
 		<div class="cp-campo" data-bloco-alternativas hidden>
 			<span>Alternativas</span>
+			<div class="alert alert-info small mb-2" data-bloco-dw hidden>
+				<p class="mb-1">
+					<i class="fas fa-database" aria-hidden="true"></i>
+					<span data-dw-resumo></span>
+				</p>
+				<ol class="mb-0 ps-4" style="max-height: 16rem; overflow-y: auto;" data-dw-lista></ol>
+			</div>
 			<div data-alternativas></div>
 			<button type="button" class="btn btn-outline-secondary btn-sm" data-acao="alternativa-adicionar">
 				<i class="fas fa-plus" aria-hidden="true"></i> Adicionar alternativa

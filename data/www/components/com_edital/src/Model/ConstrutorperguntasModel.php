@@ -6,6 +6,7 @@ defined('_JEXEC') or die;
 
 use Comedital\Component\Edital\Administrator\Table\AgrupamentoTable;
 use Comedital\Component\Edital\Administrator\Table\PerguntaTable;
+use Comedital\Component\Edital\Site\Helper\DwHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filter\InputFilter;
@@ -110,6 +111,7 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 					? array_column(PerguntaHelper::getOpcoesSelecao($pergunta, false), 'nome')
 					: [],
 				'permiteOutro' => PerguntaHelper::permiteOutro($pergunta),
+				'listaDw'      => in_array($tipo, self::TIPOS_SELECAO, true) ? $this->listaDw($pergunta) : null,
 				'chave'        => 'p' . (int) $pergunta->id,
 				'exibir'       => $this->lerCondicao($pergunta->depende_de, $pergunta->depende_de_valor, $perguntas, (string) ($pergunta->depende_de_fonte ?? '')),
 				'ocultar'      => $this->lerCondicao($pergunta->depende_de_ocultar, $pergunta->depende_de_ocultar_valor, $perguntas, (string) ($pergunta->depende_de_ocultar_fonte ?? '')),
@@ -117,6 +119,30 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 		}
 
 		return array_values($resultado);
+	}
+
+	/**
+	 * Alternativas que o preenchimento mostra a partir do DW (parâmetro fonte_dw), só para exibição:
+	 * as alternativas fixas da pergunta continuam gravadas como reserva para quando o DW não responde.
+	 */
+	private function listaDw(object $pergunta): ?array
+	{
+		$fonte = PerguntaHelper::getParametro($pergunta, DwHelper::PARAM_FONTE);
+
+		if ($fonte === '')
+		{
+			return null;
+		}
+
+		$porInstrumento = DwHelper::fonteComFiltro($fonte);
+		$opcoes         = $porInstrumento ? [] : DwHelper::getOpcoes($fonte);
+
+		return [
+			'fonte'          => $fonte,
+			'porInstrumento' => $porInstrumento,
+			'filtrada'       => (bool) array_filter(array_column($opcoes, 'filtro')),
+			'opcoes'         => array_column($opcoes, 'nome'),
+		];
 	}
 
 	/**
@@ -262,7 +288,10 @@ class ConstrutorperguntasModel extends BaseDatabaseModel
 						}
 					}
 
-					if (count($alternativas) < 2 || count($alternativas) !== count(array_unique($alternativas)))
+					// Com lista do DW as alternativas fixas são só reserva e podem faltar.
+					$temListaDw = $pId && PerguntaHelper::getParametro($perguntasAtuais[$pId], DwHelper::PARAM_FONTE) !== '';
+
+					if ((!$temListaDw && count($alternativas) < 2) || count($alternativas) !== count(array_unique($alternativas)))
 					{
 						throw new \InvalidArgumentException("A pergunta {$m} da seção {$n} precisa de ao menos 2 alternativas distintas.");
 					}
