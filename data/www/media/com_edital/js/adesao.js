@@ -609,9 +609,13 @@ var AdesaoForm = {
             var $tabela = $(this);
             var colunas = JSON.parse($tabela.attr('data-colunas') || '[]');
             var $oculto = $tabela.children('input[type="hidden"]');
-            var $corpo = $tabela.find('.pergunta-tabela-lista tbody');
+            var $lista = $tabela.find('.pergunta-tabela-lista');
             var $erro = $tabela.find('.pergunta-tabela-erro');
+            var $adicionar = $tabela.find('.pergunta-tabela-adicionar');
+            var $cancelar = $tabela.find('.pergunta-tabela-cancelar');
+            var $tituloEntrada = $tabela.find('.pergunta-tabela-entrada-titulo');
             var itens = [];
+            var editando = -1;
 
             try {
                 itens = JSON.parse($oculto.val() || '[]');
@@ -619,23 +623,56 @@ var AdesaoForm = {
                 itens = [];
             }
 
+            var exibir = function (coluna, valor) {
+                return coluna.tipo === 'moeda' && valor !== '' ? formatarMoeda(valor) : valor;
+            };
+
+            var limparEntrada = function () {
+                editando = -1;
+                $tabela.find('[data-coluna]').val('');
+                $erro.addClass('d-none').text('');
+                $tituloEntrada.text('Novo item');
+                $adicionar.find('span').text('Adicionar à lista');
+                $adicionar.find('i').attr('class', 'fas fa-plus');
+                $cancelar.addClass('d-none');
+            };
+
+            // Cada item vira um cartão: o primeiro campo como título e os demais em pares rótulo/valor.
             var atualizar = function () {
-                $corpo.empty();
+                $lista.empty();
                 $.each(itens, function (i, item) {
-                    var $linha = $('<tr>').append($('<td>').text(i + 1));
-                    $.each(colunas, function (j, coluna) {
+                    var titulo = colunas.length ? (item[colunas[0].chave] || '') : '';
+                    var $campos = $('<div class="row g-2">');
+
+                    $.each(colunas.slice(1), function (j, coluna) {
                         var valor = item[coluna.chave] || '';
-                        $linha.append($('<td>').text(coluna.tipo === 'moeda' && valor !== '' ? formatarMoeda(valor) : valor));
+                        $campos.append($('<div class="col-12 col-md-6">').append(
+                            $('<div class="small text-muted">').text(coluna.rotulo),
+                            $('<div class="text-break">').text(valor !== '' ? exibir(coluna, valor) : '—')
+                        ));
                     });
-                    $linha.append($('<td class="text-end">').append(
-                        $('<button type="button" class="btn btn-sm btn-outline-danger pergunta-tabela-remover">')
-                            .attr('data-indice', i)
-                            .attr('aria-label', 'Remover item ' + (i + 1))
-                            .html('<i class="fas fa-trash" aria-hidden="true"></i> Remover')
-                    ));
-                    $corpo.append($linha);
+
+                    var $cartao = $('<div class="card pergunta-tabela-item">').toggleClass('border-primary', i === editando).append(
+                        $('<div class="card-body py-2 px-3">').append(
+                            $('<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">').append(
+                                $('<strong>').text((i + 1) + '. ' + titulo),
+                                $('<div class="d-flex gap-2">').append(
+                                    $('<button type="button" class="btn btn-sm btn-outline-primary pergunta-tabela-editar">')
+                                        .attr('data-indice', i)
+                                        .attr('aria-label', 'Editar item ' + (i + 1))
+                                        .html('<i class="fas fa-pen" aria-hidden="true"></i> Editar'),
+                                    $('<button type="button" class="btn btn-sm btn-outline-danger pergunta-tabela-remover">')
+                                        .attr('data-indice', i)
+                                        .attr('aria-label', 'Remover item ' + (i + 1))
+                                        .html('<i class="fas fa-trash" aria-hidden="true"></i> Remover')
+                                )
+                            ),
+                            $campos
+                        )
+                    );
+                    $lista.append($cartao);
                 });
-                $tabela.find('.pergunta-tabela-lista').toggleClass('d-none', itens.length === 0);
+                $lista.toggleClass('d-none', itens.length === 0);
                 $tabela.find('.pergunta-tabela-vazia').toggleClass('d-none', itens.length > 0);
                 $oculto.val(itens.length ? JSON.stringify(itens) : '').trigger('change');
             };
@@ -652,7 +689,7 @@ var AdesaoForm = {
             $tabela.on('keydown', 'input[data-coluna]', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    $tabela.find('.pergunta-tabela-adicionar').trigger('click');
+                    $adicionar.trigger('click');
                 }
             });
 
@@ -677,14 +714,44 @@ var AdesaoForm = {
                     return;
                 }
 
+                if (editando >= 0) {
+                    itens[editando] = item;
+                } else {
+                    itens.push(item);
+                }
+                limparEntrada();
+                atualizar();
+            });
+
+            // Editar leva os valores do item para o bloco de entrada; salvar substitui o item no lugar.
+            $tabela.on('click', '.pergunta-tabela-editar', function () {
+                editando = parseInt($(this).attr('data-indice'), 10);
+                $.each(colunas, function (i, coluna) {
+                    $tabela.find('[data-coluna="' + coluna.chave + '"]').val(itens[editando][coluna.chave] || '');
+                });
                 $erro.addClass('d-none').text('');
-                itens.push(item);
-                $tabela.find('[data-coluna]').val('');
+                $tituloEntrada.text('Editando o item ' + (editando + 1));
+                $adicionar.find('span').text('Salvar alterações');
+                $adicionar.find('i').attr('class', 'fas fa-check');
+                $cancelar.removeClass('d-none');
+                atualizar();
+                $tabela.find('.pergunta-tabela-entrada [data-coluna]').first().trigger('focus');
+            });
+
+            $tabela.on('click', '.pergunta-tabela-cancelar', function () {
+                limparEntrada();
                 atualizar();
             });
 
             $tabela.on('click', '.pergunta-tabela-remover', function () {
-                itens.splice(parseInt($(this).attr('data-indice'), 10), 1);
+                var indice = parseInt($(this).attr('data-indice'), 10);
+                itens.splice(indice, 1);
+                if (editando === indice) {
+                    limparEntrada();
+                } else if (editando > indice) {
+                    editando--;
+                    $tituloEntrada.text('Editando o item ' + (editando + 1));
+                }
                 atualizar();
             });
 
