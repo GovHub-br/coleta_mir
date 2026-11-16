@@ -474,7 +474,7 @@ ted = Form(
 
 ted.bloco("b1", "Identificação do TED", "Identificação", "fa fa-id-card",
           "<p>Apresentação formal e institucional do TED.</p>")
-ted.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg. " + AUTO, TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("resposta_unica", "sim")], req=True)
+ted.p("lista", "Número do TED", "Número da transferência no Transferegov.br; para tedinho (descentralização sem registro no Transferegov.br), o número do processo SEI. " + AUTO, TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("resposta_unica", "sim")], req=True)
 ted.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
 ted.p("linha", "Número SEI", "Número do processo de formalização no SEI/MIR.", dw("instrumento.nr_processo_sei"))
 ted.p("linha", "Processos SEI relacionados (se houver)",
@@ -549,7 +549,7 @@ ted_ges = Form(
 
 ted_ges.bloco("b0", "Identificação do TED", "Identificação", "fa fa-id-card",
              "<p>O TED é escolhido em \"Meus instrumentos\", entre os da sua UG liberada pelo MIR. Quem preenche é identificado pelo próprio login (nome, CPF e e-mail do perfil).</p>")
-ted_ges.p("lista", "Número do TED", "Código identificador no Transferegov.br e Siorg.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("acesso_unidade", "sim")], req=True)
+ted_ges.p("lista", "Número do TED", "Número da transferência no Transferegov.br; para tedinho, o número do processo SEI.", TEDS + [("fonte_dw", "teds"), ("chave_dw", "instrumento"), ("acesso_unidade", "sim")], req=True)
 ted_ges.p("texto", "Descrição do instrumento", "Parceiro e objeto do instrumento.", dw("instrumento.descricao", {"rows": "3"}))
 ted_ges.p("linha", "Período de referência da atualização", "Ex.: 3º trimestre de 2026.", req=True)
 
@@ -657,7 +657,7 @@ ted_ex.p("checkbox", "Relevância territorial no período", "", [NAO_HA_INFO])
 # ==========================================================================
 cv = Form(
     "conv", "Coleta MIR - Convênios (MIR)",
-    "<p>Instrumento para coleta de dados de forma territorializada dos convênios celebrados pelo Ministério da Igualdade Racial (MIR), na qualidade de concedente.</p>"
+    "<p>Instrumento para coleta de dados de forma territorializada dos convênios, contratos de repasse e termos de fomento e de colaboração celebrados pelo Ministério da Igualdade Racial (MIR), na qualidade de concedente.</p>"
     "<p>O Coleta MIR não substitui o registro dos atos de execução, acompanhamento e fiscalização, nem a prestação de contas, exigidos no Transferegov.br (Decreto nº 11.531/2023); "
     "seu propósito é complementar esses registros com informações territorializadas.</p>"
     + INTRO_PERFIS.format(mir="servidor do MIR (concedente)", gestor="convenente", sufixo_gestor="convenente", gestor_curto="convenente", unidade="CNPJ"),
@@ -671,7 +671,9 @@ cv.p("lista", "Número do convênio",
      "Número do instrumento no Transferegov.br e código Siorg (se houver). " + AUTO,
      [("fonte_dw", "convenios"), ("chave_dw", "instrumento"), ("resposta_unica", "sim")], req=True)
 cv.p("texto", "Descrição do instrumento", "Parceiro e objeto, preenchidos a partir do instrumento escolhido.", dw("instrumento.descricao", {"rows": "3"}))
-cv.p("radio", "Tipo de instrumento", "Conforme o Decreto nº 11.531/2023.", ["Convênio", "Contrato de repasse", ("campo_dw", "instrumento.tipo_instrumento")], chave="tipo_instr")
+cv.p("radio", "Tipo de instrumento",
+     "Convênio e contrato de repasse: Decreto nº 11.531/2023. Termo de fomento e termo de colaboração: Lei nº 13.019/2014 (MROSC).",
+     ["Convênio", "Contrato de repasse", "Termo de fomento", "Termo de colaboração", ("campo_dw", "instrumento.tipo_instrumento")], chave="tipo_instr")
 cv.p("linha", "Número SEI", "Número do processo de formalização no SEI/MIR.", dw("instrumento.nr_processo_sei"))
 cv.p("linha", "Processos SEI relacionados (se houver)",
      "Outros processos vinculados ao convênio (plano de trabalho, termos aditivos, prestação de contas), para rastreabilidade e entendimento das entregas; separar por ponto e vírgula.")
@@ -686,13 +688,13 @@ cv.p("linha", "Vigência - data de término", "Conforme o termo de convênio e s
 cv.p("radio", "Existem termos aditivos?",
      "Orientação: termos aditivos não geram novo registro - são apensados ao registro do convênio original, atualizando automaticamente valores e vigência.",
      SIM_NAO + [("campo_dw", "instrumento.existem_aditivos")], chave="aditivo")
-cv.p("linha", "Número e data do último aditivo", "", dep=("aditivo", "Sim"))
+cv.p("linha", "Número e data do último aditivo", "", dw("instrumento.ultimo_aditivo"), dep=("aditivo", "Sim"))
 cv.p("linha", "Data de celebração (assinatura)", DATA, dw("instrumento.dt_assinatura"))
 cv.p("linha", "Data de publicação do extrato", "Publicação do extrato do convênio no Diário Oficial da União. " + DATA, dw("instrumento.dt_publicacao"))
 
 cv.bloco("b2", "Responsáveis (Convênio)", "Responsáveis", "fa fa-users")
 cv.secao("Concedente (MIR)")
-cv.p("linha", "Unidade concedente responsável (Secretaria)", "Secretaria ou unidade responsável no MIR. " + AUTO)
+cv.p("linha", "Unidade concedente responsável (Secretaria)", "Secretaria ou unidade responsável no MIR. " + AUTO, dw("instrumento.unidade_mir"))
 cv.p("linha", "Código da unidade concedente (UG/SIAFI)", "Código da unidade gestora no SIAFI. " + AUTO, dw("instrumento.ug_mir"))
 fiscais(cv, "Fiscais do convênio")
 cv.secao("Convenente e intervenientes")
@@ -735,11 +737,13 @@ bloco_3(cv, "convênio", [
 EMENDAS = ["Emenda parlamentar individual", "Emenda parlamentar de bancada", "Emenda parlamentar de comissão"]
 cv.secao("Origem e fonte dos recursos")
 cv.p("checkbox", "Origem da programação orçamentária", "", EMENDAS + ["Programação própria do MIR", ("campo_dw", "instrumento.origem_programacao")], outro=True, chave="origem")
-cv.p("linha", "Número da emenda e autoria", AUTO, dep=("origem", EMENDAS))
+cv.p("linha", "Número da emenda e autoria", AUTO, dw("instrumento.emendas"), dep=("origem", EMENDAS))
 cv.p("texto", "Programa orçamentário / Fonte de recursos",
-     "Preenchido automaticamente a partir das Notas de Crédito e de Empenho do SIAFI vinculadas ao convênio (fonte de recursos e natureza de despesa); incluir código da ação e UO.")
+     "Preenchido automaticamente a partir das Notas de Empenho do convênio (programa, ação, UO, PTRES, fonte de recursos e natureza de despesa); o servidor pode complementar.",
+     dw("instrumento.programa_orcamentario", {"rows": "4"}))
 cv.secao("Justificativa da celebração")
-cv.p("texto", "Justificativa", "Importada automaticamente do campo \"justificativa\" do plano de trabalho no Transferegov.br; o servidor pode complementar.")
+cv.p("texto", "Justificativa", "Importada automaticamente do campo \"justificativa\" do plano de trabalho no Transferegov.br; o servidor pode complementar.",
+     dw("instrumento.justificativa"))
 cv.p("texto", "Instrumentos anteriores relacionados", "TEDs, convênios ou editais anteriores com o mesmo convenente ou objeto similar.")
 
 
@@ -849,7 +853,8 @@ cv_ges.p("radio", "Modalidade da contrapartida", "", [
     "Bens e serviços economicamente mensuráveis (entidades privadas sem fins lucrativos)",
 ], dep=("contrapartida", "Sim"))
 cv_ges.p("numero", "Valor da contrapartida aportado até o período (R$)",
-     "Contrapartida financeira: valor depositado. Bens e serviços: valor estimado.", MOEDA, dep=("contrapartida", "Sim"))
+     "Contrapartida financeira: valor depositado (sugerido a partir dos ingressos registrados no Transferegov.br). Bens e serviços: valor estimado.",
+     moeda_dw("instrumento.vl_contrapartida_aportada"), dep=("contrapartida", "Sim"))
 cv_ges.p("texto", "Descrição da contrapartida", "Ex.: mão de obra, infraestrutura, espaço físico, insumos.", dep=("contrapartida", "Sim"))
 cv_ges.secao("Bens adquiridos com recursos do convênio")
 cv_ges.p("radio", "Foram adquiridos bens permanentes com recursos do convênio no período (bens remanescentes)?", "", SIM_NAO, chave="bens")

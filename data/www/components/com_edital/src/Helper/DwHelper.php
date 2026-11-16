@@ -15,10 +15,20 @@ use \Joomla\CMS\Log\Log;
 /**
  * Leitura do data warehouse do data-application-mir (Postgres).
  *
- * Lê o schema coleta_mir, o contrato publicado pelo DW para o Coleta MIR (papel de leitura
- * coleta_leitor), e os complementos temporários abaixo. Só a sincronização do espelho
- * (EspelhoDwHelper) consulta o DW: os formulários leem as tabelas espelho do banco do
- * Coleta MIR. Só executa as consultas do catálogo abaixo, nunca SQL vindo de fora.
+ * Lê só o schema coleta_mir, o contrato publicado pelo DW para o Coleta MIR (papel de leitura
+ * coleta_leitor). Só a sincronização do espelho (EspelhoDwHelper) consulta o DW: os
+ * formulários leem as tabelas espelho do banco do Coleta MIR. Só executa as consultas do
+ * catálogo abaixo, nunca SQL vindo de fora.
+ *
+ * O catálogo traduz o contrato para os nomes de campo que os formulários usam (campo_dw =
+ * "registro.campo"): mudar um alias abaixo exige mudar as perguntas que o usam.
+ *
+ * Contratos lidos:
+ *   - TED: coleta_ted, coleta_ted_execucao, coleta_ted_fonte, coleta_ted_produto e coleta_unidade;
+ *   - tedinho (descentralização sem registro no TransfereGov): coleta_tedinho;
+ *   - convênio, contrato de repasse, termo de fomento e termo de colaboração: coleta_convenio,
+ *     coleta_convenio_execucao, coleta_convenio_fonte e coleta_convenio_produto;
+ *   - listas: coleta_lista_ppa e coleta_lista_pei.
  *
  * Conexão: variáveis DB_DW_HOST_MIR, DB_DW_PORT_MIR, DB_DW_DBNAME_MIR, DB_DW_USER_MIR e
  * DB_DW_PASSWORD_MIR (mesmos nomes usados pelo dbt do data-application-mir).
@@ -45,133 +55,286 @@ class DwHelper
     public const PARAMETROS = [self::PARAM_FONTE, self::PARAM_CHAVE, self::PARAM_CAMPO, self::PARAM_SUGESTOES, self::PARAM_FILTRO];
 
     /**
+     * Separador de valores num campo de checkbox vindo do DW (ex.: origem dos recursos com
+     * emenda e programação própria): cada parte marca uma alternativa.
+     */
+    public const SEPARADOR_VALORES = '|';
+
+    /**
      * Fontes de opções. Cada consulta devolve valor, nome e, opcionalmente, filtro: o valor
      * da pergunta-pai para o qual a opção vale. Nas fontes de FONTES_COM_FILTRO o filtro é a
      * chave do instrumento escolhido no preenchimento.
+     *
+     * Uma fonte pode ter várias consultas, somadas na ordem. Se uma falhar, a fonte inteira
+     * fica sem resposta e o espelho mantém as opções anteriores, em vez de perder as dessa parte.
      */
     private const OPCOES = [
-        'teds' => "
-            SELECT nr_instrumento AS valor, nr_instrumento AS nome
-            FROM coleta_mir.coleta_instrumento
-            WHERE tp_instrumento = 'ted'
-            ORDER BY nr_instrumento",
+        // TEDs pelo número da transferência (o que a pessoa vê no TransfereGov) e tedinhos
+        // pelo processo SEI, a chave de coleta_tedinho.
+        'teds' => [
+            "SELECT nr_transferencia AS valor, nr_transferencia AS nome
+             FROM coleta_mir.coleta_ted
+             ORDER BY nr_transferencia",
+            "SELECT nr_processo_sei AS valor, nr_processo_sei || ' (tedinho - ' || COALESCE(sg_parceiro, 's/ parceiro') || ')' AS nome
+             FROM coleta_mir.coleta_tedinho
+             ORDER BY nr_processo_sei",
+        ],
+        // Convênios, contratos de repasse e termos de fomento e de colaboração: o mesmo formulário.
         'convenios' => "
-            SELECT nr_instrumento AS valor, nr_instrumento AS nome
-            FROM coleta_mir.coleta_instrumento
-            WHERE tp_instrumento = 'convenio'
-            ORDER BY nr_instrumento",
+            SELECT nr_convenio AS valor, nr_convenio AS nome
+            FROM coleta_mir.coleta_convenio
+            ORDER BY nr_convenio",
+        // Filtro: código do programa do PPA ("5802"), o começo da opção escolhida em "Programa do PPA".
         'ppa_objetivos_especificos' => "
-            SELECT codigo || ' - ' || titulo AS valor, codigo || ' - ' || titulo AS nome, codigo_pai AS filtro
+            SELECT codigo || ' - ' || titulo AS valor, codigo || ' - ' || titulo AS nome, split_part(chave_pai, ':', 2) AS filtro
             FROM coleta_mir.coleta_lista_ppa
-            WHERE nivel = 'objetivo_especifico'
-              AND ano_ppa = (SELECT max(ano_ppa) FROM coleta_mir.coleta_lista_ppa)
+            WHERE nivel = 'objetivo_especifico' AND in_vigente
             ORDER BY codigo",
         'ppa_entregas_medidas' => "
             SELECT valor, valor AS nome, filtro FROM (
-                SELECT 'Entrega ' || e.codigo || ' - ' || e.titulo AS valor, o.codigo_pai AS filtro
+                SELECT 'Entrega ' || e.codigo || ' - ' || e.titulo AS valor, split_part(o.chave_pai, ':', 2) AS filtro
                 FROM coleta_mir.coleta_lista_ppa e
-                JOIN coleta_mir.coleta_lista_ppa o
-                  ON o.nivel = 'objetivo_especifico' AND o.codigo = e.codigo_pai AND o.ano_ppa = e.ano_ppa
-                WHERE e.nivel = 'entrega'
-                  AND e.ano_ppa = (SELECT max(ano_ppa) FROM coleta_mir.coleta_lista_ppa)
+                JOIN coleta_mir.coleta_lista_ppa o ON o.chave = e.chave_pai
+                WHERE e.nivel = 'entrega' AND e.in_vigente
                 UNION
-                SELECT 'Medida institucional ' || m.codigo || ' - ' || m.titulo AS valor, m.codigo_pai AS filtro
+                SELECT 'Medida institucional ' || m.codigo || ' - ' || m.titulo AS valor, split_part(m.chave_pai, ':', 2) AS filtro
                 FROM coleta_mir.coleta_lista_ppa m
-                WHERE m.nivel = 'medida_institucional'
-                  AND m.ano_ppa = (SELECT max(ano_ppa) FROM coleta_mir.coleta_lista_ppa)
+                WHERE m.nivel = 'medida_institucional_programa' AND m.in_vigente
+                UNION
+                SELECT 'Medida institucional ' || m.codigo || ' - ' || m.titulo AS valor, split_part(o.chave_pai, ':', 2) AS filtro
+                FROM coleta_mir.coleta_lista_ppa m
+                JOIN coleta_mir.coleta_lista_ppa o ON o.chave = m.chave_pai
+                WHERE m.nivel = 'medida_institucional_objetivo_especifico' AND m.in_vigente
             ) x
             ORDER BY valor",
         'pei_areas' => "
             SELECT titulo AS valor, titulo AS nome
             FROM coleta_mir.coleta_lista_pei
             WHERE nivel = 'area'
-            ORDER BY titulo",
+            ORDER BY nr_ordem NULLS LAST, titulo",
         'pei_objetivos' => "
             SELECT titulo AS valor, titulo AS nome
             FROM coleta_mir.coleta_lista_pei
             WHERE nivel = 'objetivo_estrategico'
-            ORDER BY codigo",
-        'metas_instrumento' => "
-            SELECT valor, valor AS nome, filtro FROM (
-                SELECT DISTINCT ON (chave_instrumento, nr_meta, nr_etapa)
-                       'Meta ' || nr_meta || COALESCE('.' || nr_etapa, '') || ' - ' || COALESCE(NULLIF(trim(no_meta), ''), ds_meta) AS valor,
-                       chave_instrumento AS filtro, nr_meta, nr_etapa
-                FROM coleta_mir.coleta_instrumento_meta
-                ORDER BY chave_instrumento, nr_meta, nr_etapa NULLS FIRST
-            ) x
-            WHERE valor IS NOT NULL
-            ORDER BY filtro, nr_meta, nr_etapa NULLS FIRST",
+            ORDER BY nr_ordem NULLS LAST, length(codigo), codigo",
+        // Metas e etapas do plano. Filtro: chave do instrumento ("ted:946708", "convenio:700236").
+        'metas_instrumento' => [
+            "SELECT valor, valor AS nome, filtro FROM (
+                SELECT 'ted:' || t.nr_transferencia AS filtro, p.nr_meta, p.nr_etapa,
+                       'Meta ' || p.nr_meta || COALESCE('.' || p.nr_etapa, '') || ' - '
+                           || %RESUMO(COALESCE(NULLIF(trim(p.no_item), ''), trim(p.ds_item)))% AS valor
+                FROM coleta_mir.coleta_ted_produto p
+                JOIN coleta_mir.coleta_ted t ON t.id_plano_acao = p.id_plano_acao
+             ) x
+             WHERE valor IS NOT NULL
+             ORDER BY filtro, nr_meta, nr_etapa NULLS FIRST",
+            "SELECT valor, valor AS nome, filtro FROM (
+                SELECT 'convenio:' || p.nr_convenio AS filtro, p.nr_meta, p.nr_etapa,
+                       'Meta ' || p.nr_meta || COALESCE('.' || p.nr_etapa, '') || ' - '
+                           || %RESUMO(COALESCE(NULLIF(trim(p.no_item), ''), trim(p.ds_item)))% AS valor
+                FROM coleta_mir.coleta_convenio_produto p
+             ) x
+             WHERE valor IS NOT NULL
+             ORDER BY filtro, nr_meta, nr_etapa NULLS FIRST",
+        ],
     ];
 
     private const FONTES_COM_FILTRO = ['metas_instrumento'];
 
     /**
      * Tipo do instrumento de cada fonte de instrumentos. A resposta guarda só o código
-     * (nr_instrumento, ex.: "931295"); a chave do contrato é "<tipo>:<código>" (ex.: "ted:931295").
+     * (ex.: "931295"); a chave do registro é "<tipo>:<código>" (ex.: "ted:931295"). Os
+     * tedinhos entram como "ted:<processo SEI>"; os termos de fomento, como "convenio:<número>".
      */
     private const TIPOS_INSTRUMENTO = ['teds' => 'ted', 'convenios' => 'convenio'];
 
     /**
+     * Valor em R$ com separadores brasileiros ("1.234,56"), para os textos montados abaixo.
+     * %s é a expressão numérica.
+     */
+    private const BRL = "translate(to_char(%s, 'FM999,999,999,990.00'), ',.', '.,')";
+
+    /**
+     * Texto longo cortado em 250 caracteres, com reticências: as descrições de meta do siconv
+     * passam de 2 mil caracteres e não cabem como sugestão (nem no espelho). %s é o texto.
+     */
+    private const RESUMO = 'CASE WHEN length(%1$s) > 250 THEN left(%1$s, 249) || \'…\' ELSE %1$s END';
+
+    /**
      * Registros para pré-preenchimento. Cada consulta recebe :chave e devolve uma linha
      * cujas colunas são os campos referenciados por campo_dw ("registro.coluna").
+     *
+     * Um registro pode ter várias consultas, uma por contrato: vale a primeira que achar a
+     * chave. Se uma falhar (ex.: contrato ainda não publicado no DW), as outras seguem.
+     * Consultas agrupadas pelo começo da chave ("ted:", "convenio:") só rodam para as chaves
+     * com esse começo.
      */
     private const REGISTROS = [
-        'instrumento' => "
-            SELECT ds_objeto AS objeto,
-                   concat_ws(' - ', NULLIF(trim(no_parceiro), ''), NULLIF(trim(ds_objeto), '')) AS descricao,
-                   vl_firmado,
-                   vl_empenhado,
-                   vl_liquidado,
-                   vl_pago,
-                   dt_inicio_vigencia,
-                   dt_fim_vigencia,
-                   dt_assinatura,
-                   nr_processo_sei,
-                   no_parceiro || COALESCE(' (' || upper(tp_identificador) || ' ' || co_identificador || ')', '') AS parceiro,
-                   no_parceiro,
-                   tp_identificador,
-                   co_identificador,
-                   CASE WHEN qt_aditivos > 0 THEN 'Sim' WHEN qt_aditivos = 0 THEN 'Não' END AS existem_aditivos,
-                   ds_situacao,
-                   CASE
-                       WHEN tp_instrumento <> 'convenio' THEN NULL
-                       WHEN ds_situacao = 'Proposta/Plano de Trabalho Aprovado' THEN 'Plano de trabalho aprovado, sem início da execução'
-                       WHEN ds_situacao = 'Em execução' THEN 'Em execução'
-                       WHEN ds_situacao ILIKE '%prestação de contas%' THEN 'Execução concluída, em prestação de contas'
-                       WHEN ds_situacao IN ('Cancelado', 'Convênio Anulado') THEN 'Extinta / rescindida'
-                   END AS situacao_execucao
-            FROM coleta_mir.coleta_instrumento
-            WHERE chave = :chave",
-        // Fora do contrato: objetivo geral, objetivo estratégico e público-alvo do programa do PPA
-        // (chave = código do programa, ex.: "5802"). Sem acesso ao ppa_dbt, fica sem pré-preenchimento.
+        'instrumento' => [
+          'ted:' => [
+            // TED. A UG é a da unidade descentralizadora (coleta_unidade.cd_ug, 810008); o
+            // gestor do TED é liberado pela UG do parceiro (tp_identificador/co_identificador).
+            "SELECT t.ds_objeto AS objeto,
+                    concat_ws(' - ', NULLIF(trim(t.no_parceiro), ''), NULLIF(trim(t.ds_objeto), '')) AS descricao,
+                    t.vl_total AS vl_firmado,
+                    e.vl_empenhado,
+                    e.vl_liquidado,
+                    e.vl_pago,
+                    t.dt_inicio_vigencia,
+                    t.dt_fim_vigencia,
+                    t.dt_assinatura,
+                    t.nr_processo_sei,
+                    t.no_parceiro || COALESCE(' (UG ' || t.cd_ug_parceiro || ')', '') AS parceiro,
+                    t.no_parceiro,
+                    CASE WHEN t.cd_ug_parceiro IS NOT NULL THEN 'ug' END AS tp_identificador,
+                    t.cd_ug_parceiro AS co_identificador,
+                    COALESCE(t.ds_situacao_termo, t.ds_situacao_plano) AS ds_situacao,
+                    NULLIF(concat_ws(' - ', t.sg_unidade_acompanhamento, t.no_unidade_acompanhamento), '') AS unidade_mir,
+                    u.cd_ug AS ug_mir,
+                    t.cd_programa_ppa AS programa_ppa,
+                    (SELECT string_agg(f.linha, E'\\n' ORDER BY f.aa_emissao, f.linha)
+                     FROM (
+                         SELECT aa_emissao,
+                                concat_ws(' · ', aa_emissao::text, 'Programa ' || cd_programa, 'Ação ' || cd_acao,
+                                          'PTRES ' || cd_ptres, 'Fonte ' || cd_fonte, 'ND ' || cd_natureza_despesa)
+                                    || ': R$ ' || %BRL(vl_liquido)% AS linha
+                         FROM coleta_mir.coleta_ted_fonte
+                         WHERE id_plano_acao = t.id_plano_acao
+                     ) f) AS programa_orcamentario,
+                    t.ds_justificativa AS justificativa
+             FROM coleta_mir.coleta_ted t
+             LEFT JOIN coleta_mir.coleta_ted_execucao e ON e.id_plano_acao = t.id_plano_acao
+             LEFT JOIN coleta_mir.coleta_unidade u ON u.sg_unidade = t.sg_unidade_acompanhamento
+             WHERE 'ted:' || t.nr_transferencia = :chave",
+            // Tedinho: não tem UG do parceiro, então não aparece para gestor de TED.
+            "SELECT d.ds_objeto AS objeto,
+                    concat_ws(' - ', NULLIF(trim(d.sg_parceiro), ''), NULLIF(trim(d.ds_objeto), '')) AS descricao,
+                    d.vl_total AS vl_firmado,
+                    d.vl_empenhado,
+                    d.vl_pago,
+                    d.nr_processo_sei,
+                    d.sg_parceiro AS parceiro,
+                    d.sg_parceiro AS no_parceiro,
+                    d.ds_observacao
+             FROM coleta_mir.coleta_tedinho d
+             WHERE 'ted:' || d.nr_processo_sei = :chave",
+          ],
+          'convenio:' => [
+            // Convênio, contrato de repasse, termo de fomento e termo de colaboração. Os campos de
+            // alternativas (tipo, natureza, situação, origem) já saem nos valores do formulário.
+            //
+            // Enquanto o contrato não traz programa do PPA único nem situação mapeada
+            // (data-application-gov-hub#534), os dois são calculados aqui: programa vigente
+            // primeiro, depois o de maior empenho, como em coleta_ted.cd_programa_ppa.
+            "SELECT c.ds_objeto AS objeto,
+                    concat_ws(' - ', NULLIF(trim(c.no_convenente), ''), NULLIF(trim(c.ds_objeto), '')) AS descricao,
+                    CASE c.tp_instrumento
+                        WHEN 'CONVENIO' THEN 'Convênio'
+                        WHEN 'CONTRATO DE REPASSE' THEN 'Contrato de repasse'
+                        WHEN 'TERMO DE FOMENTO' THEN 'Termo de fomento'
+                        WHEN 'TERMO DE COLABORACAO' THEN 'Termo de colaboração'
+                    END AS tipo_instrumento,
+                    c.vl_global AS vl_firmado,
+                    c.vl_repasse AS valor_repasse,
+                    c.vl_contrapartida AS valor_contrapartida,
+                    CASE WHEN c.vl_contrapartida > 0 THEN 'Sim' WHEN c.vl_contrapartida = 0 THEN 'Não' END AS contrapartida_pactuada,
+                    e.vl_desembolsado AS vl_pago,
+                    e.vl_contrapartida_aportada,
+                    c.dt_inicio_vigencia,
+                    c.dt_fim_vigencia,
+                    c.dt_assinatura,
+                    c.dt_publicacao,
+                    c.nr_processo AS nr_processo_sei,
+                    CASE WHEN c.qt_aditivos > 0 THEN 'Sim' ELSE 'Não' END AS existem_aditivos,
+                    CASE WHEN c.qt_aditivos > 0
+                         THEN concat_ws(', assinado em ', c.nr_ultimo_aditivo, to_char(c.dt_ultimo_aditivo, 'DD/MM/YYYY'))
+                    END AS ultimo_aditivo,
+                    c.no_convenente || COALESCE(' (CNPJ ' || c.nr_cnpj_convenente || ')', '') AS parceiro,
+                    c.no_convenente AS no_parceiro,
+                    CASE WHEN c.nr_cnpj_convenente IS NOT NULL THEN 'cnpj' END AS tp_identificador,
+                    c.nr_cnpj_convenente AS co_identificador,
+                    c.tp_natureza_convenente AS natureza_convenente,
+                    c.ds_situacao,
+                    CASE
+                        WHEN c.ds_situacao IN ('Assinado', 'Proposta/Plano de Trabalho Aprovado', 'Assinatura Pendente Registro TV Siafi')
+                            THEN 'Plano de trabalho aprovado, sem início da execução'
+                        WHEN c.ds_situacao = 'Em execução' THEN 'Em execução'
+                        WHEN c.ds_situacao ILIKE '%prestação de contas%' THEN 'Execução concluída, em prestação de contas'
+                        WHEN c.ds_situacao ILIKE '%suspen%' THEN 'Suspensa'
+                        WHEN c.ds_situacao ILIKE '%rescind%' OR c.ds_situacao ILIKE '%extint%'
+                            OR c.ds_situacao IN ('Cancelado', 'Convênio Anulado') THEN 'Extinta / rescindida'
+                    END AS situacao_execucao,
+                    NULLIF(concat_ws(' - ', c.sg_unidade_concedente, c.no_unidade_concedente), '') AS unidade_mir,
+                    c.cd_ug_concedente AS ug_mir,
+                    (SELECT p.cd_programa
+                     FROM (
+                         SELECT cd_programa, sum(vl_empenhado) AS vl
+                         FROM coleta_mir.coleta_convenio_fonte
+                         WHERE nr_convenio = c.nr_convenio AND cd_programa IS NOT NULL
+                         GROUP BY cd_programa
+                     ) p
+                     ORDER BY EXISTS (
+                                  SELECT 1 FROM coleta_mir.coleta_lista_ppa l
+                                  WHERE l.nivel = 'programa' AND l.in_vigente AND l.codigo = p.cd_programa
+                              ) DESC,
+                              p.vl DESC NULLS LAST, p.cd_programa
+                     LIMIT 1) AS programa_ppa,
+                    (SELECT string_agg(f.linha, E'\\n' ORDER BY f.aa_emissao, f.linha)
+                     FROM (
+                         SELECT aa_emissao,
+                                concat_ws(' · ', aa_emissao::text,
+                                          'Programa ' || NULLIF(concat_ws(' - ', cd_programa, no_programa), ''),
+                                          'Ação ' || NULLIF(concat_ws(' - ', cd_acao, no_acao), ''),
+                                          'UO ' || cd_uo,
+                                          'PTRES ' || cd_ptres,
+                                          'Fonte ' || NULLIF(concat_ws(' - ', cd_fonte, no_fonte), ''),
+                                          'ND ' || NULLIF(concat_ws(' - ', cd_natureza_despesa, no_natureza_despesa), ''))
+                                    || ': R$ ' || %BRL(sum(vl_empenhado))% AS linha
+                         FROM coleta_mir.coleta_convenio_fonte
+                         WHERE nr_convenio = c.nr_convenio
+                         GROUP BY aa_emissao, cd_programa, no_programa, cd_acao, no_acao, cd_uo, cd_ptres,
+                                  cd_fonte, no_fonte, cd_natureza_despesa, no_natureza_despesa
+                     ) f) AS programa_orcamentario,
+                    (SELECT string_agg(DISTINCT tp_origem, '|')
+                     FROM coleta_mir.coleta_convenio_fonte
+                     WHERE nr_convenio = c.nr_convenio AND tp_origem <> 'Outra') AS origem_programacao,
+                    (SELECT string_agg(DISTINCT cd_emenda || COALESCE(' - ' || no_autor_emenda, ''), '; ')
+                     FROM coleta_mir.coleta_convenio_fonte
+                     WHERE nr_convenio = c.nr_convenio AND cd_emenda <> 'sem_emenda') AS emendas,
+                    c.ds_justificativa AS justificativa
+             FROM coleta_mir.coleta_convenio c
+             LEFT JOIN coleta_mir.coleta_convenio_execucao e ON e.nr_convenio = c.nr_convenio
+             WHERE 'convenio:' || c.nr_convenio = :chave",
+          ],
+        ],
+        // Objetivo geral, objetivos estratégicos e público-alvo do programa do PPA
+        // (chave = código do programa, ex.: "5802").
         'ppa_programa' => "
             SELECT NULLIF(concat_ws(E'\\n\\n',
-                       (SELECT 'Objetivo geral: ' || g.enunciado
-                        FROM ppa_dbt.objetivo_geral_filtrado_mir g
-                        WHERE g.programa::text = :chave
-                        ORDER BY g.ano_ppa DESC NULLS LAST, g.exercicio DESC NULLS LAST LIMIT 1),
-                       (SELECT 'Objetivo estratégico: ' || o.titulo_objetivo_estrategico
-                        FROM ppa_dbt.objetivo_estrategico_programa_filtrado_mir o
-                        WHERE o.programa::text = :chave
-                        ORDER BY o.exercicio DESC NULLS LAST LIMIT 1),
-                       (SELECT 'Público-alvo: ' || p.publico_alvo
-                        FROM ppa_dbt.programa_filtrado_mir p
-                        WHERE p.programa::text = :chave
-                        ORDER BY p.exercicio DESC NULLS LAST LIMIT 1)
+                       (SELECT 'Objetivo geral: ' || string_agg(titulo, '; ' ORDER BY codigo)
+                        FROM coleta_mir.coleta_lista_ppa
+                        WHERE nivel = 'objetivo_geral' AND in_vigente AND chave_pai = 'programa:' || :chave),
+                       (SELECT 'Objetivos estratégicos: ' || string_agg(titulo, '; ' ORDER BY codigo)
+                        FROM coleta_mir.coleta_lista_ppa
+                        WHERE nivel = 'objetivo_estrategico' AND in_vigente AND chave_pai = 'programa:' || :chave),
+                       (SELECT 'Público-alvo: ' || ds_publico_alvo
+                        FROM coleta_mir.coleta_lista_ppa
+                        WHERE chave = 'programa:' || :chave)
                    ), '') AS objetivo_geral",
     ];
 
     /**
      * Chaves de cada registro, para copiar todos ao espelho. Cada consulta roda à parte e,
-     * se falhar (ex.: sem acesso ao ppa_dbt), é ignorada.
+     * se falhar (ex.: contrato ainda não publicado no DW), é ignorada.
      */
     private const CHAVES = [
         'instrumento' => [
-            "SELECT chave FROM coleta_mir.coleta_instrumento ORDER BY chave",
+            "SELECT 'ted:' || nr_transferencia AS chave FROM coleta_mir.coleta_ted",
+            "SELECT 'ted:' || nr_processo_sei AS chave FROM coleta_mir.coleta_tedinho",
+            "SELECT 'convenio:' || nr_convenio AS chave FROM coleta_mir.coleta_convenio",
         ],
         'ppa_programa' => [
-            "SELECT DISTINCT codigo AS chave FROM coleta_mir.coleta_lista_ppa WHERE nivel = 'programa'",
-            "SELECT DISTINCT programa::text AS chave FROM ppa_dbt.programa_filtrado_mir",
+            "SELECT codigo AS chave FROM coleta_mir.coleta_lista_ppa WHERE nivel = 'programa' AND in_vigente",
         ],
     ];
 
@@ -181,7 +344,7 @@ class DwHelper
         return self::TIPOS_INSTRUMENTO[$fonte] ?? '';
     }
 
-    /** Chave do contrato ("ted:931295") a partir da fonte da pergunta e do código respondido. */
+    /** Chave do registro ("ted:931295") a partir da fonte da pergunta e do código respondido. */
     public static function chaveInstrumento(string $fonte, string $codigo): string
     {
         $codigo = trim($codigo);
@@ -202,84 +365,6 @@ class DwHelper
 
         return $chave;
     }
-
-    /**
-     * Complementos temporários, fora do contrato coleta_mir: para cada registro, consultas
-     * cujas colunas preenchem os campos que o contrato não traz (nunca sobrescrevem o
-     * contrato). Cada uma roda à parte e, se falhar (ex.: coleta_leitor sem acesso ao
-     * schema), é ignorada. Remover cada uma quando o contrato passar a trazer os campos.
-     */
-    private const COMPLEMENTOS = [
-        'instrumento' => [
-            // Processo SEI de TEDs publicado no gov.br (cobre 25 dos 31 TEDs sem processo no
-            // contrato, dump de 31/10/2026). Só o num_transf principal: casar pelos
-            // num_transf_alternativos atribui o processo de outro TED.
-            "SELECT processo AS nr_processo_sei
-             FROM siafi_dbt.teds_gov_br
-             WHERE 'ted:' || ltrim(trim(num_transf), '0') = :chave
-               AND NULLIF(trim(processo), '') IS NOT NULL
-             ORDER BY dt_ingest DESC NULLS LAST
-             LIMIT 1",
-            // TED: unidade do MIR que acompanha, programa do PPA (código), programa orçamentário e
-            // justificativa do plano de ação.
-            "SELECT r.sigla_unidade_responsavel_acompanhamento AS unidade_mir,
-                    NULLIF(trim(r.programa_governo::text), '') AS programa_ppa,
-                    NULLIF(concat_ws(' - ', r.programa_governo, r.programa_governo_descricao), '') AS programa_orcamentario,
-                    p.tx_justificativa_plano_acao AS justificativa
-             FROM siafi_dbt.ted_resumo_orcamentario r
-             LEFT JOIN LATERAL (
-                 SELECT pa.tx_justificativa_plano_acao
-                 FROM siafi_dbt.planos_acao_ted pa
-                 WHERE pa.id_plano_acao::text = r.plano_acao::text
-                 ORDER BY pa.dt_ingest DESC NULLS LAST
-                 LIMIT 1
-             ) p ON true
-             WHERE r.tipo_instrumento = 'TED' AND 'ted:' || r.num_transf = :chave
-             LIMIT 1",
-            // TED: UG da unidade do MIR que acompanha, pela sigla (SEPAR -> "238024 - SEPAR/MIR").
-            // Sem UG quando a sigla é só "MIR" ou está vazia.
-            "SELECT u.ug_codigo || ' - ' || u.ug_nome AS ug_mir
-             FROM siafi_dbt.ted_resumo_orcamentario r
-             JOIN mir.ugs_mir u ON u.ug_nome = split_part(r.sigla_unidade_responsavel_acompanhamento, '-', 1) || '/MIR'
-             WHERE r.tipo_instrumento = 'TED' AND 'ted:' || r.num_transf = :chave
-             LIMIT 1",
-            // Convênio: UG responsável (ou emitente) no SIAFI; quando vêm várias ("238022, 810008"),
-            // a primeira.
-            "SELECT concat_ws(' - ', c.ug, u.ug_nome) AS ug_mir
-             FROM mir_silver.convenio_mir m
-             CROSS JOIN LATERAL (SELECT trim(split_part(coalesce(m.ug_responsavel_codigo, m.ug_emitente), ',', 1)) AS ug) c
-             LEFT JOIN mir.ugs_mir u ON u.ug_codigo = c.ug
-             WHERE 'convenio:' || m.nr_convenio = :chave
-               AND coalesce(m.ug_responsavel_codigo, m.ug_emitente) IS NOT NULL
-             ORDER BY (m.ug_responsavel_codigo IS NULL), (m.ug_responsavel_codigo = '810008')
-             LIMIT 1",
-            // Convênio: valores separados, publicação, natureza do convenente e origem dos recursos,
-            // já nos valores das alternativas dos formulários.
-            "SELECT CASE WHEN m.modalidade = 'CONVENIO' THEN 'Convênio' END AS tipo_instrumento,
-                    m.valor_repasse,
-                    m.valor_contrapartida,
-                    m.data_publicacao AS dt_publicacao,
-                    CASE
-                        WHEN m.convenente_natureza_juridica = 'Organização da Sociedade Civil' THEN 'Entidade privada sem fins lucrativos'
-                        WHEN m.convenente_natureza_juridica = 'Administração Pública Municipal' THEN 'Administração pública municipal'
-                        WHEN m.convenente_natureza_juridica = 'Administração Pública Estadual ou do Distrito Federal'
-                            THEN CASE WHEN m.uf = 'DF' THEN 'Administração pública distrital' ELSE 'Administração pública estadual' END
-                    END AS natureza_convenente,
-                    CASE WHEN m.origem_recurso = 'Recurso próprio' THEN 'Programação própria do MIR' END AS origem_programacao,
-                    CASE WHEN m.valor_contrapartida > 0 THEN 'Sim' WHEN m.valor_contrapartida = 0 THEN 'Não' END AS contrapartida_pactuada
-             FROM mir_silver.convenio_mir m
-             WHERE 'convenio:' || m.nr_convenio = :chave
-             LIMIT 1",
-            // Convênio: programa do PPA pela ação orçamentária das notas de empenho (só convênios
-            // com empenho vinculado no DW: 30 de 409 no dump de 31/10/2026).
-            "SELECT max(a.codigo_programa::text) AS programa_ppa
-             FROM mir_convenios.fato_execucao_orcamentaria f
-             JOIN mir_convenios.dim_convenio c ON c.sk_convenio = f.sk_convenio
-             JOIN mir_convenios.dim_acao_orcamentaria a ON a.sk_acao_orcamentaria = f.sk_acao_orcamentaria
-             WHERE 'convenio:' || c.nr_convenio = :chave
-             HAVING max(a.codigo_programa::text) IS NOT NULL",
-        ],
-    ];
 
     private static $conexao = null;
 
@@ -319,6 +404,35 @@ class DwHelper
         }
 
         return self::$conexao ?: null;
+    }
+
+    /**
+     * Consultas de uma entrada do catálogo (uma ou várias), com os valores em R$ já expandidos.
+     * Numa entrada agrupada pelo começo da chave, só as do grupo de $chave.
+     */
+    private static function consultas($entrada, string $chave = ''): array
+    {
+        if (is_array($entrada) && !array_is_list($entrada)) {
+            $grupo = [];
+
+            foreach ($entrada as $prefixo => $sqls) {
+                if (strpos($chave, $prefixo) === 0) {
+                    $grupo = $sqls;
+                    break;
+                }
+            }
+
+            $entrada = $grupo;
+        }
+
+        return array_map(
+            static fn (string $sql) => preg_replace_callback(
+                '/%(BRL|RESUMO)\((.+?)\)%/s',
+                static fn ($m) => sprintf($m[1] === 'BRL' ? self::BRL : self::RESUMO, $m[2]),
+                $sql
+            ),
+            (array) $entrada
+        );
     }
 
     public static function fonteComFiltro(string $fonte): bool
@@ -372,20 +486,24 @@ class DwHelper
 
     /**
      * Opções de uma fonte: lista de ['nome' => ..., 'valor' => ..., 'filtro' => ...].
-     * Null quando a fonte não existe ou o DW não responde (para não apagar o espelho).
+     * Null quando a fonte não existe ou o DW não responde a alguma das consultas (para não
+     * apagar o espelho).
      */
     public static function getOpcoes(string $fonte): ?array
     {
-        $sql = self::OPCOES[$fonte] ?? null;
-        $opcoes = [];
-
-        if ($sql === null) {
+        if (!isset(self::OPCOES[$fonte])) {
             Log::add('Fonte de opções do DW desconhecida: ' . $fonte, Log::WARNING, 'com_edital');
 
             return null;
         }
 
-        if ($db = self::conexao()) {
+        if (!($db = self::conexao())) {
+            return null;
+        }
+
+        $opcoes = [];
+
+        foreach (self::consultas(self::OPCOES[$fonte]) as $i => $sql) {
             try {
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
@@ -402,15 +520,13 @@ class DwHelper
                     }
                 }
             } catch (\Throwable $e) {
-                Log::add('Falha ao ler a fonte "' . $fonte . '" do DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
+                Log::add('Falha ao ler a fonte "' . $fonte . '" (consulta ' . $i . ') do DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
 
                 return null;
             }
-
-            return $opcoes;
         }
 
-        return null;
+        return $opcoes;
     }
 
     /**
@@ -419,42 +535,31 @@ class DwHelper
      */
     public static function getRegistro(string $registro, string $chave): ?array
     {
-        $sql = self::REGISTROS[$registro] ?? null;
         $chave = self::normalizarChave($registro, $chave);
 
-        if ($sql === null || $chave === '' || !($db = self::conexao())) {
+        if (!isset(self::REGISTROS[$registro]) || $chave === '' || !($db = self::conexao())) {
             return null;
         }
 
-        try {
-            $stmt = $db->prepare($sql);
-            $stmt->execute([':chave' => $chave]);
-            $linha = $stmt->fetch();
-        } catch (\Throwable $e) {
-            Log::add('Falha ao ler o registro "' . $registro . '" do DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
+        $linha = null;
 
-            return null;
+        foreach (self::consultas(self::REGISTROS[$registro], $chave) as $i => $sql) {
+            try {
+                $stmt = $db->prepare($sql);
+                $stmt->execute([':chave' => $chave]);
+                $linha = $stmt->fetch() ?: null;
+            } catch (\Throwable $e) {
+                Log::add('Falha ao ler o registro "' . $registro . '" (consulta ' . $i . ') do DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
+                continue;
+            }
+
+            if ($linha) {
+                break;
+            }
         }
 
         if (!$linha) {
             return null;
-        }
-
-        foreach (self::COMPLEMENTOS[$registro] ?? [] as $i => $sqlComplemento) {
-            try {
-                $stmt = $db->prepare($sqlComplemento);
-                $stmt->execute([':chave' => $chave]);
-                $complemento = $stmt->fetch() ?: [];
-            } catch (\Throwable $e) {
-                Log::add('Complemento ' . $i . ' de "' . $registro . '" indisponível no DW: ' . $e->getMessage(), Log::WARNING, 'com_edital');
-                continue;
-            }
-
-            foreach ($complemento as $campo => $valor) {
-                if (($linha[$campo] ?? null) === null || $linha[$campo] === '') {
-                    $linha[$campo] = $valor;
-                }
-            }
         }
 
         $dados = [];
@@ -468,9 +573,6 @@ class DwHelper
 
             if (preg_match('/^(\d{4})-(\d{2})-(\d{2})(?:[ T][\d:.+-]+)?$/', $valor, $m)) {
                 $valor = $m[3] . '/' . $m[2] . '/' . $m[1];
-            } elseif ($campo === 'nr_processo_sei' && preg_match('/^(\d{5})(\d{6})(\d{4})(\d{2})$/', $valor, $m)) {
-                // Processos sem máscara (comuns nos convênios e termos de fomento): 00000.000000/0000-00.
-                $valor = $m[1] . '.' . $m[2] . '/' . $m[3] . '-' . $m[4];
             }
 
             $dados[$campo] = $valor;
