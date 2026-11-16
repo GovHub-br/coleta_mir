@@ -527,16 +527,19 @@ var AdesaoForm = {
             return;
         }
 
-        // Checkbox: marca a alternativa vinda do DW; só mexe se nada foi marcado pela pessoa.
+        // Checkbox: marca as alternativas vindas do DW (várias separadas por "|"); só mexe se
+        // nada foi marcado pela pessoa ou se o marcado é só o que o DW tinha preenchido antes.
         var $checkboxes = $destino.find('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
         if ($checkboxes.length > 0) {
             var $marcados = $checkboxes.filter(':checked');
-            var soAutomatico = $marcados.length === 1 && $marcados.val() === anterior;
+            var valores = valor === '' ? [] : valor.split('|');
+            var marcadosAgora = $marcados.map(function () { return this.value; }).get().sort().join('|');
+            var soAutomatico = typeof anterior === 'string' && marcadosAgora === anterior.split('|').sort().join('|');
             if ($marcados.length > 0 && !(sobrescrever && soAutomatico)) {
                 return;
             }
             $marcados.prop('checked', false);
-            $checkboxes.filter(function () { return this.value === valor; }).prop('checked', true);
+            $checkboxes.filter(function () { return valores.indexOf(this.value) !== -1; }).prop('checked', true);
             $checkboxes.first().trigger('change');
             $destino.data('dwValor', valor);
             return;
