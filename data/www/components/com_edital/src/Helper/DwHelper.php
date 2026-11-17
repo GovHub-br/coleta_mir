@@ -222,10 +222,8 @@ class DwHelper
           'convenio:' => [
             // Convênio, contrato de repasse, termo de fomento e termo de colaboração. Os campos de
             // alternativas (tipo, natureza, situação, origem) já saem nos valores do formulário.
-            //
-            // Enquanto o contrato não traz programa do PPA único nem situação mapeada
-            // (data-application-gov-hub#534), os dois são calculados aqui: programa vigente
-            // primeiro, depois o de maior empenho, como em coleta_ted.cd_programa_ppa.
+            // Programa do PPA e situação vêm prontos do contrato (cd_programa_ppa e
+            // tp_situacao_execucao); situação sem opção no formulário fica em branco.
             "SELECT c.ds_objeto AS objeto,
                     concat_ws(' - ', NULLIF(trim(c.no_convenente), ''), NULLIF(trim(c.ds_objeto), '')) AS descricao,
                     CASE c.tp_instrumento
@@ -255,30 +253,10 @@ class DwHelper
                     c.nr_cnpj_convenente AS co_identificador,
                     c.tp_natureza_convenente AS natureza_convenente,
                     c.ds_situacao,
-                    CASE
-                        WHEN c.ds_situacao IN ('Assinado', 'Proposta/Plano de Trabalho Aprovado', 'Assinatura Pendente Registro TV Siafi')
-                            THEN 'Plano de trabalho aprovado, sem início da execução'
-                        WHEN c.ds_situacao = 'Em execução' THEN 'Em execução'
-                        WHEN c.ds_situacao ILIKE '%prestação de contas%' THEN 'Execução concluída, em prestação de contas'
-                        WHEN c.ds_situacao ILIKE '%suspen%' THEN 'Suspensa'
-                        WHEN c.ds_situacao ILIKE '%rescind%' OR c.ds_situacao ILIKE '%extint%'
-                            OR c.ds_situacao IN ('Cancelado', 'Convênio Anulado') THEN 'Extinta / rescindida'
-                    END AS situacao_execucao,
+                    c.tp_situacao_execucao AS situacao_execucao,
                     NULLIF(concat_ws(' - ', c.sg_unidade_concedente, c.no_unidade_concedente), '') AS unidade_mir,
                     c.cd_ug_concedente AS ug_mir,
-                    (SELECT p.cd_programa
-                     FROM (
-                         SELECT cd_programa, sum(vl_empenhado) AS vl
-                         FROM coleta_mir.coleta_convenio_fonte
-                         WHERE nr_convenio = c.nr_convenio AND cd_programa IS NOT NULL
-                         GROUP BY cd_programa
-                     ) p
-                     ORDER BY EXISTS (
-                                  SELECT 1 FROM coleta_mir.coleta_lista_ppa l
-                                  WHERE l.nivel = 'programa' AND l.in_vigente AND l.codigo = p.cd_programa
-                              ) DESC,
-                              p.vl DESC NULLS LAST, p.cd_programa
-                     LIMIT 1) AS programa_ppa,
+                    c.cd_programa_ppa AS programa_ppa,
                     (SELECT string_agg(f.linha, E'\\n' ORDER BY f.aa_emissao, f.linha)
                      FROM (
                          SELECT aa_emissao,
