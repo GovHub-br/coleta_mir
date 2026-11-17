@@ -825,3 +825,11 @@ body.com_edital.view-adesaoform .sp-page-title .sp-page-title-sub-heading {
 .tab-agrupamento.active {
     display: block!important;
 }
+
+/* Formulário de execução: perguntas preenchidas a partir do formulário de origem */
+.pergunta-travada input,
+.pergunta-travada select,
+.pergunta-travada textarea {
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    cursor: not-allowed;
+}

@@ -113,7 +113,22 @@ $userId = Factory::getApplication()->getIdentity()->id;
 					</div>
 				</div>
 
-				
+				<!-- Perfis que podem iniciar o formulário pelo botão "Novo instrumento" -->
+				<?php $gruposMarcados = \Comedital\Component\Edital\Site\Helper\PerfilHelper::getGruposFormulario($this->item); ?>
+				<div class="form-group row mb-3">
+					<span class="col-md-3 col-form-label">Perfis que podem iniciar</span>
+					<div class="col-md-9">
+						<input type="hidden" name="co_grupos" value="" />
+						<?php foreach (\Comedital\Component\Edital\Site\Helper\PerfilHelper::getGruposPerfil() as $grupo) : ?>
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="co_grupos[]" id="co_grupos_<?php echo (int) $grupo->id; ?>"
+									value="<?php echo (int) $grupo->id; ?>"<?php echo in_array((int) $grupo->id, $gruposMarcados, true) ? ' checked' : ''; ?>>
+								<label class="form-check-label" for="co_grupos_<?php echo (int) $grupo->id; ?>"><?php echo htmlspecialchars($grupo->title, ENT_QUOTES, 'UTF-8'); ?></label>
+							</div>
+						<?php endforeach; ?>
+						<small class="form-text text-muted">Quem está nesses grupos vê este formulário no botão "Novo instrumento" da lista de formulários. Sem nenhum marcado, o formulário não aparece no botão.</small>
+					</div>
+				</div>
 
 				<!-- Hidden fields -->
 				<?php $isPublicado = (int) ($this->item->state ?? 0) === 1; ?>

@@ -29,9 +29,8 @@ use Joomla\Event\SubscriberInterface;
  */
 final class SinapirLogin extends CMSPlugin implements SubscriberInterface
 {
-    // IDs dos grupos de usuários — devem corresponder ao banco de dados
+    // ID do grupo MIR — deve corresponder ao banco de dados
     private const GROUP_MIR = 10;
-    private const GROUP_ENTE = 11;
 
     // Alias dos itens de menu — estáveis entre ambientes (não usar Itemid fixo)
     private const ROUTE_PAINEL = 'gestao-de-formularios';
@@ -106,15 +105,13 @@ final class SinapirLogin extends CMSPlugin implements SubscriberInterface
         $groups = $user->getAuthorisedGroups();
 
         $isMir = \in_array(self::GROUP_MIR, $groups, true);
-        $isEnte = \in_array(self::GROUP_ENTE, $groups, true);
 
         if ($isMir) {
             $alias = self::ROUTE_PAINEL;
-        } elseif ($isEnte) {
-            $alias = self::ROUTE_ADESAO;
         } else {
-            // Usuário sem perfil MIR ou Ente — não redireciona (comportamento padrão)
-            return;
+            // Demais usuários (Ente, perfis do Coleta MIR, responsáveis de projeto vinculados pelo CPF):
+            // a listagem dos instrumentos.
+            $alias = self::ROUTE_ADESAO;
         }
 
         $redirect = $this->resolveMenuRouteByAlias($alias);

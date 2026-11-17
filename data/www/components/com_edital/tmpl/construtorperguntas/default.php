@@ -100,6 +100,11 @@ include __DIR__ . '/../parts/_menu_formularios_gestao.php';
 		</label>
 		<div class="cp-campo" data-bloco-alternativas hidden>
 			<span>Alternativas</span>
+			<p class="alert alert-info small mb-2" data-bloco-dw hidden>
+				<i class="fas fa-database" aria-hidden="true"></i>
+				Alternativas sincronizadas com o data warehouse (fonte "<span data-dw-fonte></span>").
+				Novas opções do data warehouse entram sozinhas; nomes editados e alternativas excluídas aqui são mantidos.
+			</p>
 			<div data-alternativas></div>
 			<button type="button" class="btn btn-outline-secondary btn-sm" data-acao="alternativa-adicionar">
 				<i class="fas fa-plus" aria-hidden="true"></i> Adicionar alternativa
