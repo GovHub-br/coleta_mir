@@ -9,6 +9,8 @@ services:
       coletamir_db:
         condition: service_healthy
     environment:
+      JOOMLA_SECRET: ${JOOMLA_SECRET}
+      JOOMLA_CIPHER_KEY: ${JOOMLA_CIPHER_KEY}
       JOOMLA_DB_HOST: ${JOOMLA_DB_HOST}
       JOOMLA_DB_USER: ${JOOMLA_DB_USER}
       JOOMLA_DB_PASSWORD: ${JOOMLA_DB_PASSWORD}
@@ -83,7 +85,7 @@ services:
       - ${DB_PORT}:3306
     volumes:
       - ${DB_DATA_SERVER:-"./data/mysql_data"}:/var/lib/mysql
-      - ./sql/coletamir-dump.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./sql/coletamir-seed.sql:/docker-entrypoint-initdb.d/db.sql
     networks:
       internal:
         aliases:
