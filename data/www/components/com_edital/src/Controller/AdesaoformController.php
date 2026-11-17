@@ -24,6 +24,10 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Comedital\Component\Edital\Site\Helper\EditalHelper;
 use Comedital\Component\Edital\Site\Helper\PerguntaHelper;
 use Comedital\Component\Edital\Site\Helper\AdesaoHelper;
+use Comedital\Component\Edital\Site\Helper\AcessoHelper;
+use Comedital\Component\Edital\Site\Helper\DwHelper;
+use Comedital\Component\Edital\Site\Helper\EspelhoDwHelper;
+use Comedital\Component\Edital\Site\Helper\OrigemHelper;
 use Comedital\Component\Edital\Site\Model\RespostaModel;
 use Comedital\Component\Edital\Site\Model\MunicipioAdesaoModel;
 use Joomla\CMS\Mail\MailerFactoryInterface;
@@ -192,6 +196,59 @@ class AdesaoformController extends FormController
 	}
 
 	/**
+	 * Dados de um registro do espelho do data warehouse (TED, convênio, programa do PPA) para
+	 * pré-preencher perguntas com campo_dw via AJAX.
+	 *
+	 * @return  void
+	 */
+	public function dadosDw()
+	{
+		// Check for request forgeries.
+		$this->checkToken('get');
+
+		$app = Factory::getApplication();
+		$registro = $app->input->getCmd('registro', '');
+		$chave = $app->input->getString('chave', '');
+
+		// A resposta guarda só o código do instrumento; a fonte da pergunta diz o tipo.
+		if ($registro === 'instrumento') {
+			$chave = DwHelper::chaveInstrumento($app->input->getCmd('fonte', ''), $chave);
+		}
+
+		$dados = EspelhoDwHelper::getRegistro($registro, $chave);
+
+		echo json_encode($dados === null ? ['success' => false] : ['success' => true, 'data' => $dados], JSON_UNESCAPED_UNICODE);
+		$app->close();
+	}
+
+	/**
+	 * Opções do espelho do data warehouse que dependem de outra resposta
+	 * (ex.: metas do instrumento selecionado), para sugestões via AJAX.
+	 *
+	 * @return  void
+	 */
+	public function opcoesDw()
+	{
+		// Check for request forgeries.
+		$this->checkToken('get');
+
+		$app = Factory::getApplication();
+		$fonte = $app->input->getCmd('fonte', '');
+		// Filtro = código do instrumento escolhido na pergunta com a fonte "origem" (ex.: teds).
+		$filtro = DwHelper::chaveInstrumento($app->input->getCmd('origem', ''), $app->input->getString('filtro', ''));
+
+		if (!DwHelper::fonteComFiltro($fonte) || trim($filtro) === '') {
+			echo json_encode(['success' => false]);
+			$app->close();
+		}
+
+		$opcoes = array_map(static fn ($opcao) => ['nome' => $opcao['nome'], 'valor' => $opcao['valor']], EspelhoDwHelper::getOpcoes($fonte, $filtro));
+
+		echo json_encode(['success' => true, 'data' => $opcoes], JSON_UNESCAPED_UNICODE);
+		$app->close();
+	}
+
+	/**
 	 * Function that allows child controller access to model data
 	 * after the data has been saved.
 	 *
@@ -350,7 +407,11 @@ class AdesaoformController extends FormController
 			}
 
 			$data['state'] = 1; // Define o estado como publicado
-			if($data['rascunho']){
+			$adesaoExistente = !empty($data['id']) ? AdesaoHelper::getAdesaoById($data['id']) : null;
+			if ($adesaoExistente && $adesaoExistente->st_adesao !== 'rascunho' && ($dadosEdital->tp_edital ?? '') === 'formulario') {
+				// Atualização de resposta já enviada: salvar (inclusive como rascunho) não a reabre.
+				$data['st_adesao'] = $adesaoExistente->st_adesao;
+			} elseif($data['rascunho']){
 				$data['st_adesao'] = 'rascunho'; // Define o estado como rascunho
 			}else{
 				$data['st_adesao'] = 'pendente'; // Define a situação como pendente
@@ -484,7 +545,10 @@ class AdesaoformController extends FormController
 				$user = Factory::getUser();
 				if($user->id != $adesao->created_by){
 					$errors[] = 'Você não tem permissão para editar esta adesão.';
-				} elseif ($adesao->st_adesao !== 'rascunho') {
+				} elseif ((int) $adesao->co_edital !== $dados['co_edital']) {
+					$errors[] = 'Esta resposta pertence a outro formulário.';
+				} elseif ($adesao->st_adesao !== 'rascunho' && ($edital->tp_edital ?? '') !== 'formulario') {
+					// Respostas de formulário seguem editáveis depois de enviadas (atualizações periódicas).
 					$errors[] = 'Apenas adesões em rascunho podem ser alteradas por este formulário.';
 				}
 			}
@@ -543,6 +607,42 @@ class AdesaoformController extends FormController
 			$respostasExistentes = $respostaModel->getRespostasMapByAdesao($dados['id']);
 		}
 
+		// Formulário de execução: as perguntas ligadas ao formulário de origem valem o que veio
+		// da origem (resposta nova, pelo link do projeto) ou o que já foi gravado (edição).
+		if (OrigemHelper::ehExecucao($edital)) {
+			if ($dados['id'] > 0) {
+				$valoresOrigem = OrigemHelper::getValoresSalvos($resPerguntas, $respostasExistentes);
+				$dados['co_adesao_origem'] = (int) ($adesao->co_adesao_origem ?? 0);
+			} else {
+				$origem = OrigemHelper::resolver($edital, $this->input->getString('origem_key', ''), $this->input->getInt('projeto', -1));
+				$valoresOrigem = $origem['valores'];
+				$dados['co_adesao_origem'] = (int) ($origem['adesao']->id ?? 0);
+
+				if ($origem['erro'] !== null) {
+					$errors[] = $origem['erro'];
+				}
+			}
+
+			foreach ($valoresOrigem as $perguntaId => $valor) {
+				$inputPerguntas[$perguntaId] = $valor;
+			}
+		}
+
+		// Formulário do gestor: instrumento e descrição vêm da UG/CNPJ liberada (resposta nova) ou do
+		// que já foi gravado; o que vier no POST para essas perguntas é ignorado.
+		if (AcessoHelper::getPerguntaAcessoUnidade($resPerguntas)) {
+			$instrumento = AcessoHelper::valoresDoInstrumento($resPerguntas, $dados['id'] > 0 ? $respostasExistentes : [],
+				$this->input->getString('instrumento', ''), Factory::getApplication()->getIdentity());
+
+			if ($instrumento['erro'] !== null) {
+				$errors[] = $instrumento['erro'];
+			}
+
+			foreach ($instrumento['valores'] as $perguntaId => $valor) {
+				$inputPerguntas[$perguntaId] = $valor;
+			}
+		}
+
 		$resValidacaoPerguntas = PerguntaHelper::validarRespostasPerguntas(
 			$resPerguntas,
 			$inputPerguntas,
@@ -552,6 +652,13 @@ class AdesaoformController extends FormController
 		);
 		$errors = array_merge($errors, $resValidacaoPerguntas['errors']);
 		$dados['respostas'] = $resValidacaoPerguntas['respostas'];
+
+		$errors = array_merge($errors, PerguntaHelper::validarRespostasUnicas(
+			$resPerguntas,
+			$dados['respostas'],
+			$dados['co_edital'],
+			$dados['id']
+		));
 
 		// Se houver erros, retorna com mensagens
 		if (!empty($errors)) {

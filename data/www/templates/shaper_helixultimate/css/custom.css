@@ -1297,3 +1297,24 @@ h5 {
         padding: 24px;
     }
 }
+/* Menu do MIR (cinco itens + usuário) numa linha só, sem invadir o conteúdo abaixo do cabeçalho */
+@media (min-width: 992px) {
+    #sp-header .row {
+        flex-wrap: nowrap;
+    }
+
+    #sp-header .sp-megamenu-parent > li > a {
+        padding: 0 10px !important;
+    }
+
+    #sp-header .sp-megamenu-parent > li:last-child > a {
+        padding-right: 0 !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    #sp-header .sp-megamenu-parent > li > a {
+        padding: 0 6px !important;
+        font-size: 0.85rem;
+    }
+}

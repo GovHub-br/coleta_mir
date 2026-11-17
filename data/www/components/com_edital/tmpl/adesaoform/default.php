@@ -54,7 +54,8 @@ $captchaPlugin = $config->get('captcha', '0');
 
 // Load the interactive form JavaScript only in filling mode.
 if (!$isPreview) {
-    $this->document->addScript(Uri::root() . 'media/com_edital/js/adesao.js');
+    // Versão = data do arquivo: o navegador não fica com um adesao.js antigo em cache depois de uma atualização.
+    $this->document->addScript(Uri::root() . 'media/com_edital/js/adesao.js?v=' . (int) @filemtime(JPATH_ROOT . '/media/com_edital/js/adesao.js'));
 }
 
 $activeMenu = $app->getMenu()->getActive();
@@ -170,6 +171,13 @@ if ($travado) {
         <input type="hidden" id="id_usuario_logado" name="id_usuario_logado" value="<?php echo isset($this->user->id) ? $this->user->id : ''; ?>"/>
         <input type="hidden" id="co_adesao" name="co_adesao" value="<?php echo isset($this->item->id) ? $this->item->id : ''; ?>"/>
         <input type="hidden" id="municipi_salvo" name="municipi_salvo" value="<?php echo isset($this->item->ds_municipios) ? $this->item->ds_municipios : ''; ?>"/>
+        <?php if ($this->instrumento !== '') : ?>
+        <input type="hidden" name="instrumento" value="<?php echo $this->escape($this->instrumento); ?>"/>
+        <?php endif; ?>
+        <?php if ($this->origemKey !== '') : ?>
+        <input type="hidden" name="origem_key" value="<?php echo $this->escape($this->origemKey); ?>"/>
+        <input type="hidden" name="projeto" value="<?php echo (int) $this->projeto; ?>"/>
+        <?php endif; ?>
         <?php endif; ?>
 
         <?php
@@ -290,7 +298,13 @@ if ($travado) {
                     echo '<div class="etapa-subtitulo">Anexos obrigatórios</div>';
                 }
 
-                echo PerguntaHelper::renderPerguntaField($pergunta, $resposta, $currentIndex);
+                // Formulário de execução: valor vindo do formulário de origem, travado.
+                if (array_key_exists((int) $pergunta->id, $this->valoresOrigem)) {
+                    $html = PerguntaHelper::renderPerguntaField($pergunta, $this->valoresOrigem[(int) $pergunta->id], $currentIndex);
+                    echo preg_replace('/^<div class="pergunta-field /', '<div data-definido-por="' . htmlspecialchars($this->definidoPor, ENT_QUOTES, 'UTF-8') . '" class="pergunta-field pergunta-travada ', $html, 1);
+                } else {
+                    echo PerguntaHelper::renderPerguntaField($pergunta, $resposta, $currentIndex);
+                }
 
                 // Increment counter only for non-informativo questions
                 if ($pergunta->tp_pergunta !== 'informativo') {

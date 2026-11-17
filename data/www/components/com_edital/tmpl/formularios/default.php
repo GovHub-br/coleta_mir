@@ -9,249 +9,103 @@
 
 defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Router\Route;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 
-//insert css
-$this->document->addStyleSheet(Uri::root() . 'media/com_edital/css/formularios.css');
+$this->document->addStyleSheet(Uri::root() . 'media/com_edital/css/formularios.css?v=' . @filemtime(JPATH_ROOT . '/media/com_edital/css/formularios.css'));
 
-
-$app = Factory::getApplication();
-$user = Factory::getUser();
+// Menu do "Novo instrumento" quando o perfil tem mais de um formulário.
+HTMLHelper::_('bootstrap.dropdown', '.dropdown-toggle');
 
 include __DIR__ . '/../parts/_menu_formularios_ente.php';
-
-// Preenchimento abre sob o item de menu "Meus Formulários" (título e breadcrumb)
-$itemidMeusFormularios = \Comedital\Component\Edital\Site\Helper\EditalHelper::getItemidMeusFormularios();
-$itemidPreenchimento   = $itemidMeusFormularios ? '&Itemid=' . $itemidMeusFormularios : '';
 ?>
 
 <div class="formularios-container">
 
-	<!-- Formulários Disponíveis -->
-	<?php if (!empty($this->available)) : ?>
-		<section class="formularios-section">
-			<h2 class="section-title">
-				<?php echo Text::_('COM_EDITAL_FORMULARIOS_DISPONIVEIS'); ?>
-			</h2>
+	<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+		<h2 class="section-title mb-0">Meus instrumentos</h2>
+		<?php if (!\Joomla\CMS\Factory::getApplication()->getIdentity()->guest) : ?>
+			<a class="ms-auto" href="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_edital&view=solicitacaoacesso'); ?>"><i class="fas fa-user-check" aria-hidden="true"></i> Meus acessos</a>
+		<?php endif; ?>
 
-			<div class="formularios-list">
-				<?php foreach ($this->available as $item) : ?>
-					<div class="formulario-card">
-						<div class="card-header">
-							<div class="badge-group">
-								<span class="badge badge-success">
-									<i class="fa fa-check-circle"></i> Aberto para preenchimento
-								</span>
-                                <?php
-                                    if(!empty($item->adesao)):
-                                ?>
-                                        <span class="badge badge-warning">
-                                            <i class="fa fa-clock-o"></i> Em preenchimento
-                                        </span>
-                                <?php
-                                    endif;
-                                ?>
-								<?php if (!empty($item->ds_versao)) : ?>
-									<span class="formulario-version"><?php echo $this->escape($item->ds_versao); ?></span>
-								<?php endif; ?>
-							</div>
-						</div>
-
-						<div class="card-body">
-							<h3 class="formulario-title">
-								<?php echo $this->escape($item->no_edital); ?>
-							</h3>
-
-							<?php if (!empty($item->ds_edital)) : ?>
-								<p class="formulario-description">
-									<?php echo substr(strip_tags($item->ds_edital), 0, 200); ?>
-									<?php if (strlen(strip_tags($item->ds_edital)) > 200) : ?>
-										...
-									<?php endif; ?>
-								</p>
-							<?php endif; ?>
-
-                            <?php 
-								$now = Factory::getDate();
-								$closing = Factory::getDate($item->dt_encerramento);
-								$daysRemaining = $closing->diff($now)->days;
-							?>
-							<div class="formulario-meta">
-								<div class="meta-row">
-									<i class="far fa-calendar"></i>
-									<span>
-										<?php echo Text::_('COM_EDITAL_FORMULARIO_PRAZO'); ?>: 
-										<?php echo HTMLHelper::_('date', $item->dt_abertura, Text::_('d/m/Y')); ?>
-										a 
-										<?php echo HTMLHelper::_('date', $item->dt_encerramento, Text::_('d/m/Y')); ?>
-									</span>
-                                    <div class="formulario-days-remaining">
-                                        <strong><?php echo $daysRemaining; ?></strong> <?php echo Text::plural('COM_EDITAL_FORMULARIO_DIAS_RESTANTES', $daysRemaining); ?>
-                                    </div>
-                                    <i class="far fa-file"></i>
-									<span>
-                                        <?php echo $item->tamanho['qtAgrupamentos']; ?> seções - <?php echo $item->tamanho['qtPerguntas']; ?> quesitos
-                                    </span>
-								</div>
-							</div>
-
-							<!-- Dias Restantes -->
-							
-							
-
-							<?php
-							$total = (int) ($item->progresso->total ?? 0);
-							$respondidos = (int) ($item->progresso->respondidos ?? 0);
-							$pct = $total > 0 ? (int) round(($respondidos / $total) * 100) : 0;
-							?>
-							<div class="formulario-progress">
-								<div class="progress-bar">
-									<div class="progress-fill" style="width: <?php echo $pct; ?>%"></div>
-								</div>
-								<div class="progress-text">
-									<span><?php echo $pct; ?>% concluído · <?php echo $respondidos; ?> de <?php echo $total; ?> quesitos respondidos</span>
-								</div>
-							</div>
-
-							
-						</div>
-
-						<div class="card-footer">
-                            <?php
-                                if(empty($item->adesao)):
-                            ?>
-                                <a href="<?php echo Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . $item->id . $itemidPreenchimento); ?>" class="btn btn-primary btn-action">
-									<i class="fas fa-play" aria-hidden="true"></i>
-                                    Iniciar Preenchimento
-                                </a>
-                            <?php else: ?>
-                                <a href="<?php echo Route::_('index.php?option=com_edital&view=adesaoform&layout=default&modo=iniciar&edital_id=' . $item->id . $itemidPreenchimento); ?>" class="btn btn-primary btn-action">
-									<i class="fas fa-arrow-right" aria-hidden="true"></i>
-                                    <?php echo Text::_('COM_EDITAL_FORMULARIO_CONTINUAR'); ?>
-                                </a>
-                            <?php
-                                endif;
-                            ?>
-						</div>
-					</div>
-				<?php endforeach; ?>
+		<?php if (count($this->novos) === 1) : ?>
+			<a href="<?php echo $this->novos[0]->url; ?>" class="btn btn-primary">
+				<i class="fas fa-plus" aria-hidden="true"></i> Novo instrumento
+			</a>
+		<?php elseif ($this->novos) : ?>
+			<div class="dropdown">
+				<button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+					<i class="fas fa-plus" aria-hidden="true"></i> Novo instrumento
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end">
+					<?php foreach ($this->novos as $novo) : ?>
+						<li><a class="dropdown-item" href="<?php echo $novo->url; ?>"><?php echo $this->escape($novo->titulo); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
-		</section>
-	<?php endif; ?>
+		<?php endif; ?>
+	</div>
 
-	<!-- Formulários Encerrados -->
-	<?php if (!empty($this->closed)) : ?>
-		<section class="formularios-section">
-			<h2 class="section-title">
-				<?php echo Text::_('COM_EDITAL_FORMULARIOS_ENCERRADOS'); ?>
-			</h2>
-
-			<div class="formularios-list">
-				<?php foreach ($this->closed as $item) : ?>
-					<div class="formulario-card closed">
-						<div class="card-header">
-							<div class="badge-group">
-								<span class="badge badge-info">
-									<i class="fa fa-clock"></i> <?php echo Text::_('COM_EDITAL_FORMULARIO_ENCERRADO'); ?>
-								</span>
-                                <?php
-                                    if (!empty($item->adesao) && $item->adesao->st_adesao != 'rascunho'):
-                                ?>
-                                <span class="badge badge-success">
-                                    <i class="fas fa-check-circle"></i> <?php echo Text::_('COM_EDITAL_FORMULARIO_ENVIADO'); ?>
-                                </span>
-                                <?php
-                                    endif;
-                                ?>
-								<?php if (!empty($item->ds_versao)) : ?>
-									<span class="formulario-version"><?php echo $this->escape($item->ds_versao); ?></span>
-								<?php endif; ?>
-							</div>
-						</div>
-
-						<div class="card-body">
-							<h3 class="formulario-title">
-								<?php echo $this->escape($item->no_edital); ?>
-							</h3>
-
-							<?php if (!empty($item->ds_edital)) : ?>
-								<p class="formulario-description">
-									<?php echo substr(strip_tags($item->ds_edital), 0, 200); ?>
-									<?php if (strlen(strip_tags($item->ds_edital)) > 200) : ?>
-										...
-									<?php endif; ?>
-								</p>
-							<?php endif; ?>
-
-							<div class="formulario-meta">
-								<div class="meta-row">
-									<i class="far fa-calendar"></i>
-									<span>
-										<?php echo Text::_('COM_EDITAL_FORMULARIO_PRAZO'); ?>:
-										<?php echo HTMLHelper::_('date', $item->dt_abertura, Text::_('d/m/Y')); ?>
-										a
-										<?php echo HTMLHelper::_('date', $item->dt_encerramento, Text::_('d/m/Y')); ?>
-									</span>
-									<i class="far fa-file"></i>
-									<span>
-										<?php echo $item->tamanho['qtAgrupamentos']; ?> seções - <?php echo $item->tamanho['qtPerguntas']; ?> quesitos
-									</span>
-								</div>
-							</div>
-
-							<?php if (!empty($item->adesao)) : ?>
-								<?php
-								$total = (int) ($item->progresso->total ?? 0);
-								$respondidos = (int) ($item->progresso->respondidos ?? 0);
-								$pct = $total > 0 ? (int) round(($respondidos / $total) * 100) : 0;
-								$pendencias = max(0, $total - $respondidos);
-								?>
-								<div class="formulario-progress">
-									<div class="progress-text progress-text-split">
-										<span><?php echo $pct; ?>% concluído · <?php echo $respondidos; ?> de <?php echo $total; ?> quesitos respondidos</span>
-										<?php if ($pendencias > 0) : ?>
-											<span class="progress-pendencias"><?php echo $pendencias; ?> <?php echo $pendencias === 1 ? 'pendência' : 'pendências'; ?></span>
-										<?php endif; ?>
-									</div>
-									<div class="progress-bar complete">
-										<div class="progress-fill" style="width: <?php echo $pct; ?>%"></div>
-									</div>
-								</div>
-							<?php endif; ?>
-						</div>
-
-                        <?php
-                            if(!empty($item->adesao)){
-                        ?>
-						<div class="card-footer">
-							<a href="<?php echo Route::_('index.php?option=com_edital&view=formulariosrespostas&id=' . $item->adesao->id); ?>" class="btn btn-secondary btn-action">
-								<i class="fas fa-eye" aria-hidden="true"></i>
-								<?php echo Text::_('COM_EDITAL_FORMULARIO_VISUALIZAR'); ?>
-							</a>
-							<a href="<?php echo Route::_('index.php?option=com_edital&task=formularios.pdfcomprovante&id=' . $item->adesao->id); ?>" class="btn btn-primary btn-action">
-								<i class="fas fa-download" aria-hidden="true"></i>
-								<?php echo Text::_('COM_EDITAL_FORMULARIO_BAIXAR_COMPROVANTE'); ?>
-							</a>
-						</div>
-                        <?php
-                            }
-                        ?>
-					</div>
-				<?php endforeach; ?>
-			</div>
-		</section>
-	<?php endif; ?>
-
-	<!-- Empty State -->
-	<?php if (empty($this->available) && empty($this->closed)) : ?>
+	<?php if (\Joomla\CMS\Factory::getApplication()->getIdentity()->guest) : ?>
 		<div class="alert alert-info">
-			<?php echo Text::_('COM_EDITAL_FORMULARIOS_NENHUM_DISPONIVEL'); ?>
+			<a href="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_users&view=login&return=' . base64_encode(\Joomla\CMS\Uri\Uri::getInstance()->toString())); ?>">Entre com o seu CPF</a> para ver os seus instrumentos.
+			Ainda não tem conta? <a href="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_edital&view=solicitacaoacesso'); ?>">Solicite acesso</a>.
+		</div>
+	<?php elseif (empty($this->instrumentos) && empty($this->outrasRespostas)) : ?>
+		<div class="alert alert-info">
+			<?php if ($this->novos) : ?>
+				Você ainda não preencheu nenhum instrumento. Clique em <strong>Novo instrumento</strong> para começar.
+			<?php else : ?>
+				Nenhum instrumento por aqui ainda. Gestores de TED e convenentes veem os instrumentos da sua UG ou CNPJ depois que o MIR libera o acesso (peça em <a href="<?php echo \Joomla\CMS\Router\Route::_('index.php?option=com_edital&view=solicitacaoacesso'); ?>">Meus acessos</a>). Responsáveis por projeto veem o projeto quando o gestor informa o seu CPF.
+			<?php endif; ?>
 		</div>
 	<?php endif; ?>
 
-</div>
+	<div class="formularios-list">
+		<?php foreach ($this->instrumentos as $instrumento) : ?>
+			<div class="formulario-card">
+				<div class="card-body">
+					<h3 class="formulario-title">
+						<?php echo $this->escape($instrumento->rotuloTipo . ' ' . $instrumento->codigo); ?>
+					</h3>
+					<?php if ($instrumento->descricao !== '') : ?>
+						<p class="formulario-description instrumento-descricao" title="<?php echo $this->escape($instrumento->descricao); ?>"><?php echo $this->escape($instrumento->descricao); ?></p>
+					<?php endif; ?>
+					<?php if ($instrumento->projetos) : ?>
+						<p class="mb-1"><strong>Para você preencher</strong></p>
+						<ul class="list-group mb-3">
+							<?php foreach ($instrumento->projetos as $projeto) : ?>
+								<li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+									<div>
+										<strong><?php echo $this->escape($projeto->formulario); ?></strong>
+										<?php if ($projeto->rotulo !== '') : ?>
+											<br><small>Projeto: <?php echo $this->escape($projeto->rotulo); ?></small>
+										<?php endif; ?>
+										<br><small class="text-muted"><?php echo $this->escape($projeto->detalhe); ?></small>
+									</div>
+									<a href="<?php echo $this->escape($projeto->url); ?>" class="btn btn-sm btn-primary">
+										<i class="fas fa-plus" aria-hidden="true"></i> Preencher
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
+					<?php if ($instrumento->respostas) : ?>
+						<?php $respostas = $instrumento->respostas; include __DIR__ . '/default_respostas.php'; ?>
+					<?php endif; ?>
+				</div>
+			</div>
+		<?php endforeach; ?>
 
+		<?php foreach ($this->outrasRespostas as $grupo) : ?>
+			<div class="formulario-card">
+				<div class="card-body">
+					<h3 class="formulario-title"><?php echo $this->escape($grupo->formulario); ?></h3>
+					<p class="formulario-description">Preenchimentos ainda sem instrumento escolhido.</p>
+					<?php $respostas = $grupo->respostas; include __DIR__ . '/default_respostas.php'; ?>
+				</div>
+			</div>
+		<?php endforeach; ?>
+	</div>
+
+</div>

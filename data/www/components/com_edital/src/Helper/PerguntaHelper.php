@@ -72,6 +72,223 @@ class PerguntaHelper
         return is_object($opcao) && ($opcao->nome ?? null) === self::OUTRO_PARAM;
     }
 
+    /** Parâmetro de ds_opcoes: a mesma resposta não pode se repetir em outro preenchimento do formulário. */
+    public const PARAM_RESPOSTA_UNICA = 'resposta_unica';
+
+    /**
+     * Parâmetro de ds_opcoes das perguntas do tipo "tabela" (lista de itens): JSON com as colunas,
+     * ex.: [{"chave":"nome","rotulo":"Nome","tipo":"linha","obrigatoria":true},
+     *       {"chave":"posicao","rotulo":"Posição","tipo":"lista","opcoes":["A","B"]}].
+     * Tipos de coluna: linha, cnpj, moeda e lista.
+     */
+    public const PARAM_COLUNAS = 'colunas';
+
+    public const TIPOS_COLUNA_TABELA = ['linha', 'cnpj', 'cpf', 'moeda', 'lista'];
+
+    /** Limites de uma lista de itens, para não gravar respostas desproporcionais. */
+    private const TABELA_MAX_LINHAS = 500;
+
+    private const TABELA_MAX_CARACTERES = 1000;
+
+    /** Nomes de ds_opcoes que configuram a pergunta (não são alternativas nem editáveis no construtor). */
+    public static function parametrosConfiguracao(): array
+    {
+        return array_merge(DwHelper::PARAMETROS, [EspelhoDwHelper::PARAM_REMOVIDOS, AcessoHelper::PARAM_ACESSO_UNIDADE], OrigemHelper::PARAMETROS, [self::PARAM_RESPOSTA_UNICA, self::PARAM_COLUNAS]);
+    }
+
+    /** Só os 11 dígitos do CPF, se os dígitos verificadores conferem; vazio caso contrário. */
+    public static function cpfValido(string $cpf): string
+    {
+        $digitos = preg_replace('/\D/', '', $cpf);
+
+        if (strlen($digitos) !== 11 || preg_match('/^(\d)\1{10}$/', $digitos)) {
+            return '';
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            $soma = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $soma += (int) $digitos[$i] * ($t + 1 - $i);
+            }
+            if ((int) $digitos[$t] !== ($soma * 10) % 11 % 10) {
+                return '';
+            }
+        }
+
+        return $digitos;
+    }
+
+    /**
+     * Colunas normalizadas de uma pergunta do tipo "tabela".
+     *
+     * @return  array  Lista de ['chave', 'rotulo', 'tipo', 'opcoes', 'obrigatoria']
+     */
+    public static function getColunasTabela($pergunta): array
+    {
+        $definicao = json_decode(self::getParametro($pergunta, self::PARAM_COLUNAS), true);
+        $colunas = [];
+
+        foreach (is_array($definicao) ? $definicao : [] as $coluna) {
+            $chave = preg_replace('/[^a-z0-9_]/', '', strtolower((string) ($coluna['chave'] ?? '')));
+
+            if ($chave === '' || isset($colunas[$chave])) {
+                continue;
+            }
+
+            $tipo = in_array($coluna['tipo'] ?? '', self::TIPOS_COLUNA_TABELA, true) ? $coluna['tipo'] : 'linha';
+            $colunas[$chave] = [
+                'chave'       => $chave,
+                'rotulo'      => trim((string) ($coluna['rotulo'] ?? $chave)),
+                'tipo'        => $tipo,
+                'opcoes'      => $tipo === 'lista' ? array_values(array_map('strval', (array) ($coluna['opcoes'] ?? []))) : [],
+                'obrigatoria' => !empty($coluna['obrigatoria']),
+            ];
+        }
+
+        return array_values($colunas);
+    }
+
+    /**
+     * Itens de uma resposta do tipo "tabela", limpos conforme as colunas: só chaves conhecidas,
+     * texto sem HTML, opções de lista válidas, CNPJ com 14 dígitos e valores numéricos.
+     * Erros de preenchimento vão para $erros (ex.: coluna obrigatória vazia).
+     *
+     * @param   object  $pergunta  Pergunta do tipo tabela
+     * @param   mixed   $valor     JSON recebido do formulário (ou já gravado)
+     * @param   array   $erros     Recebe as mensagens de erro
+     *
+     * @return  array  Itens válidos
+     */
+    public static function normalizarTabela($pergunta, $valor, array &$erros = []): array
+    {
+        $colunas = self::getColunasTabela($pergunta);
+        $linhas = is_string($valor) && trim($valor) !== '' ? json_decode($valor, true) : $valor;
+        $itens = [];
+
+        foreach (is_array($linhas) ? array_slice(array_values($linhas), 0, self::TABELA_MAX_LINHAS) : [] as $i => $linha) {
+            if (!is_array($linha)) {
+                continue;
+            }
+
+            $item = [];
+
+            foreach ($colunas as $coluna) {
+                $texto = is_scalar($linha[$coluna['chave']] ?? null) ? (string) $linha[$coluna['chave']] : '';
+                $texto = mb_substr(trim(strip_tags($texto)), 0, self::TABELA_MAX_CARACTERES);
+
+                if ($texto !== '' && $coluna['tipo'] === 'lista' && !in_array($texto, $coluna['opcoes'], true)) {
+                    $texto = '';
+                } elseif ($texto !== '' && $coluna['tipo'] === 'cnpj') {
+                    $digitos = preg_replace('/\D/', '', $texto);
+                    $texto = strlen($digitos) === 14
+                        ? vsprintf('%s.%s.%s/%s-%s', [substr($digitos, 0, 2), substr($digitos, 2, 3), substr($digitos, 5, 3), substr($digitos, 8, 4), substr($digitos, 12, 2)])
+                        : '';
+                    if ($texto === '') {
+                        $erros[] = 'CNPJ inválido no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
+                    }
+                } elseif ($texto !== '' && $coluna['tipo'] === 'cpf') {
+                    $digitos = self::cpfValido($texto);
+                    $texto = $digitos !== '' ? vsprintf('%s.%s.%s-%s', [substr($digitos, 0, 3), substr($digitos, 3, 3), substr($digitos, 6, 3), substr($digitos, 9, 2)]) : '';
+                    if ($texto === '') {
+                        $erros[] = 'CPF inválido no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
+                    }
+                } elseif ($texto !== '' && $coluna['tipo'] === 'moeda') {
+                    $numero = str_replace(',', '.', preg_replace('/[^\d,.-]/', '', $texto));
+                    $texto = is_numeric($numero) ? number_format((float) $numero, 2, '.', '') : '';
+                }
+
+                $item[$coluna['chave']] = $texto;
+            }
+
+            if (implode('', $item) === '') {
+                continue;
+            }
+
+            foreach ($colunas as $coluna) {
+                if ($coluna['obrigatoria'] && $item[$coluna['chave']] === '') {
+                    $erros[] = 'Preencha "' . $coluna['rotulo'] . '" no item ' . ($i + 1) . ' da pergunta: ' . $pergunta->ds_titulo;
+                }
+            }
+
+            $itens[] = $item;
+        }
+
+        return $itens;
+    }
+
+    /** Entradas de ds_opcoes que configuram a pergunta e não são alternativas. */
+    public static function ehParametro($opcao): bool
+    {
+        return self::ehParametroOutro($opcao)
+            || (is_object($opcao) && in_array($opcao->nome ?? null, self::parametrosConfiguracao(), true));
+    }
+
+    /**
+     * Perguntas com resposta_unica (ex.: o instrumento no formulário do MIR, um preenchimento
+     * por TED/convênio): erro se outro preenchimento do mesmo formulário já tem o mesmo valor.
+     *
+     * @param   array  $perguntas  Perguntas do formulário
+     * @param   array  $respostas  Respostas validadas (pergunta_id => valor)
+     * @param   int    $editalId   Formulário
+     * @param   int    $adesaoId   Preenchimento sendo salvo (0 = novo)
+     *
+     * @return  array  Mensagens de erro
+     */
+    public static function validarRespostasUnicas(array $perguntas, array $respostas, int $editalId, int $adesaoId): array
+    {
+        $db = Factory::getContainer()->get('DatabaseDriver');
+        $erros = [];
+
+        foreach ($perguntas as $pergunta) {
+            $valor = $respostas[$pergunta->id] ?? '';
+
+            if (!is_scalar($valor) || trim((string) $valor) === '' || self::getParametro($pergunta, self::PARAM_RESPOSTA_UNICA) !== 'sim') {
+                continue;
+            }
+
+            $valor = (string) $valor;
+            $query = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__tb_resposta', 'r'))
+                ->join('INNER', $db->quoteName('#__tb_adesao', 'a') . ' ON a.id = r.co_adesao')
+                ->where('r.co_pergunta = ' . (int) $pergunta->id)
+                ->where('r.ds_resposta = :valor')
+                ->where('a.co_edital = ' . (int) $editalId)
+                ->where('a.state = 1')
+                ->where('a.id <> ' . (int) $adesaoId)
+                ->bind(':valor', $valor);
+            $db->setQuery($query);
+
+            if ((int) $db->loadResult() > 0) {
+                $erros[] = 'Já existe um preenchimento deste formulário para "' . $pergunta->ds_titulo . '" com o valor informado. '
+                    . 'Para atualizá-lo, abra-o na lista de Formulários.';
+            }
+        }
+
+        return $erros;
+    }
+
+    /** Valor de um parâmetro de ds_opcoes (ex.: fonte_dw), ou '' se ausente. */
+    public static function getParametro($pergunta, string $nome): string
+    {
+        $decoded = !empty($pergunta->ds_opcoes) ? json_decode($pergunta->ds_opcoes) : null;
+
+        foreach ((is_array($decoded) || is_object($decoded)) ? $decoded : [] as $opcao) {
+            if (is_object($opcao) && ($opcao->nome ?? null) === $nome) {
+                return trim((string) ($opcao->valor ?? ''));
+            }
+        }
+
+        return '';
+    }
+
+    protected static function atributoFiltro(array $opcao): string
+    {
+        return ($opcao['filtro'] ?? '') !== ''
+            ? ' data-filtro="' . htmlspecialchars($opcao['filtro'], ENT_QUOTES, 'UTF-8') . '"'
+            : '';
+    }
+
     public static function permiteOutro($pergunta): bool
     {
         if (!in_array($pergunta->tp_pergunta ?? '', ['radio', 'checkbox'], true) || empty($pergunta->ds_opcoes)) {
@@ -93,12 +310,12 @@ class PerguntaHelper
         return false;
     }
 
-    /** Opções de radio/checkbox sem a entrada de parâmetro. */
+    /** Opções de radio/checkbox sem as entradas de parâmetro. */
     protected static function getOpcoesComValor($pergunta): array
     {
         $options = !empty($pergunta->ds_opcoes) ? json_decode($pergunta->ds_opcoes) : [];
 
-        return array_values(array_filter((array) $options, static fn ($opcao) => !self::ehParametroOutro($opcao)));
+        return array_values(array_filter((array) $options, static fn ($opcao) => !self::ehParametro($opcao)));
     }
 
     protected static function renderOutroOpcao($pergunta, string $tipo, bool $marcado, string $texto, bool $obrigatorio): string
@@ -202,7 +419,7 @@ class PerguntaHelper
             . ' data-tipo-pergunta="' . htmlspecialchars($pergunta->tp_pergunta) . '"'
             . ' data-pergunta-chave="' . htmlspecialchars(self::getValueAlias($pergunta->ds_titulo)) . '"'
             . ' data-obrigatorio="' . ($pergunta->tp_requerida === 'sim' ? '1' : '0') . '"'
-            . $dsDependeAttr . '>';
+            . $dsDependeAttr . self::getIntegracaoDwAttr($pergunta) . '>';
 
         switch ($pergunta->tp_pergunta) {
             case 'linha':
@@ -249,6 +466,9 @@ class PerguntaHelper
                 break;
             case 'distribuicao_numerica':
                 $html .= self::renderDistribuicaoNumericaField($pergunta, $resposta, $index);
+                break;
+            case 'tabela':
+                $html .= self::renderTabelaField($pergunta, $resposta);
                 break;
             case 'uf':
                 $html .= self::renderUfField($pergunta, $resposta, $index);
@@ -308,12 +528,19 @@ class PerguntaHelper
             . '</label>';
         $html .= self::renderInformacaoComplementar2($pergunta);
 
+        // Sugestões vindas do DW (sugestoes_dw): o adesao.js preenche o datalist.
+        $listaSugestoes = self::getParametro($pergunta, DwHelper::PARAM_SUGESTOES) !== ''
+            ? 'sugestoes_pergunta_' . (int) $pergunta->id
+            : '';
+
         $html .= '<input type="text" '
         . 'id="pergunta_' . $pergunta->id . '" '
         . 'name="pergunta[' . $pergunta->id . ']" '
         . 'class="form-control" '
+        . ($listaSugestoes ? 'list="' . $listaSugestoes . '" autocomplete="off" ' : '')
         . 'value="' . ($resposta) . '"'
         . $required . ' />';
+        $html .= $listaSugestoes ? '<datalist id="' . $listaSugestoes . '"></datalist>' : '';
         $html .= !empty($pergunta->ds_descricao) ? '<small class="form-text text-muted">' . $pergunta->ds_descricao . '</small>' : '';
         $html .= '</div></div>';
 
@@ -370,7 +597,8 @@ class PerguntaHelper
     }
 
     /**
-     * Normaliza opções nome/valor e mantém suporte ao formato legado separado por vírgulas.
+     * Normaliza opções nome/valor (e o filtro das que vêm do DW) e mantém suporte ao formato
+     * legado separado por vírgulas.
      */
     public static function getOpcoesSelecao($pergunta): array
     {
@@ -388,7 +616,7 @@ class PerguntaHelper
                     continue;
                 }
 
-                if (self::ehParametroOutro($opcao)) {
+                if (self::ehParametro($opcao)) {
                     continue;
                 }
 
@@ -396,7 +624,7 @@ class PerguntaHelper
                 $valor = trim((string) ($opcao->valor ?? $nome));
 
                 if ($nome !== '' || $valor !== '') {
-                    $options[] = ['nome' => $nome ?: $valor, 'valor' => $valor ?: $nome];
+                    $options[] = ['nome' => $nome ?: $valor, 'valor' => $valor ?: $nome, 'filtro' => trim((string) ($opcao->filtro ?? ''))];
                 }
             }
 
@@ -431,6 +659,12 @@ class PerguntaHelper
         $isObrigatorio = !empty($pergunta->tp_requerida) && $pergunta->tp_requerida == 'sim';
         $required = $isObrigatorio ? ' required' : '';
         $options = self::getOpcoesSelecao($pergunta);
+
+        // Lista alimentada só pelo DW e sem opções (DW fora do ar): campo de texto para não travar o preenchimento.
+        if (empty($options) && self::getParametro($pergunta, DwHelper::PARAM_FONTE) !== '') {
+            return self::renderLinhaField($pergunta, htmlspecialchars((string) $resposta, ENT_QUOTES, 'UTF-8'), $index);
+        }
+
         $indexHtml = $index > 0 ? '<div class="pergunta-index"><span>' . $index . '</span></div>' : '';
 
         $html = '<div class="pergunta-content d-flex gap-3 pt-2 pb-2">';
@@ -452,7 +686,7 @@ class PerguntaHelper
 
         foreach ($options as $option) {
             $selected = ((string) $option['valor'] === (string) $resposta) ? ' selected' : '';
-            $html .= '<option value="' . htmlspecialchars($option['valor']) . '"' . $selected . '>'
+            $html .= '<option value="' . htmlspecialchars($option['valor']) . '"' . $selected . self::atributoFiltro($option) . '>'
                 . htmlspecialchars($option['nome'])
                 . '</option>';
         }
@@ -903,7 +1137,7 @@ class PerguntaHelper
                 $value   = isset($opcao->valor) ? $opcao->valor : $label;
                 $checked = ((string) $resposta === (string) $value) ? ' checked' : '';
                 $fieldId = 'pergunta_' . $pergunta->id . '_' . md5($value);
-                $html .= '<div class="form-check">';
+                $html .= '<div class="form-check"' . self::atributoFiltro((array) $opcao) . '>';
                 $html .= '<input class="form-check-input" type="radio"'
                     . ' id="' . $fieldId . '"'
                     . ' name="pergunta[' . $pergunta->id . ']"'
@@ -974,7 +1208,7 @@ class PerguntaHelper
                 $value   = isset($opcao->valor) ? $opcao->valor : $label;
                 $checked = in_array((string) $value, $selectedValues) ? ' checked' : '';
                 $fieldId = 'pergunta_' . $pergunta->id . '_' . md5($value);
-                $html .= '<div class="form-check">';
+                $html .= '<div class="form-check"' . self::atributoFiltro((array) $opcao) . '>';
                 $html .= '<input class="form-check-input" type="checkbox"'
                     . ' id="' . $fieldId . '"'
                     . ' name="pergunta[' . $pergunta->id . '][]"'
@@ -1241,6 +1475,78 @@ class PerguntaHelper
 
         $html .= !empty($pergunta->ds_descricao) ? '<small class="form-text text-muted d-block mt-1">' . $pergunta->ds_descricao . '</small>' : '';
       
+
+        return $html;
+    }
+
+    /**
+     * Lista de itens (tipo "tabela"): itens já adicionados em cartões (com edição e remoção) e,
+     * abaixo, o bloco "Novo item" com um campo por coluna e o botão "Adicionar à lista". Os itens vão em JSON num campo oculto, montado pelo adesao.js.
+     */
+    protected static function renderTabelaField($pergunta, $resposta)
+    {
+        $isObrigatorio = !empty($pergunta->tp_requerida) && $pergunta->tp_requerida == 'sim';
+        $colunas = self::getColunasTabela($pergunta);
+        $fieldId = 'pergunta_' . (int) $pergunta->id;
+        $esc = static fn ($texto) => htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
+
+        $html = '<div class="pergunta-content pt-2 pb-2">';
+        $html .= '<p class="form-label mb-2">' . $esc($pergunta->ds_titulo)
+            . ($isObrigatorio ? ' <span class="text-danger">*</span>' : '') . '</p>';
+        $html .= self::renderInformacaoComplementar2($pergunta);
+
+        if (empty($colunas)) {
+            return $html . '<p class="text-warning">Nenhuma coluna configurada para esta pergunta.</p></div>';
+        }
+
+        $html .= '<div class="pergunta-tabela" data-colunas="' . $esc(json_encode($colunas, JSON_UNESCAPED_UNICODE)) . '">';
+        $html .= '<div class="pergunta-tabela-lista d-flex flex-column gap-2 mb-3"></div>';
+        $html .= '<p class="text-muted small pergunta-tabela-vazia">Nenhum item adicionado.</p>';
+
+        $html .= '<fieldset class="pergunta-tabela-entrada border rounded p-3">';
+        $html .= '<legend class="float-none w-auto px-2 mb-0 fs-6 fw-semibold pergunta-tabela-entrada-titulo">Novo item</legend>';
+        $html .= '<div class="row g-3">';
+
+        foreach ($colunas as $coluna) {
+            $entradaId = $fieldId . '_' . $coluna['chave'];
+            $html .= '<div class="col-12 col-md-6">';
+            $html .= '<label class="form-label small mb-1" for="' . $entradaId . '">' . $esc($coluna['rotulo'])
+                . ($coluna['obrigatoria'] ? ' <span class="text-danger">*</span>' : '') . '</label>';
+
+            if ($coluna['tipo'] === 'lista') {
+                $html .= '<select class="form-select" id="' . $entradaId . '" data-coluna="' . $coluna['chave'] . '">'
+                    . '<option value="">Selecione</option>';
+                foreach ($coluna['opcoes'] as $opcao) {
+                    $html .= '<option value="' . $esc($opcao) . '">' . $esc($opcao) . '</option>';
+                }
+                $html .= '</select>';
+            } else {
+                $atributos = $coluna['tipo'] === 'moeda'
+                    ? 'type="number" min="0" step="0.01" inputmode="decimal"'
+                    : ($coluna['tipo'] === 'cnpj' ? 'type="text" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00"'
+                    : ($coluna['tipo'] === 'cpf' ? 'type="text" maxlength="14" inputmode="numeric" placeholder="000.000.000-00"' : 'type="text"'));
+                $html .= '<input class="form-control" id="' . $entradaId . '" data-coluna="' . $coluna['chave']
+                    . '" data-tipo-coluna="' . $coluna['tipo'] . '" ' . $atributos . ' />';
+            }
+
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+        $html .= '<div class="small text-danger pergunta-tabela-erro d-none mt-2" role="alert"></div>';
+        $html .= '<div class="d-flex flex-wrap gap-2 justify-content-end mt-3">';
+        $html .= '<button type="button" class="btn btn-outline-secondary pergunta-tabela-cancelar d-none">Cancelar edição</button>';
+        $html .= '<button type="button" class="btn btn-primary pergunta-tabela-adicionar">'
+            . '<i class="fas fa-plus" aria-hidden="true"></i> <span>Adicionar à lista</span></button>';
+        $html .= '</div>';
+        $html .= '</fieldset>';
+
+        $itens = self::normalizarTabela($pergunta, $resposta);
+        $html .= '<input type="hidden" id="' . $fieldId . '" name="pergunta[' . (int) $pergunta->id . ']" value="'
+            . $esc($itens ? json_encode($itens, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '') . '" />';
+        $html .= '</div>';
+        $html .= !empty($pergunta->ds_descricao) ? '<small class="form-text text-muted d-block mt-1">' . $pergunta->ds_descricao . '</small>' : '';
+        $html .= '</div>';
 
         return $html;
     }
@@ -1551,6 +1857,17 @@ class PerguntaHelper
                         && $resp[$chave] !== '';
                 }
                 $respostas[$perguntaId] = json_encode($resp, JSON_UNESCAPED_UNICODE);
+            } elseif ($pergunta->tp_pergunta === 'tabela') {
+                $errosTabela = [];
+                $itens = self::normalizarTabela($pergunta, $inputPerguntas[$perguntaId] ?? '', $errosTabela);
+
+                if (!$rascunho) {
+                    $errors = array_merge($errors, $errosTabela);
+                }
+
+                $preenchida = $itens !== [];
+                // Lista vazia é gravada como '' para não contar como respondida no progresso.
+                $respostas[$perguntaId] = $itens ? json_encode($itens, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
             } elseif ($pergunta->tp_pergunta === 'radio') {
                 $valorRecebido = $inputPerguntas[$perguntaId] ?? '';
                 $resp = is_scalar($valorRecebido) ? trim((string) $valorRecebido) : '';
@@ -1753,6 +2070,22 @@ class PerguntaHelper
         }
 
         return false;
+    }
+
+    /** Atributos lidos pelo adesao.js para filtrar opções e pré-preencher a partir do DW. */
+    public static function getIntegracaoDwAttr($pergunta): string
+    {
+        $atributos = '';
+
+        foreach (array_combine(DwHelper::PARAMETROS, ['data-fonte-dw', 'data-chave-dw', 'data-campo-dw', 'data-sugestoes-dw', 'data-filtro-dw']) as $parametro => $atributo) {
+            $valor = self::getParametro($pergunta, $parametro);
+
+            if ($valor !== '') {
+                $atributos .= ' ' . $atributo . '="' . htmlspecialchars($valor, ENT_QUOTES, 'UTF-8') . '"';
+            }
+        }
+
+        return $atributos;
     }
 
     public static function getDependenciaAttr($pergunta){
