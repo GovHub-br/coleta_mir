@@ -102,7 +102,7 @@ $assetRoot = $extraData['assetRoot'] ?? Uri::root();
             <table role="presentation" class="email-shell" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;background-color:#ffffff;">
                 <tr>
                     <td class="portal-header" style="padding:13px 28px;color:#ffffff;background-color:#1351b4;font-size:13px;">
-                        <strong>PORTAL DO SINAPIR - GOVERNO FEDERAL</strong>
+                        <strong>COLETA MIR - GOVERNO FEDERAL</strong>
                         <span class="portal-divider">|</span>
                         <span class="portal-ministry">Ministério da Igualdade Racial</span>
                     </td>
@@ -119,7 +119,7 @@ $assetRoot = $extraData['assetRoot'] ?? Uri::root();
                 </tr>
                 <tr>
                     <td class="footer" style="padding:20px 24px;text-align:center;font-size:12px;line-height:1.6;color:#ffffff;background-color:#1351b4;">
-                        <p>SINAPIR - Sistema Nacional de Promoção da Igualdade Racial</p>
+                        <p>Coleta MIR - Acompanhamento da execução dos TEDs e convênios do MIR</p>
                         <p>Ministério da Igualdade Racial | Governo Federal © 2026</p>
                         <p class="automatic-message" style="margin-top:10px;color:#dbe8fb;">Este é um e-mail automático gerado pela plataforma, por favor não responda.</p>
                     </td>

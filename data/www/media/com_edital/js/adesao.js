@@ -21,6 +21,15 @@ var AdesaoForm = {
         // Alternativa "Outro" (texto livre) de perguntas de seleção única/múltipla
         AdesaoForm.initOutroOpcoes();
 
+        // Opções filtradas e pré-preenchimento a partir do data warehouse
+        AdesaoForm.initIntegracaoDw();
+
+        // Perguntas do tipo lista de itens (tabela)
+        AdesaoForm.initTabelas();
+
+        // Formulário de execução: perguntas preenchidas a partir do formulário de origem
+        AdesaoForm.initPerguntasTravadas();
+
         // Customizações visuais da etapa Estrutura e Gestão
         AdesaoForm.initEstruturaGestaoFrontend();
 
@@ -189,33 +198,7 @@ var AdesaoForm = {
             });
         };
 
-        // Retorna o(s) valor(es) atualmente selecionado(s)/preenchido(s) para uma pergunta de origem
-        var getValorPergunta = function (perguntaId) {
-            if (perguntaId === 'solicitante') {
-                var esfera = $('input[type="radio"][name="tp_esfera_governamental"]:checked').val()
-                    || $('input[type="hidden"][name="tp_esfera_governamental"]').val()
-                    || '';
-
-                return [esfera];
-            }
-
-            var $radios = $('input[type="radio"][name="pergunta[' + perguntaId + ']"]');
-            if ($radios.length > 0) {
-                return [$radios.filter(':checked').val() || ''];
-            }
-
-            var $checkboxes = $('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
-            if ($checkboxes.length > 0) {
-                return $checkboxes.filter(':checked').map(function () { return $(this).val(); }).get();
-            }
-
-            var $campo = $('#pergunta_' + perguntaId);
-            if ($campo.length > 0) {
-                return [$campo.val() || ''];
-            }
-
-            return [''];
-        };
+        var getValorPergunta = AdesaoForm.valoresPergunta;
 
         var getPerguntaField = function (perguntaId) {
             return $('.pergunta-field[data-pergunta-id="' + perguntaId + '"]');
@@ -320,6 +303,463 @@ var AdesaoForm = {
         });
 
         AdesaoForm.updateSubmitButtonState();
+    },
+
+    // Retorna o(s) valor(es) atualmente selecionado(s)/preenchido(s) para uma pergunta de origem
+    valoresPergunta: function (perguntaId) {
+        if (perguntaId === 'solicitante') {
+            var esfera = $('input[type="radio"][name="tp_esfera_governamental"]:checked').val()
+                || $('input[type="hidden"][name="tp_esfera_governamental"]').val()
+                || '';
+
+            return [esfera];
+        }
+
+        var $radios = $('input[type="radio"][name="pergunta[' + perguntaId + ']"]');
+        if ($radios.length > 0) {
+            return [$radios.filter(':checked').val() || ''];
+        }
+
+        var $checkboxes = $('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
+        if ($checkboxes.length > 0) {
+            return $checkboxes.filter(':checked').map(function () { return $(this).val(); }).get();
+        }
+
+        var $campo = $('#pergunta_' + perguntaId);
+        if ($campo.length > 0) {
+            return [$campo.val() || ''];
+        }
+
+        return [''];
+    },
+
+    // Integração com o data warehouse (data-application-mir):
+    // - perguntas com data-fonte-dw e depende-de mostram só as opções cujo data-filtro
+    //   corresponde à resposta da pergunta-pai ("5802 - Políticas..." casa com "5802");
+    // - perguntas com data-chave-dw identificam um registro; ao mudar, as perguntas com
+    //   data-campo-dw="registro.campo" são preenchidas com os dados do DW.
+    // Valores vindos do formulário de origem (o servidor ignora alterações): somente leitura,
+    // mas ainda enviados (disabled não seria). O <select> não tem readonly: sai do foco e do clique.
+    initPerguntasTravadas: function () {
+        var $travadas = $('.pergunta-field.pergunta-travada');
+        $travadas.find('input, textarea').prop('readonly', true);
+        $travadas.find('select').attr({ tabindex: '-1', 'aria-readonly': 'true' })
+            .on('mousedown keydown', function (e) { e.preventDefault(); });
+        $travadas.each(function () {
+            $('<span class="badge text-bg-light fw-normal"></span>').text($(this).attr('data-definido-por') || 'definido pelo gestor')
+                .appendTo($(this).find('label').first()).before(' ');
+        });
+    },
+
+    initIntegracaoDw: function () {
+        var seletorResposta = function (perguntaId) {
+            return '[name="pergunta[' + perguntaId + ']"], [name="pergunta[' + perguntaId + '][]"]';
+        };
+
+        var filtroCorresponde = function (filtro, valores) {
+            return valores.some(function (valor) {
+                valor = String(valor || '');
+                return valor === filtro || valor.indexOf(filtro + ' ') === 0;
+            });
+        };
+
+        $('.pergunta-field[data-fonte-dw][data-depende-de]').each(function () {
+            var $campo = $(this);
+            var origem = $campo.attr('data-depende-de');
+            // Cópia de todas as opções filtráveis: as que não valem para a resposta da
+            // pergunta-pai saem do <select> (o Safari ignora hidden em <option>).
+            var $select = $campo.find('select');
+            var valorSalvo = $select.val();
+            var $opcoesFiltraveis = $select.find('option[data-filtro]').detach();
+
+            var aplicarFiltro = function () {
+                var valores = AdesaoForm.valoresPergunta(origem);
+
+                if ($select.length > 0) {
+                    var selecionado = $select.val() || valorSalvo;
+                    valorSalvo = null;
+                    $select.find('option[data-filtro]').detach();
+                    $select.append($opcoesFiltraveis.filter(function () {
+                        return filtroCorresponde(this.getAttribute('data-filtro'), valores);
+                    }));
+                    $select.val(selecionado);
+                    if (($select.val() || '') !== (selecionado || '')) {
+                        $select.val('').trigger('change');
+                    }
+                }
+
+                $campo.find('.form-check[data-filtro]').each(function () {
+                    var $item = $(this);
+                    var corresponde = filtroCorresponde($item.attr('data-filtro'), valores);
+                    $item.toggleClass('d-none', !corresponde);
+                    if (!corresponde) {
+                        $item.find('input:checked').prop('checked', false).trigger('change');
+                    }
+                });
+            };
+
+            $(document).on('change', seletorResposta(origem), aplicarFiltro);
+            aplicarFiltro();
+        });
+
+        // Sugestões (datalist) filtradas pela resposta da pergunta cuja fonte é data-filtro-dw,
+        // ex.: metas do plano de trabalho do instrumento selecionado.
+        $('.pergunta-field[data-sugestoes-dw][data-filtro-dw]').each(function () {
+            var $campo = $(this);
+            var fonte = $campo.attr('data-sugestoes-dw');
+            var $origem = $('.pergunta-field[data-fonte-dw="' + $campo.attr('data-filtro-dw') + '"]').first();
+            var $lista = $campo.find('datalist');
+
+            if ($origem.length === 0 || $lista.length === 0) {
+                return;
+            }
+
+            var origemId = $origem.attr('data-pergunta-id');
+
+            var carregar = function () {
+                var filtro = AdesaoForm.valoresPergunta(origemId)[0] || '';
+                $lista.empty();
+                if (!filtro) {
+                    return;
+                }
+
+                var ajaxData = {
+                    option: 'com_edital',
+                    task: 'adesaoform.opcoesDw',
+                    fonte: fonte,
+                    origem: $campo.attr('data-filtro-dw'),
+                    filtro: filtro
+                };
+                ajaxData[window.adesaoConfig.token] = 1;
+
+                $.ajax({
+                    url: window.adesaoConfig.baseUrl + 'index.php',
+                    type: 'GET',
+                    data: ajaxData,
+                    dataType: 'json'
+                }).done(function (response) {
+                    if (!response || !response.success) {
+                        return;
+                    }
+                    $.each(response.data, function (i, opcao) {
+                        $('<option>').attr('value', opcao.valor).appendTo($lista);
+                    });
+                }).fail(function (xhr, status, error) {
+                    console.debug('Sugestões do DW indisponíveis:', error);
+                });
+            };
+
+            $(document).on('change', seletorResposta(origemId), carregar);
+            carregar();
+        });
+
+        $('.pergunta-field[data-chave-dw]').each(function () {
+            var registro = $(this).attr('data-chave-dw');
+            var fonte = $(this).attr('data-fonte-dw') || '';
+            var perguntaId = $(this).attr('data-pergunta-id');
+            var $destinos = $('.pergunta-field[data-campo-dw^="' + registro + '."]');
+
+            if ($destinos.length === 0) {
+                return;
+            }
+
+            var preencher = function (sobrescrever) {
+                var chave = AdesaoForm.valoresPergunta(perguntaId)[0] || '';
+                if (!chave) {
+                    return;
+                }
+
+                var ajaxData = {
+                    option: 'com_edital',
+                    task: 'adesaoform.dadosDw',
+                    registro: registro,
+                    fonte: fonte,
+                    chave: chave
+                };
+                ajaxData[window.adesaoConfig.token] = 1;
+
+                $.ajax({
+                    url: window.adesaoConfig.baseUrl + 'index.php',
+                    type: 'GET',
+                    data: ajaxData,
+                    dataType: 'json'
+                }).done(function (response) {
+                    // Registro não encontrado conta como "sem dados": limpa o que foi preenchido automaticamente antes.
+                    var dados = (response && response.success) ? response.data : {};
+                    $destinos.each(function () {
+                        var campo = $(this).attr('data-campo-dw').split('.')[1];
+                        var valor = dados[campo] !== undefined ? String(dados[campo]) : '';
+                        if (valor !== '' || sobrescrever) {
+                            AdesaoForm.preencherCampoDw($(this), valor, sobrescrever);
+                        }
+                    });
+                }).fail(function (xhr, status, error) {
+                    console.debug('Dados do DW indisponíveis:', error);
+                });
+            };
+
+            $(document).on('change', seletorResposta(perguntaId), function () {
+                preencher(true);
+            });
+            preencher(false);
+        });
+    },
+
+    // Preenche a pergunta com o valor vindo do DW. Só altera campos vazios ou, quando
+    // sobrescrever, campos que ainda guardam o valor preenchido automaticamente antes.
+    preencherCampoDw: function ($destino, valor, sobrescrever) {
+        var perguntaId = $destino.attr('data-pergunta-id');
+        var anterior = $destino.data('dwValor');
+        var $radios = $destino.find('input[type="radio"][name="pergunta[' + perguntaId + ']"]');
+
+        if ($radios.length > 0) {
+            var $marcado = $radios.filter(':checked');
+            if ($marcado.length > 0 && !(sobrescrever && $marcado.val() === anterior)) {
+                return;
+            }
+            var $alvo = $radios.filter(function () { return this.value === valor; });
+            if ($alvo.length > 0) {
+                $alvo.prop('checked', true).trigger('change');
+            } else if (valor === '' && $marcado.length > 0) {
+                $marcado.prop('checked', false).trigger('change');
+            }
+            $destino.data('dwValor', valor);
+            return;
+        }
+
+        // Checkbox: marca as alternativas vindas do DW (várias separadas por "|"); só mexe se
+        // nada foi marcado pela pessoa ou se o marcado é só o que o DW tinha preenchido antes.
+        var $checkboxes = $destino.find('input[type="checkbox"][name="pergunta[' + perguntaId + '][]"]');
+        if ($checkboxes.length > 0) {
+            var $marcados = $checkboxes.filter(':checked');
+            var valores = valor === '' ? [] : valor.split('|');
+            var marcadosAgora = $marcados.map(function () { return this.value; }).get().sort().join('|');
+            var soAutomatico = typeof anterior === 'string' && marcadosAgora === anterior.split('|').sort().join('|');
+            if ($marcados.length > 0 && !(sobrescrever && soAutomatico)) {
+                return;
+            }
+            $marcados.prop('checked', false);
+            $checkboxes.filter(function () { return valores.indexOf(this.value) !== -1; }).prop('checked', true);
+            $checkboxes.first().trigger('change');
+            $destino.data('dwValor', valor);
+            return;
+        }
+
+        var $input = $destino.find('#pergunta_' + perguntaId);
+        if ($input.length === 0) {
+            return;
+        }
+
+        // Lista: o DW pode trazer só o código ("5802") de uma opção "5802 - Políticas...".
+        if ($input.is('select') && valor !== '') {
+            var $opcao = $input.find('option').filter(function () {
+                return this.value === valor || this.value.indexOf(valor + ' ') === 0;
+            }).first();
+            if ($opcao.length === 0) {
+                return;
+            }
+            valor = $opcao.val();
+        }
+
+        var atual = $input.val() || '';
+        if (atual === valor || (atual !== '' && !(sobrescrever && atual === anterior))) {
+            return;
+        }
+
+        $input.val(valor).trigger('input').trigger('change');
+        $destino.data('dwValor', valor);
+    },
+
+    // Lista de itens (pergunta do tipo "tabela"): a pessoa preenche os campos de entrada e
+    // adiciona o item à lista; os itens ficam em JSON no campo oculto pergunta[id].
+    initTabelas: function () {
+        var formatarCpf = function (valor) {
+            var d = valor.replace(/\D/g, '').slice(0, 11);
+            return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+        };
+
+        var cpfValido = function (valor) {
+            var d = valor.replace(/\D/g, '');
+            if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) {
+                return false;
+            }
+            for (var t = 9; t < 11; t++) {
+                var soma = 0;
+                for (var i = 0; i < t; i++) {
+                    soma += parseInt(d.charAt(i), 10) * (t + 1 - i);
+                }
+                if (parseInt(d.charAt(t), 10) !== (soma * 10) % 11 % 10) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        var formatarCnpj = function (valor) {
+            var d = String(valor || '').replace(/\D/g, '').substring(0, 14);
+            return d.replace(/^(\d{2})(\d)/, '$1.$2')
+                .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d)/, '.$1/$2')
+                .replace(/(\d{4})(\d)/, '$1-$2');
+        };
+
+        var formatarMoeda = function (valor) {
+            var numero = parseFloat(valor);
+            return isNaN(numero) ? valor : numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
+        $('.pergunta-field[data-tipo-pergunta="tabela"] .pergunta-tabela').each(function () {
+            var $tabela = $(this);
+            var colunas = JSON.parse($tabela.attr('data-colunas') || '[]');
+            var $oculto = $tabela.children('input[type="hidden"]');
+            var $lista = $tabela.find('.pergunta-tabela-lista');
+            var $erro = $tabela.find('.pergunta-tabela-erro');
+            var $adicionar = $tabela.find('.pergunta-tabela-adicionar');
+            var $cancelar = $tabela.find('.pergunta-tabela-cancelar');
+            var $tituloEntrada = $tabela.find('.pergunta-tabela-entrada-titulo');
+            var itens = [];
+            var editando = -1;
+
+            try {
+                itens = JSON.parse($oculto.val() || '[]');
+            } catch (e) {
+                itens = [];
+            }
+
+            var exibir = function (coluna, valor) {
+                return coluna.tipo === 'moeda' && valor !== '' ? formatarMoeda(valor) : valor;
+            };
+
+            var limparEntrada = function () {
+                editando = -1;
+                $tabela.find('[data-coluna]').val('');
+                $erro.addClass('d-none').text('');
+                $tituloEntrada.text('Novo item');
+                $adicionar.find('span').text('Adicionar à lista');
+                $adicionar.find('i').attr('class', 'fas fa-plus');
+                $cancelar.addClass('d-none');
+            };
+
+            // Cada item vira um cartão: o primeiro campo como título e os demais em pares rótulo/valor.
+            var atualizar = function () {
+                $lista.empty();
+                $.each(itens, function (i, item) {
+                    var titulo = colunas.length ? (item[colunas[0].chave] || '') : '';
+                    var $campos = $('<div class="row g-2">');
+
+                    $.each(colunas.slice(1), function (j, coluna) {
+                        var valor = item[coluna.chave] || '';
+                        $campos.append($('<div class="col-12 col-md-6">').append(
+                            $('<div class="small text-muted">').text(coluna.rotulo),
+                            $('<div class="text-break">').text(valor !== '' ? exibir(coluna, valor) : '—')
+                        ));
+                    });
+
+                    var $cartao = $('<div class="card pergunta-tabela-item">').toggleClass('border-primary', i === editando).append(
+                        $('<div class="card-body py-2 px-3">').append(
+                            $('<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">').append(
+                                $('<strong>').text((i + 1) + '. ' + titulo),
+                                $('<div class="d-flex gap-2">').append(
+                                    $('<button type="button" class="btn btn-sm btn-outline-primary pergunta-tabela-editar">')
+                                        .attr('data-indice', i)
+                                        .attr('aria-label', 'Editar item ' + (i + 1))
+                                        .html('<i class="fas fa-pen" aria-hidden="true"></i> Editar'),
+                                    $('<button type="button" class="btn btn-sm btn-outline-danger pergunta-tabela-remover">')
+                                        .attr('data-indice', i)
+                                        .attr('aria-label', 'Remover item ' + (i + 1))
+                                        .html('<i class="fas fa-trash" aria-hidden="true"></i> Remover')
+                                )
+                            ),
+                            $campos
+                        )
+                    );
+                    $lista.append($cartao);
+                });
+                $lista.toggleClass('d-none', itens.length === 0);
+                $tabela.find('.pergunta-tabela-vazia').toggleClass('d-none', itens.length > 0);
+                $oculto.val(itens.length ? JSON.stringify(itens) : '').trigger('change');
+            };
+
+            $tabela.on('input', 'input[data-tipo-coluna="cnpj"]', function () {
+                this.value = formatarCnpj(this.value);
+            });
+
+            $tabela.on('input', 'input[data-tipo-coluna="cpf"]', function () {
+                this.value = formatarCpf(this.value);
+            });
+
+            // Enter num campo de entrada adiciona o item em vez de enviar o formulário.
+            $tabela.on('keydown', 'input[data-coluna]', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $adicionar.trigger('click');
+                }
+            });
+
+            $tabela.on('click', '.pergunta-tabela-adicionar', function () {
+                var item = {};
+                var faltando = [];
+
+                $.each(colunas, function (i, coluna) {
+                    var valor = $.trim($tabela.find('[data-coluna="' + coluna.chave + '"]').val() || '');
+                    if (coluna.tipo === 'cnpj' && valor !== '' && valor.replace(/\D/g, '').length !== 14) {
+                        faltando.push(coluna.rotulo + ' (14 dígitos)');
+                    } else if (coluna.tipo === 'cpf' && valor !== '' && !cpfValido(valor)) {
+                        faltando.push(coluna.rotulo + ' (CPF válido)');
+                    } else if (coluna.obrigatoria && valor === '') {
+                        faltando.push(coluna.rotulo);
+                    }
+                    item[coluna.chave] = valor;
+                });
+
+                if (faltando.length) {
+                    $erro.text('Preencha: ' + faltando.join(', ') + '.').removeClass('d-none');
+                    return;
+                }
+
+                if (editando >= 0) {
+                    itens[editando] = item;
+                } else {
+                    itens.push(item);
+                }
+                limparEntrada();
+                atualizar();
+            });
+
+            // Editar leva os valores do item para o bloco de entrada; salvar substitui o item no lugar.
+            $tabela.on('click', '.pergunta-tabela-editar', function () {
+                editando = parseInt($(this).attr('data-indice'), 10);
+                $.each(colunas, function (i, coluna) {
+                    $tabela.find('[data-coluna="' + coluna.chave + '"]').val(itens[editando][coluna.chave] || '');
+                });
+                $erro.addClass('d-none').text('');
+                $tituloEntrada.text('Editando o item ' + (editando + 1));
+                $adicionar.find('span').text('Salvar alterações');
+                $adicionar.find('i').attr('class', 'fas fa-check');
+                $cancelar.removeClass('d-none');
+                atualizar();
+                $tabela.find('.pergunta-tabela-entrada [data-coluna]').first().trigger('focus');
+            });
+
+            $tabela.on('click', '.pergunta-tabela-cancelar', function () {
+                limparEntrada();
+                atualizar();
+            });
+
+            $tabela.on('click', '.pergunta-tabela-remover', function () {
+                var indice = parseInt($(this).attr('data-indice'), 10);
+                itens.splice(indice, 1);
+                if (editando === indice) {
+                    limparEntrada();
+                } else if (editando > indice) {
+                    editando--;
+                    $tituloEntrada.text('Editando o item ' + (editando + 1));
+                }
+                atualizar();
+            });
+
+            atualizar();
+        });
     },
 
     initOutroOpcoes: function () {
@@ -436,6 +876,10 @@ var AdesaoForm = {
             var $arquivo = $campos.filter('input[type="file"]').first();
             return ($arquivo[0] && $arquivo[0].files.length > 0)
                 || $arquivo.attr('data-tem-resposta-rascunho') === 'Sim';
+        }
+
+        if (tipoPergunta === 'tabela') {
+            return $.trim($pergunta.find('.pergunta-tabela > input[type="hidden"]').val() || '') !== '';
         }
 
         if (tipoPergunta === 'distribuicao_numerica') {

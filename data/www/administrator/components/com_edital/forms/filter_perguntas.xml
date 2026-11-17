@@ -68,6 +68,7 @@
             <option value="uf">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_UF</option>
             <option value="municipio">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_MUNICIPIO</option>
             <option value="distribuicao_numerica">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_DISTRIBUICAO_NUMERICA</option>
+            <option value="tabela">COM_EDITAL_PERGUNTAS_TP_PERGUNTA_OPTION_TABELA</option>
         </field>
         <field
             name="tp_requerida"

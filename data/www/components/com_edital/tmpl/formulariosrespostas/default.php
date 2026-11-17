@@ -111,6 +111,37 @@ $statusConfig = [
 		</div>
 	</div>
 
+	<?php if (!empty($this->linksExecucao)) : ?>
+	<!-- Formulário de execução: um preenchimento por atividade, aberto pelo projeto -->
+	<div class="fr-docs-section fr-execucao">
+		<h3 class="fr-docs-titulo"><i class="fas fa-tasks"></i> <?php echo htmlspecialchars($this->editalExecucao->no_edital); ?></h3>
+		<?php if (count(array_diff_key($this->linksExecucao, [0 => true])) > 0) : ?>
+			<p class="text-muted">Cada pessoa cadastrada vê o instrumento em "Meus instrumentos" ao entrar com o CPF informado; os dados do instrumento já vêm preenchidos.</p>
+		<?php endif; ?>
+		<?php if (isset($this->linksExecucao[0])) : ?>
+			<a href="<?php echo htmlspecialchars($this->linksExecucao[0]['url']); ?>" class="btn btn-primary mb-3">
+				<i class="fas fa-plus"></i> Registrar atividades (<?php echo htmlspecialchars($this->linksExecucao[0]['rotulo']); ?>)
+			</a>
+		<?php endif; ?>
+		<?php foreach ($this->linksExecucao as $projeto => $link) : if ($projeto === 0) continue; ?>
+			<div class="fr-resposta-card">
+				<div class="fr-resposta-header">
+					<span class="fr-resposta-titulo"><?php echo $projeto . '. ' . htmlspecialchars($link['rotulo']); ?></span>
+				</div>
+				<?php $responsavel = array_filter([$link['responsavel'], $link['cpf'] !== '' ? 'CPF ' . vsprintf('%s.%s.%s-%s', str_split(str_pad($link['cpf'], 11, '0', STR_PAD_LEFT), 3)) : '', $link['email']]); ?>
+				<?php if ($responsavel) : ?>
+					<div class="fr-resposta-meta"><i class="far fa-user"></i>
+						<?php echo htmlspecialchars(implode(' - ', $responsavel)); ?>
+					</div>
+				<?php endif; ?>
+				<a class="btn btn-sm btn-outline-primary mt-2" href="<?php echo htmlspecialchars($link['url']); ?>">
+					<i class="fas fa-plus"></i> Preencher
+				</a>
+			</div>
+		<?php endforeach; ?>
+	</div>
+	<?php endif; ?>
+
 	<!-- Responses by Section -->
 		<?php if (!empty($respostas)):
 			$agrupamentoAtual = false;

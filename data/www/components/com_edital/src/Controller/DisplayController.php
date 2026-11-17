@@ -11,6 +11,7 @@ namespace Comedital\Component\Edital\Site\Controller;
 
 \defined('_JEXEC') or die;
 
+use Comedital\Component\Edital\Site\Helper\EspelhoDwHelper;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
@@ -56,7 +57,12 @@ class DisplayController extends \Joomla\CMS\MVC\Controller\BaseController
 		$view = $this->input->getCmd('view', 'editais');
 		$view = $view == "featured" ? 'editais' : $view;
 		$this->input->set('view', $view);
-		
+
+		// Espelho do data warehouse vazio ou vencido: sincroniza em segundo plano.
+		if (!$this->app->getIdentity()->guest)
+		{
+			EspelhoDwHelper::agendarSincronizacao();
+		}
 
 		parent::display($cachable, $urlparams);
 		return $this;

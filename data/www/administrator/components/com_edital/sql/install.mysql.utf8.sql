@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `#__tb_edital` (
 `tp_edital` VARCHAR(24) NULL DEFAULT 'adesao',
 `co_edital_adesao` INT NULL DEFAULT NULL ,
 `tp_esfera_solicitante` VARCHAR(24) NULL DEFAULT NULL ,
+`co_grupos` VARCHAR(255) NULL DEFAULT NULL ,
 PRIMARY KEY (`id`)
 ,KEY `idx_state` (`state`)
 ,KEY `idx_checked_out` (`checked_out`)
@@ -35,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `#__tb_pergunta` (
 `co_edital` INT(10)  NOT NULL  DEFAULT 0,
 `ds_descricao` TEXT NULL ,
 `tp_pergunta` VARCHAR(255)  NULL  DEFAULT "",
-`ds_opcoes` TEXT NULL ,
+`ds_opcoes` MEDIUMTEXT NULL ,
 `tp_requerida` VARCHAR(255)  NULL  DEFAULT "",
 `ds_informacao_complementar` TEXT NULL ,
 `qt_dias_complementacao` INT(11) NULL DEFAULT 5,
@@ -83,6 +84,58 @@ PRIMARY KEY (`id`)
 ) DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 CREATE INDEX `#__tb_adesao_co_edital` ON `#__tb_adesao`(`co_edital`);
+
+-- Solicitações de acesso aos perfis do Coleta MIR (AcessoHelper).
+CREATE TABLE IF NOT EXISTS `#__coleta_solicitacao_acesso` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`user_id` INT NOT NULL,
+`tp_perfil` VARCHAR(24) NOT NULL,
+`tp_identificador` VARCHAR(8) NULL DEFAULT NULL,
+`co_identificador` VARCHAR(32) NULL DEFAULT NULL,
+`no_unidade` VARCHAR(255) NULL DEFAULT NULL,
+`ds_justificativa` TEXT NULL,
+`st_solicitacao` VARCHAR(12) NOT NULL DEFAULT 'pendente',
+`ds_motivo` TEXT NULL,
+`dt_solicitacao` DATETIME NOT NULL,
+`dt_decisao` DATETIME NULL DEFAULT NULL,
+`decidido_por` INT NULL DEFAULT NULL,
+PRIMARY KEY (`id`),
+KEY `idx_user` (`user_id`),
+KEY `idx_situacao` (`st_solicitacao`),
+KEY `idx_unidade` (`tp_identificador`, `co_identificador`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Espelho do data warehouse (EspelhoDwHelper).
+CREATE TABLE IF NOT EXISTS `#__coleta_dw_opcao` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`fonte` VARCHAR(64) NOT NULL,
+`valor` VARCHAR(1000) NOT NULL,
+`nome` TEXT NOT NULL,
+`filtro` VARCHAR(191) NOT NULL DEFAULT '',
+`ordem` INT NOT NULL DEFAULT 0,
+PRIMARY KEY (`id`),
+KEY `idx_fonte_filtro` (`fonte`, `filtro`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__coleta_dw_registro` (
+`registro` VARCHAR(32) NOT NULL,
+`chave` VARCHAR(191) NOT NULL,
+`dados` MEDIUMTEXT NOT NULL,
+`dt_sincronizacao` DATETIME NOT NULL,
+PRIMARY KEY (`registro`, `chave`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__coleta_dw_sincronizacao` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`dt_inicio` DATETIME NOT NULL,
+`dt_fim` DATETIME NULL,
+`st_sincronizacao` VARCHAR(20) NOT NULL,
+`qt_opcoes` INT NOT NULL DEFAULT 0,
+`qt_registros` INT NOT NULL DEFAULT 0,
+`qt_perguntas` INT NOT NULL DEFAULT 0,
+`ds_mensagem` TEXT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__tb_resposta` (
 `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,

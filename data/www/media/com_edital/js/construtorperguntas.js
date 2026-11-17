@@ -60,6 +60,10 @@
 	function prepararEstado(lista) {
 		lista.forEach(function (s) {
 			s.perguntas.forEach(function (p) {
+				// Valor gravado de cada alternativa, na mesma posição; vazio nas novas.
+				p.valores = (p.alternativas || []).map(function (_, i) {
+					return (p.valores && p.valores[i]) || '';
+				});
 				REGRAS.forEach(function (nome) {
 					p[nome] = p[nome] || condicaoVazia();
 					p[nome].ativa = !!p[nome].origem;
@@ -79,6 +83,7 @@
 			tipo: 'linha',
 			obrigatoria: false,
 			alternativas: [],
+			valores: [],
 			permiteOutro: false,
 			exibir: condicaoVazia(),
 			ocultar: condicaoVazia()
@@ -372,6 +377,14 @@
 		return el;
 	}
 
+	// Pergunta com fonte_dw: as alternativas vêm do espelho do data warehouse e podem ser editadas.
+	function renderAvisoDw(bloco, fonte) {
+		const aviso = bloco.querySelector('[data-bloco-dw]');
+
+		aviso.hidden = !fonte;
+		aviso.querySelector('[data-dw-fonte]').textContent = fonte || '';
+	}
+
 	function renderPergunta(pergunta, i, total, iSecao) {
 		const el = novoTemplate('tpl-pergunta');
 		const select = el.querySelector('[data-campo="tipo"]');
@@ -395,6 +408,7 @@
 		const bloco = el.querySelector('[data-bloco-alternativas]');
 		bloco.hidden = !ehSelecao(pergunta.tipo);
 		bloco.querySelector('[data-alternativas]').replaceChildren(...pergunta.alternativas.map(renderAlternativa));
+		renderAvisoDw(bloco, pergunta.fonteDw);
 
 		const blocoOutro = bloco.querySelector('[data-bloco-outro]');
 		blocoOutro.hidden = !aceitaOutro(pergunta.tipo);
@@ -509,6 +523,7 @@
 			const copia = clonar(c.pergunta);
 			copia.id = 0;
 			copia.chave = novaChave();
+			copia.valores = copia.alternativas.map(function () { return ''; });
 			c.secao.perguntas.splice(c.iPergunta + 1, 0, copia);
 			render();
 			focar(contSecoes.children[c.iSecao].querySelector('[data-perguntas]').children[c.iPergunta + 1]);
@@ -524,6 +539,7 @@
 		},
 		'alternativa-adicionar': function (c) {
 			c.pergunta.alternativas.push('');
+			c.pergunta.valores.push('');
 			render();
 
 			const lista = contSecoes.children[c.iSecao]
@@ -540,6 +556,7 @@
 			}
 
 			c.pergunta.alternativas.splice(c.iAlt, 1);
+			c.pergunta.valores.splice(c.iAlt, 1);
 			render();
 		},
 		'regra-remover-legada': function (c) {
@@ -645,6 +662,7 @@
 
 			while (ehSelecao(c.pergunta.tipo) && c.pergunta.alternativas.length < 2) {
 				c.pergunta.alternativas.push('');
+				c.pergunta.valores.push('');
 			}
 
 			render();
