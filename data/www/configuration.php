@@ -27,7 +27,7 @@ class JConfig {
     public $dbsslcipher = '';
     public $force_ssl = 0;
     public $live_site = '';
-    public $secret = 'REMOVIDO_SECRET';
+    public $secret = '';
     public $gzip = false;
     public $error_reporting = 'default';
     public $helpurl = 'https://help.joomla.org/proxy?keyref=Help{major}{minor}:{keyref}&lang={langcode}';
@@ -103,12 +103,15 @@ class JConfig {
     public $asset_id = '1';
     public $redis_server_auth = '';
     public $session_redis_server_auth = '';
-    public $cipher_key = 'REMOVIDO_CIPHER_KEY';
+    public $cipher_key = '';
     public $admin_access_key = '';
 
     public function __construct() {
         $g = fn($k) => getenv($k) ?: '';
         $bool = fn($k) => in_array(strtolower($g($k)), ['1', 'true', 'yes'], true);
+        // Chaves do site: só no .env de cada ambiente (mantido pela infra), nunca no git.
+        if (($v = $g('JOOMLA_SECRET')) !== '') $this->secret = $v;
+        if (($v = $g('JOOMLA_CIPHER_KEY')) !== '') $this->cipher_key = $v;
         if (($v = $g('JOOMLA_DB_HOST')) !== '') $this->host = $v;
         if (($v = $g('JOOMLA_DB_USER')) !== '') $this->user = $v;
         if (($v = $g('JOOMLA_DB_PASSWORD')) !== '') $this->password = $v;
