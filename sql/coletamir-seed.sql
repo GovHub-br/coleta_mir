@@ -1391,6 +1391,8 @@ CREATE TABLE `joom_tb_adesao` (
   `asset_id` int DEFAULT NULL,
   `dt_alterado` datetime DEFAULT NULL,
   `co_adesao_origem` int DEFAULT NULL COMMENT 'adesao de origem usado no caso de adesao por consorcio',
+  `ds_cargo` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ds_instituicao` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `state` (`state`),
   KEY `ordering` (`ordering`),
