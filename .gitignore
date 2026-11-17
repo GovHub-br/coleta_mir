@@ -13,4 +13,10 @@ tools/__pycache__/
 .local/oidc/
 test/
 docs/
+# Nada de dados reais no repositório
 *.dump
+sql/*dump*.sql
+data/uploads/
+*.pdf
+configuration.php.*
+.DS_Store
